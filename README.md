@@ -22,38 +22,6 @@ For more information, visit the official website: [https://www.xalgos.com](https
 - **Database**: Firebase / SQLite (depending on your app's backend)
 - **Version Control**: Git, GitHub
 
-## ⚙️ Installation
-
-Clone the repository to your local machine:
-
-```bash
-git clone https://github.com/yourusername/xalgos.git
-cd xalgos
-```
-
-Install dependencies:
-
-```bash
-flutter pub get
-```
-
-Run the app on a simulator/emulator or connected device:
-
-```bash
-flutter run
-```
-
-## 📝 Contributing
-
-We welcome contributions to improve the app! Follow these steps to contribute:
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -am 'Add new feature'`)
-5. Push to the branch (`git push origin feature/your-feature`)
-6. Open a pull request
-
 ## 🔒 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

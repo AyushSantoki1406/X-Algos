@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:xalgo/widgets/drawer_widget.dart';
 // import 'package:xalgo/widgets/user_detail_dashboard.dart';
@@ -20,6 +21,28 @@ class _HomeState extends State<Home> {
     final Map<String, String> body = {
       'Email': 'ayushsantoki1462004@gmail.com',
     };
+    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+
+    Future<void> loadUserSchema() async {
+      try {
+        // Retrieve the JSON string from secure storage
+        String? userSchemaJson = await secureStorage.read(key: 'backendData');
+
+        if (userSchemaJson != null) {
+          // Decode the JSON string back to a map
+          Map<String, dynamic> userSchema = jsonDecode(userSchemaJson);
+
+          print('User Name: ${userSchema}');
+          print('User Email: ${userSchema['Email']}');
+        } else {
+          print('No user schema found in storage.');
+        }
+      } catch (e) {
+        print('Error loading user schema: $e');
+      }
+    }
+
+    loadUserSchema();
 
     try {
       final response = await http.post(

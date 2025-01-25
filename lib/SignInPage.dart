@@ -10,6 +10,7 @@ import 'package:xalgo/main.dart';
 import 'package:xalgo/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
   runApp(const SignInPage());
@@ -42,6 +43,8 @@ class _SignInState extends State<SignIn> {
   TextEditingController _controller = TextEditingController();
   TextEditingController _pin = TextEditingController();
   String realOTP = "";
+
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   final List<FocusNode> mobileOtpFocusNodes =
       List.generate(6, (index) => FocusNode());
@@ -157,18 +160,19 @@ class _SignInState extends State<SignIn> {
     }
   }
 
-  Future<void> verifyPin() async {
+  Future<void> verifyPin(
+      BuildContext context, TextEditingController _pin) async {
     // Get the user agent string asynchronously
-    String userAgent = await getUserAgent();
+    String userAgent = await getUserAgent(); // Ensure getUserAgent() is defined
 
     // API endpoint
     String url = "https://oyster-app-4y3eb.ondigitalocean.app/verify-pin";
 
     // The request body with the user agent
     Map<String, dynamic> body = {
-      "userInput": "1111111111",
+      "userInput": _controller,
       "deviceInfo": userAgent,
-      "pin": "${_pin.text}"
+      "pin": _pin.text, // Use _pin.text directly
     };
 
     // Make the API request
@@ -181,20 +185,70 @@ class _SignInState extends State<SignIn> {
         body: json.encode(body),
       );
 
-      print(_pin.text);
+      print("Pin entered: ${_pin.text}");
 
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      if (responseData['pin'] != false) {
-        print(responseData);
+      // Decode response body
+      final Map<String, dynamic> a = jsonDecode(response.body);
+
+      // Validate response structure
+      if (a['pin'] != false && a['userSchema'] is Map<String, dynamic>) {
+        // Access user schema data
+        final String email = a['userSchema']['Email'] ?? "Unknown";
+        final Map<String, dynamic> userData = a['userSchema'];
+        String userSchemaJson = jsonEncode(userData);
+        print("User Email: $email");
+        print("User Name: ${a['userSchema']['Name']}");
+
+// Save email in secure storage
+        await secureStorage.write(key: 'Email', value: email);
+        await secureStorage.write(
+            key: 'backendData',
+            value: userSchemaJson); // Save the string directly
+
+        // Send login mail
+        await sendLoginMail(email, userAgent);
+
+        // Update login status
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
-        // Navigator.push(
-        //     context, MaterialPageRoute(builder: (context) => Home()));
+
+        // Navigate to the Home screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Home()), // Replace Home with your widget
+        );
       } else {
         print("Failed to verify pin: ${response.statusCode}");
       }
     } catch (e) {
       print("Error: $e");
+    }
+  }
+
+  Future<void> sendLoginMail(String email, String userAgent) async {
+    final String url =
+        'https://oyster-app-4y3eb.ondigitalocean.app/sendLoginMail';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'Email': email,
+          'deviceInfo': userAgent,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Mail sent successfully: ${response.body}');
+      } else {
+        print('Failed to send mail: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error sending mail: $error');
     }
   }
 
@@ -468,11 +522,8 @@ class _SignInState extends State<SignIn> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            verifyPin();
-                          },
+                    onPressed:
+                        isLoading ? null : () => verifyPin(context, _pin),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.yellow,
                       shape: RoundedRectangleBorder(

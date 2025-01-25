@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/SignInPage.dart';
 import 'package:xalgo/app_colors.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const SignUpPage());
@@ -29,7 +34,19 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  bool isLoading = false;
   int currentIndex = 0;
+
+  String? realGmailOtp;
+  String? realMobileOtp;
+
+  TextEditingController _fname = TextEditingController();
+  TextEditingController _lname = TextEditingController();
+  TextEditingController _email = TextEditingController();
+  TextEditingController _phoneNo = TextEditingController();
+  TextEditingController _referCode = TextEditingController();
+  TextEditingController _pin = TextEditingController();
+  TextEditingController _confirmPin = TextEditingController();
 
   final List<FocusNode> gmailOtpFocusNodes =
       List.generate(6, (index) => FocusNode());
@@ -47,6 +64,95 @@ class _SignUpState extends State<SignUp> {
 
   String getMobileOtp() {
     return mobileOtpControllers.map((controller) => controller.text).join();
+  }
+
+  Future<void> fetchStep1Data(String route, Map<String, dynamic> body) async {
+    setState(() {
+      isLoading = true;
+    });
+    print(_email.text.isNotEmpty);
+
+    if (_email.text.isNotEmpty &&
+        _fname.text.isNotEmpty &&
+        _lname.text.isNotEmpty &&
+        _phoneNo.text.isNotEmpty) {
+      try {
+        final response = await http.post(
+          Uri.parse(route),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(body),
+        );
+
+        final Map<String, dynamic> response2 = jsonDecode(response.body);
+        print(response2);
+        if (response2['email'] == false) {
+          print("Email already exist!");
+        } else if (response2['number'] == false) {
+          print("Number already exist!");
+        } else if (response2['Referr'] == false) {
+          print("Wrong Referral Code");
+        } else if (response2['Referr']) {
+          realGmailOtp = response2['gmailOtp'];
+          realMobileOtp = response2['mobileNumberOtp'];
+          print(realGmailOtp);
+          print(realMobileOtp);
+          setState(() {
+            currentIndex++;
+          });
+        } else {
+          print(">>>>>>>>>>>>");
+        }
+      } catch (e) {
+        print("Exception occurred: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("An error occurred: $e")),
+        );
+      } finally {
+        setState(() {
+          isLoading:
+          false;
+        });
+      }
+    }
+  }
+
+  Future<void> fetchStep3Data(String route, Map<String, dynamic> body) async {
+    if (_pin.text.isNotEmpty && _confirmPin.text.isNotEmpty) {
+      if (_pin.text == _confirmPin.text) {
+        print("Pin: ${_pin.text}");
+        print("Confirm Pin: ${_confirmPin.text}");
+        try {
+          final response = await http.post(
+            Uri.parse(route),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(body),
+          );
+
+          final Map<String, dynamic> response2 = jsonDecode(response.body);
+
+          // Process the response if needed
+          print("Response: $response2");
+          if (response2['signup']) {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => SignIn()));
+          }
+        } catch (e) {
+          print("Error: $e");
+        } finally {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        print("Pins do not match");
+      }
+    } else {
+      print("Pin or Confirm Pin not entered");
+    }
   }
 
   @override
@@ -77,6 +183,7 @@ class _SignUpState extends State<SignUp> {
                         height: 7,
                       ),
                       TextField(
+                        controller: _fname,
                         decoration: InputDecoration(
                           labelText: "First Name",
                           labelStyle: TextStyle(
@@ -122,6 +229,7 @@ class _SignUpState extends State<SignUp> {
                         height: 7,
                       ),
                       TextField(
+                        controller: _lname,
                         decoration: InputDecoration(
                           labelText: "Last Name",
                           labelStyle: TextStyle(
@@ -167,6 +275,10 @@ class _SignUpState extends State<SignUp> {
                         height: 7,
                       ),
                       TextField(
+                        controller: _email,
+                        keyboardType: TextInputType
+                            .emailAddress, // Shows email-specific keyboard
+                        textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           labelText: "Email",
                           labelStyle: TextStyle(
@@ -212,6 +324,13 @@ class _SignUpState extends State<SignUp> {
                         height: 7,
                       ),
                       TextField(
+                        controller: _phoneNo,
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Allows only digits
+                          LengthLimitingTextInputFormatter(
+                              10), // Limits to 10 characters
+                        ],
                         decoration: InputDecoration(
                           labelText: "Enter Phone Number",
                           labelStyle: TextStyle(
@@ -257,6 +376,7 @@ class _SignUpState extends State<SignUp> {
                         height: 7,
                       ),
                       TextField(
+                        controller: _referCode,
                         decoration: InputDecoration(
                           labelText: "Enter Referral Code",
                           labelStyle: TextStyle(
@@ -290,13 +410,37 @@ class _SignUpState extends State<SignUp> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (currentIndex < 2) {
-                            currentIndex++; // Move to the next step (Step 2)
-                          }
-                        });
-                      },
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              // Set loading to true when initiating the request
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              fetchStep1Data(
+                                "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1", // Step 1 API endpoint
+                                {
+                                  "email": _email.text,
+                                  "firstName": _fname.text,
+                                  "lastName": _lname.text,
+                                  "phone": _phoneNo.text,
+                                  "referralCode": _referCode.text,
+                                },
+                              ).then((_) {
+                                setState(() {
+                                  isLoading = false;
+                                  // currentIndex++; // Move to the next step
+                                });
+                              }).catchError((error) {
+                                setState(() {
+                                  isLoading =
+                                      false; // Ensure loading is false even on error
+                                });
+                                // Handle the error here, show a snack bar or other UI feedback
+                                print("Error fetching data: $error");
+                              });
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.yellow,
                         shape: RoundedRectangleBorder(
@@ -399,11 +543,18 @@ class _SignUpState extends State<SignUp> {
                           String mobileOtp = getMobileOtp();
                           print('Gmail OTP: $gmailOtp');
                           print('Mobile OTP: $mobileOtp');
-                          setState(() {
-                            if (currentIndex > 0) {
-                              currentIndex++; // Go back to Step 1
-                            }
-                          });
+                          print('Gmail OTP: $realGmailOtp');
+                          print('Mobile OTP: $realMobileOtp');
+
+                          if (gmailOtp.toString() == realGmailOtp.toString() ||
+                              mobileOtp.toString() ==
+                                  realMobileOtp.toString()) {
+                            setState(() {
+                              currentIndex++;
+                            });
+                          } else {
+                            print("OTP is wrong");
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.yellow,
@@ -430,7 +581,7 @@ class _SignUpState extends State<SignUp> {
                         onPressed: () {
                           setState(() {
                             if (currentIndex > 0) {
-                              currentIndex--; // Go back to Step 1
+                              currentIndex--;
                             }
                           });
                         },
@@ -500,6 +651,7 @@ class _SignUpState extends State<SignUp> {
                   height: 7,
                 ),
                 TextField(
+                  controller: _pin,
                   decoration: InputDecoration(
                     labelText: "Enter Pin",
                     labelStyle: TextStyle(
@@ -539,6 +691,7 @@ class _SignUpState extends State<SignUp> {
                   height: 7,
                 ),
                 TextField(
+                  controller: _confirmPin,
                   decoration: InputDecoration(
                     labelText: "Confirm Pin",
                     labelStyle: TextStyle(
@@ -571,11 +724,38 @@ class _SignUpState extends State<SignUp> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Home()));
-                      setState(() {});
-                    },
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            // Set loading to true when initiating the request
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            fetchStep3Data(
+                              "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-3", // Step 1 API endpoint
+                              {
+                                "email": _email.text,
+                                "firstName": _fname.text,
+                                "lastName": _lname.text,
+                                "phone": _phoneNo.text,
+                                "referralCode": _referCode.text,
+                                "pin": _pin.text
+                              },
+                            ).then((_) {
+                              setState(() {
+                                isLoading = false;
+                                currentIndex++;
+                              });
+                            }).catchError((error) {
+                              setState(() {
+                                isLoading =
+                                    false; // Ensure loading is false even on error
+                              });
+                              // Handle the error here, show a snack bar or other UI feedback
+                              print("Error fetching data: $error");
+                            });
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.yellow,
                       shape: RoundedRectangleBorder(
@@ -664,12 +844,6 @@ class _SignUpState extends State<SignUp> {
                                     curve: Curves
                                         .easeInOut, // Smoother curve for transitions
                                     child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          currentIndex =
-                                              index; // Update the current step
-                                        });
-                                      },
                                       child: Transform.scale(
                                         scale: currentIndex == index
                                             ? 1.0
@@ -764,7 +938,8 @@ class _SignUpState extends State<SignUp> {
                     Flexible(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
-                        child: pages[currentIndex], // Display the current page
+                        child: pages[currentIndex.clamp(
+                            0, pages.length - 1)], // Clamp to valid range
                       ),
                     ),
                   ],

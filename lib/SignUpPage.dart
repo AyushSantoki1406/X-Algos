@@ -652,6 +652,12 @@ class _SignUpState extends State<SignUp> {
                 ),
                 TextField(
                   controller: _pin,
+                  inputFormatters: [
+                    FilteringTextInputFormatter
+                        .digitsOnly, // Allows only digits
+                    LengthLimitingTextInputFormatter(
+                        4), // Limits to 10 characters
+                  ],
                   decoration: InputDecoration(
                     labelText: "Enter Pin",
                     labelStyle: TextStyle(
@@ -692,6 +698,12 @@ class _SignUpState extends State<SignUp> {
                 ),
                 TextField(
                   controller: _confirmPin,
+                  inputFormatters: [
+                    FilteringTextInputFormatter
+                        .digitsOnly, // Allows only digits
+                    LengthLimitingTextInputFormatter(
+                        4), // Limits to 10 characters
+                  ],
                   decoration: InputDecoration(
                     labelText: "Confirm Pin",
                     labelStyle: TextStyle(
@@ -990,7 +1002,7 @@ class OtpInputRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF6C5DD3), width: 2),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 2),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),

@@ -131,7 +131,6 @@ class _SignInState extends State<SignIn> {
           "Content-Type": "application/json",
         },
       );
-
       print("Response from Step 2: ${response.body}");
 
       if (response.statusCode == 200) {
@@ -167,10 +166,10 @@ class _SignInState extends State<SignIn> {
 
     // API endpoint
     String url = "https://oyster-app-4y3eb.ondigitalocean.app/verify-pin";
-
+    print(_pin.text);
     // The request body with the user agent
     Map<String, dynamic> body = {
-      "userInput": _controller,
+      "userInput": _controller.text, // Use _pin.text to get the text value
       "deviceInfo": userAgent,
       "pin": _pin.text, // Use _pin.text directly
     };
@@ -182,15 +181,13 @@ class _SignInState extends State<SignIn> {
         headers: {
           "Content-Type": "application/json",
         },
-        body: json.encode(body),
+        body: json.encode(body), // Ensure the body is properly encoded
       );
-
-      print("Pin entered: ${_pin.text}");
 
       // Decode response body
       final Map<String, dynamic> a = jsonDecode(response.body);
 
-      // Validate response structure
+      print(a);
       if (a['pin'] != false && a['userSchema'] is Map<String, dynamic>) {
         // Access user schema data
         final String email = a['userSchema']['Email'] ?? "Unknown";
@@ -199,7 +196,7 @@ class _SignInState extends State<SignIn> {
         print("User Email: $email");
         print("User Name: ${a['userSchema']['Name']}");
 
-// Save email in secure storage
+        // Save email in secure storage
         await secureStorage.write(key: 'Email', value: email);
         await secureStorage.write(
             key: 'backendData',
@@ -294,6 +291,10 @@ class _SignInState extends State<SignIn> {
                       ),
                       TextField(
                         controller: _controller,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(
+                              10), // Limits to 10 characters
+                        ],
                         decoration: InputDecoration(
                           labelText: "Enter Client ID or Mobile No",
                           labelStyle: TextStyle(
@@ -491,6 +492,12 @@ class _SignInState extends State<SignIn> {
                 ),
                 TextField(
                   controller: _pin,
+                  inputFormatters: [
+                    FilteringTextInputFormatter
+                        .digitsOnly, // Allows only digits
+                    LengthLimitingTextInputFormatter(
+                        4), // Limits to 10 characters
+                  ],
                   decoration: InputDecoration(
                     labelText: "Enter Pin",
                     labelStyle: TextStyle(

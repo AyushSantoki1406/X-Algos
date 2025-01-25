@@ -52,7 +52,41 @@ class SubcribedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text("Subcribed Page Content Goes Here!"),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Use min size for smaller column
+        children: [
+          Row(
+            children: [
+              // First child takes half the width
+              Expanded(
+                child: Container(
+                  height: 100, // Set height for the container
+                  color: Colors.blue,
+                  child: const Center(
+                    child: Text(
+                      'Child 1',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              // Second child takes half the width
+              Expanded(
+                child: Container(
+                  height: 100, // Set height for the container
+                  color: Colors.green,
+                  child: const Center(
+                    child: Text(
+                      'Child 2',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

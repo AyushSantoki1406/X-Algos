@@ -39,6 +39,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   bool isLoading = false;
   int currentIndex = 0;
+  bool isOtpWrong = false;
 
   TextEditingController _controller = TextEditingController();
   TextEditingController _pin = TextEditingController();
@@ -47,10 +48,9 @@ class _SignInState extends State<SignIn> {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   final List<FocusNode> mobileOtpFocusNodes =
-      List.generate(6, (index) => FocusNode());
-
+      List.generate(6, (_) => FocusNode());
   final List<TextEditingController> mobileOtpControllers =
-      List.generate(6, (index) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
 
   String getMobileOtp() {
     return mobileOtpControllers.map((controller) => controller.text).join();
@@ -198,9 +198,6 @@ class _SignInState extends State<SignIn> {
 
         // Save email in secure storage
         await secureStorage.write(key: 'Email', value: email);
-        await secureStorage.write(
-            key: 'backendData',
-            value: userSchemaJson); // Save the string directly
 
         // Send login mail
         await sendLoginMail(email, userAgent);
@@ -249,18 +246,20 @@ class _SignInState extends State<SignIn> {
     }
   }
 
-  void chechOTP() {
+  void checkOTP() {
     final otp = getMobileOtp();
-    print(otp);
-    print(realOTP);
-    if (otp == realOTP) {
-      print("otp is same");
-      setState(() {
-        currentIndex++; // Move to the next step
-      });
-    } else {
-      print("otp is wrong");
-    }
+    print("Entered OTP: $otp, Real OTP: $realOTP");
+
+    setState(() {
+      if (otp == realOTP) {
+        print("OTP is correct.");
+        isOtpWrong = false; // Correct OTP
+        currentIndex++;
+      } else {
+        print("OTP is incorrect.");
+        isOtpWrong = true; // Incorrect OTP
+      }
+    });
   }
 
   @override
@@ -415,6 +414,7 @@ class _SignInState extends State<SignIn> {
                   OtpInputRow(
                     focusNodes: mobileOtpFocusNodes,
                     controllers: mobileOtpControllers,
+                    isOtpWrong: isOtpWrong, // Pass the flag
                   ),
                   SizedBox(height: 20),
                   SizedBox(height: 20),
@@ -424,7 +424,7 @@ class _SignInState extends State<SignIn> {
                       onPressed: isLoading
                           ? null
                           : () {
-                              chechOTP();
+                              checkOTP();
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.yellow,
@@ -466,6 +466,7 @@ class _SignInState extends State<SignIn> {
                       ),
                     ],
                   ),
+                  Text("OTP is $realOTP")
                 ],
               ),
             ),
@@ -579,6 +580,7 @@ class _SignInState extends State<SignIn> {
     ];
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFF1A1A1A),
       body: SafeArea(
         child: Container(
@@ -710,54 +712,59 @@ class _SignInState extends State<SignIn> {
 class OtpInputRow extends StatelessWidget {
   final List<FocusNode> focusNodes;
   final List<TextEditingController> controllers;
+  final bool isOtpWrong; // Flag for incorrect OTP
 
-  const OtpInputRow(
-      {super.key, required this.focusNodes, required this.controllers});
+  const OtpInputRow({
+    super.key,
+    required this.focusNodes,
+    required this.controllers,
+    required this.isOtpWrong,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(6, (index) {
-        return SizedBox(
+      children: List.generate(
+        6,
+        (index) => SizedBox(
           width: 45,
-          child: RawKeyboardListener(
-            focusNode: FocusNode(),
-            onKey: (RawKeyEvent event) {
-              if (event is RawKeyDownEvent &&
-                  event.logicalKey == LogicalKeyboardKey.backspace &&
-                  controllers[index].text.isEmpty &&
-                  index > 0) {
-                focusNodes[index - 1].requestFocus();
+          child: TextField(
+            controller: controllers[index],
+            focusNode: focusNodes[index],
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            maxLength: 1,
+            decoration: InputDecoration(
+              counterText: "",
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: isOtpWrong
+                      ? Colors.red
+                      : Colors.white, // Red if incorrect
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: isOtpWrong
+                      ? Colors.red
+                      : AppColors.yellow, // Red if incorrect
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
+            onChanged: (value) {
+              if (value.isNotEmpty && index < 5) {
+                focusNodes[index + 1].requestFocus();
               }
             },
-            child: TextField(
-              controller: controllers[index],
-              focusNode: focusNodes[index],
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              decoration: InputDecoration(
-                counterText: "",
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white, width: 1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.yellow, width: 2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              style: TextStyle(color: Colors.white, fontSize: 18),
-              onChanged: (value) {
-                if (value.isNotEmpty && index < 5) {
-                  focusNodes[index + 1].requestFocus();
-                }
-              },
-            ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

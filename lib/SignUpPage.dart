@@ -49,22 +49,16 @@ class _SignUpState extends State<SignUp> {
   TextEditingController _confirmPin = TextEditingController();
 
   final List<FocusNode> gmailOtpFocusNodes =
-      List.generate(6, (index) => FocusNode());
-  final List<FocusNode> mobileOtpFocusNodes =
-      List.generate(6, (index) => FocusNode());
-
+      List.generate(6, (_) => FocusNode());
   final List<TextEditingController> gmailOtpControllers =
-      List.generate(6, (index) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> mobileOtpFocusNodes =
+      List.generate(6, (_) => FocusNode());
   final List<TextEditingController> mobileOtpControllers =
-      List.generate(6, (index) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
 
-  String getGmailOtp() {
-    return gmailOtpControllers.map((controller) => controller.text).join();
-  }
-
-  String getMobileOtp() {
-    return mobileOtpControllers.map((controller) => controller.text).join();
-  }
+  bool isGmailOtpWrong = false;
+  bool isMobileOtpWrong = false;
 
   Future<void> fetchStep1Data(String route, Map<String, dynamic> body) async {
     setState(() {
@@ -155,343 +149,359 @@ class _SignUpState extends State<SignUp> {
     }
   }
 
+  String getGmailOtp() {
+    return gmailOtpControllers.map((controller) => controller.text).join();
+  }
+
+  String getMobileOtp() {
+    return mobileOtpControllers.map((controller) => controller.text).join();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Define pages dynamically based on currentIndex
     List<Widget> pages = [
       // Step 1 Content
-      Container(
-        padding: EdgeInsets.only(top: 10),
-        child: Column(
-          children: [
-            Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 5), // Adjust padding as needed
-                        child: Text(
-                          "First Name",
-                          style: TextStyle(color: Colors.white),
+      SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+          ),
+          child: Column(
+            children: [
+              Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: 5), // Adjust padding as needed
+                          child: Text(
+                            "First Name",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 7,
-                      ),
-                      TextField(
-                        controller: _fname,
-                        decoration: InputDecoration(
-                          labelText: "First Name",
-                          labelStyle: TextStyle(
-                            fontSize: 13,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                          ),
-                          filled: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          fillColor: Color(0xFF1A1A1A),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 10),
+                        SizedBox(
+                          height: 7,
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 5), // Adjust padding as needed
-                        child: Text(
-                          "Last Name",
-                          style: TextStyle(color: Colors.white),
+                        TextField(
+                          controller: _fname,
+                          decoration: InputDecoration(
+                            labelText: "First Name",
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                            ),
+                            filled: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            fillColor: Color(0xFF1A1A1A),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 10),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 7,
-                      ),
-                      TextField(
-                        controller: _lname,
-                        decoration: InputDecoration(
-                          labelText: "Last Name",
-                          labelStyle: TextStyle(
-                            fontSize: 13,
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: 5), // Adjust padding as needed
+                          child: Text(
+                            "Last Name",
+                            style: TextStyle(color: Colors.white),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                          ),
-                          filled: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          fillColor: Color(0xFF1A1A1A),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 10),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 5), // Adjust padding as needed
-                        child: Text(
-                          "Email",
-                          style: TextStyle(color: Colors.white),
+                        SizedBox(
+                          height: 7,
                         ),
-                      ),
-                      SizedBox(
-                        height: 7,
-                      ),
-                      TextField(
-                        controller: _email,
-                        keyboardType: TextInputType
-                            .emailAddress, // Shows email-specific keyboard
-                        textInputAction: TextInputAction.done,
-                        decoration: InputDecoration(
-                          labelText: "Email",
-                          labelStyle: TextStyle(
-                            fontSize: 13,
+                        TextField(
+                          controller: _lname,
+                          decoration: InputDecoration(
+                            labelText: "Last Name",
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                            ),
+                            filled: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            fillColor: Color(0xFF1A1A1A),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 10),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                          ),
-                          filled: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          fillColor: Color(0xFF1A1A1A),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 10),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 5), // Adjust padding as needed
-                        child: Text(
-                          "Phone",
-                          style: TextStyle(color: Colors.white),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: 5), // Adjust padding as needed
+                          child: Text(
+                            "Email",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 7,
-                      ),
-                      TextField(
-                        controller: _phoneNo,
-                        inputFormatters: [
-                          FilteringTextInputFormatter
-                              .digitsOnly, // Allows only digits
-                          LengthLimitingTextInputFormatter(
-                              10), // Limits to 10 characters
-                        ],
-                        decoration: InputDecoration(
-                          labelText: "Enter Phone Number",
-                          labelStyle: TextStyle(
-                            fontSize: 13,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                          ),
-                          filled: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          fillColor: Color(0xFF1A1A1A),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 10),
+                        SizedBox(
+                          height: 7,
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 5), // Adjust padding as needed
-                        child: Text(
-                          "Referral Code(optional)",
-                          style: TextStyle(color: Colors.white),
+                        TextField(
+                          controller: _email,
+                          keyboardType: TextInputType
+                              .emailAddress, // Shows email-specific keyboard
+                          textInputAction: TextInputAction.done,
+                          decoration: InputDecoration(
+                            labelText: "Email",
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                            ),
+                            filled: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            fillColor: Color(0xFF1A1A1A),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 10),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 7,
-                      ),
-                      TextField(
-                        controller: _referCode,
-                        decoration: InputDecoration(
-                          labelText: "Enter Referral Code",
-                          labelStyle: TextStyle(
-                            fontSize: 13,
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: 5), // Adjust padding as needed
+                          child: Text(
+                            "Phone",
+                            style: TextStyle(color: Colors.white),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                          ),
-                          filled: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          fillColor: Color(0xFF1A1A1A),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.2),
-                            borderSide: BorderSide(
-                                color: Color(0xFF3D3E57), width: 0.5),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 10),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                              // Set loading to true when initiating the request
-                              setState(() {
-                                isLoading = true;
-                              });
+                        SizedBox(
+                          height: 7,
+                        ),
+                        TextField(
+                          controller: _phoneNo,
+                          inputFormatters: [
+                            FilteringTextInputFormatter
+                                .digitsOnly, // Allows only digits
+                            LengthLimitingTextInputFormatter(
+                                10), // Limits to 10 characters
+                          ],
+                          decoration: InputDecoration(
+                            labelText: "Enter Phone Number",
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                            ),
+                            filled: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            fillColor: Color(0xFF1A1A1A),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 10),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: 5), // Adjust padding as needed
+                          child: Text(
+                            "Referral Code(optional)",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 7,
+                        ),
+                        TextField(
+                          controller: _referCode,
+                          decoration: InputDecoration(
+                            labelText: "Enter Referral Code",
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                            ),
+                            filled: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            fillColor: Color(0xFF1A1A1A),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7.2),
+                              borderSide: BorderSide(
+                                  color: Color(0xFF3D3E57), width: 0.5),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 10),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                // Set loading to true when initiating the request
+                                setState(() {
+                                  isLoading = true;
+                                });
 
-                              fetchStep1Data(
-                                "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1", // Step 1 API endpoint
-                                {
-                                  "email": _email.text,
-                                  "firstName": _fname.text,
-                                  "lastName": _lname.text,
-                                  "phone": _phoneNo.text,
-                                  "referralCode": _referCode.text,
-                                },
-                              ).then((_) {
-                                setState(() {
-                                  isLoading = false;
-                                  // currentIndex++; // Move to the next step
+                                fetchStep1Data(
+                                  "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1", // Step 1 API endpoint
+                                  {
+                                    "email": _email.text,
+                                    "firstName": _fname.text,
+                                    "lastName": _lname.text,
+                                    "phone": _phoneNo.text,
+                                    "referralCode": _referCode.text,
+                                  },
+                                ).then((_) {
+                                  setState(() {
+                                    isLoading = false;
+                                    // currentIndex++; // Move to the next step
+                                  });
+                                }).catchError((error) {
+                                  setState(() {
+                                    isLoading =
+                                        false; // Ensure loading is false even on error
+                                  });
+                                  // Handle the error here, show a snack bar or other UI feedback
+                                  print("Error fetching data: $error");
                                 });
-                              }).catchError((error) {
-                                setState(() {
-                                  isLoading =
-                                      false; // Ensure loading is false even on error
-                                });
-                                // Handle the error here, show a snack bar or other UI feedback
-                                print("Error fetching data: $error");
-                              });
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.yellow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.yellow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                      ),
-                      child: const Text(
-                        "Proceed",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A1A),
+                        child: const Text(
+                          "Proceed",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A1A1A),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Already have an account?"),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    SignInPage()), // Replace with your target page
-                          );
-                        },
-                        child: Text(
-                          "  Sign In here",
-                          style: TextStyle(color: AppColors.yellow),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Already have an account?"),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      SignInPage()), // Replace with your target page
+                            );
+                          },
+                          child: Text(
+                            "  Sign In here",
+                            style: TextStyle(color: AppColors.yellow),
+                          ),
                         ),
-                      ),
-                    ],
-                  )
-                ],
+                      ],
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       // Step 2 Content
-      Container(
-        child: Center(
+      SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -520,6 +530,7 @@ class _SignUpState extends State<SignUp> {
                     OtpInputRow(
                       focusNodes: gmailOtpFocusNodes,
                       controllers: gmailOtpControllers,
+                      isOtpWrong: isGmailOtpWrong, // Pass the validation flag
                     ),
                     SizedBox(height: 20),
                     Text(
@@ -533,6 +544,7 @@ class _SignUpState extends State<SignUp> {
                     OtpInputRow(
                       focusNodes: mobileOtpFocusNodes,
                       controllers: mobileOtpControllers,
+                      isOtpWrong: isMobileOtpWrong, // Pass the validation flag
                     ),
                     SizedBox(height: 20),
                     SizedBox(
@@ -546,15 +558,28 @@ class _SignUpState extends State<SignUp> {
                           print('Gmail OTP: $realGmailOtp');
                           print('Mobile OTP: $realMobileOtp');
 
-                          if (gmailOtp.toString() == realGmailOtp.toString() ||
-                              mobileOtp.toString() ==
-                                  realMobileOtp.toString()) {
-                            setState(() {
-                              currentIndex++;
-                            });
-                          } else {
-                            print("OTP is wrong");
-                          }
+                          setState(() {
+                            // Validate Gmail OTP
+                            if (gmailOtp.toString() ==
+                                realGmailOtp.toString()) {
+                              isGmailOtpWrong = false; // Correct Gmail OTP
+                            } else {
+                              isGmailOtpWrong = true; // Incorrect Gmail OTP
+                            }
+
+                            // Validate Mobile OTP
+                            if (mobileOtp.toString() ==
+                                realMobileOtp.toString()) {
+                              isMobileOtpWrong = false; // Correct Mobile OTP
+                            } else {
+                              isMobileOtpWrong = true; // Incorrect Mobile OTP
+                            }
+
+                            // Proceed if both OTPs are correct
+                            if (!isGmailOtpWrong && !isMobileOtpWrong) {
+                              currentIndex++; // Move to the next step
+                            }
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.yellow,
@@ -624,7 +649,9 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                       ],
-                    )
+                    ),
+                    Text("$realGmailOtp"),
+                    Text("$realMobileOtp"),
                   ],
                 ),
               ),
@@ -633,328 +660,338 @@ class _SignUpState extends State<SignUp> {
         ),
       ),
       // Step 3 Content
-      Container(
-        child: Center(
-            child: Column(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 5), // Adjust padding as needed
-                  child: Text(
-                    "Pin",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                SizedBox(
-                  height: 7,
-                ),
-                TextField(
-                  controller: _pin,
-                  inputFormatters: [
-                    FilteringTextInputFormatter
-                        .digitsOnly, // Allows only digits
-                    LengthLimitingTextInputFormatter(
-                        4), // Limits to 10 characters
-                  ],
-                  decoration: InputDecoration(
-                    labelText: "Enter Pin",
-                    labelStyle: TextStyle(
-                      fontSize: 13,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7.2),
-                    ),
-                    filled: true,
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    fillColor: Color(0xFF1A1A1A),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7.2),
-                      borderSide:
-                          BorderSide(color: Color(0xFF3D3E57), width: 0.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7.2),
-                      borderSide:
-                          BorderSide(color: Color(0xFF3D3E57), width: 0.5),
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 5), // Adjust padding as needed
-                  child: Text(
-                    "Confirm Pin",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                SizedBox(
-                  height: 7,
-                ),
-                TextField(
-                  controller: _confirmPin,
-                  inputFormatters: [
-                    FilteringTextInputFormatter
-                        .digitsOnly, // Allows only digits
-                    LengthLimitingTextInputFormatter(
-                        4), // Limits to 10 characters
-                  ],
-                  decoration: InputDecoration(
-                    labelText: "Confirm Pin",
-                    labelStyle: TextStyle(
-                      fontSize: 13,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7.2),
-                    ),
-                    filled: true,
-                    hintStyle: TextStyle(color: Colors.amber),
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    fillColor: Color(0xFF1A1A1A),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7.2),
-                      borderSide:
-                          BorderSide(color: Color(0xFF3D3E57), width: 0.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7.2),
-                      borderSide:
-                          BorderSide(color: Color(0xFF3D3E57), width: 0.5),
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            // Set loading to true when initiating the request
-                            setState(() {
-                              isLoading = true;
-                            });
-
-                            fetchStep3Data(
-                              "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-3", // Step 1 API endpoint
-                              {
-                                "email": _email.text,
-                                "firstName": _fname.text,
-                                "lastName": _lname.text,
-                                "phone": _phoneNo.text,
-                                "referralCode": _referCode.text,
-                                "pin": _pin.text
-                              },
-                            ).then((_) {
-                              setState(() {
-                                isLoading = false;
-                                currentIndex++;
-                              });
-                            }).catchError((error) {
-                              setState(() {
-                                isLoading =
-                                    false; // Ensure loading is false even on error
-                              });
-                              // Handle the error here, show a snack bar or other UI feedback
-                              print("Error fetching data: $error");
-                            });
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.yellow,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                    ),
-                    child: Text(
-                      "Submit",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Already have an account?"),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  SignInPage()), // Replace with your target page
-                        );
-                      },
-                      child: Text(
-                        "  Sign In here",
-                        style: TextStyle(color: AppColors.yellow),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+      SingleChildScrollView(
+        child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context)
+                  .viewInsets
+                  .bottom, // Adjust for keyboard
             ),
-          ],
-        )),
+            child: Column(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsets.only(left: 5), // Adjust padding as needed
+                      child: Text(
+                        "Pin",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 7,
+                    ),
+                    TextField(
+                      controller: _pin,
+                      inputFormatters: [
+                        FilteringTextInputFormatter
+                            .digitsOnly, // Allows only digits
+                        LengthLimitingTextInputFormatter(
+                            4), // Limits to 10 characters
+                      ],
+                      decoration: InputDecoration(
+                        labelText: "Enter Pin",
+                        labelStyle: TextStyle(
+                          fontSize: 13,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.2),
+                        ),
+                        filled: true,
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        fillColor: Color(0xFF1A1A1A),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.2),
+                          borderSide:
+                              BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.2),
+                          borderSide:
+                              BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.only(left: 5), // Adjust padding as needed
+                      child: Text(
+                        "Confirm Pin",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 7,
+                    ),
+                    TextField(
+                      controller: _confirmPin,
+                      inputFormatters: [
+                        FilteringTextInputFormatter
+                            .digitsOnly, // Allows only digits
+                        LengthLimitingTextInputFormatter(
+                            4), // Limits to 10 characters
+                      ],
+                      decoration: InputDecoration(
+                        labelText: "Confirm Pin",
+                        labelStyle: TextStyle(
+                          fontSize: 13,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.2),
+                        ),
+                        filled: true,
+                        hintStyle: TextStyle(color: Colors.amber),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        fillColor: Color(0xFF1A1A1A),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.2),
+                          borderSide:
+                              BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.2),
+                          borderSide:
+                              BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                // Set loading to true when initiating the request
+                                setState(() {
+                                  isLoading = true;
+                                });
+
+                                fetchStep3Data(
+                                  "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-3", // Step 1 API endpoint
+                                  {
+                                    "email": _email.text,
+                                    "firstName": _fname.text,
+                                    "lastName": _lname.text,
+                                    "phone": _phoneNo.text,
+                                    "referralCode": _referCode.text,
+                                    "pin": _pin.text
+                                  },
+                                ).then((_) {
+                                  setState(() {
+                                    isLoading = false;
+                                    currentIndex++;
+                                  });
+                                }).catchError((error) {
+                                  setState(() {
+                                    isLoading =
+                                        false; // Ensure loading is false even on error
+                                  });
+                                  // Handle the error here, show a snack bar or other UI feedback
+                                  print("Error fetching data: $error");
+                                });
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.yellow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                        ),
+                        child: Text(
+                          "Submit",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Already have an account?"),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      SignInPage()), // Replace with your target page
+                            );
+                          },
+                          child: Text(
+                            "  Sign In here",
+                            style: TextStyle(color: AppColors.yellow),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ],
+            )),
       ),
     ];
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFF1A1A1A),
       body: SafeArea(
-        child: Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(10),
-          margin: EdgeInsets.only(top: 20, bottom: 30),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            elevation: 0,
-            color: Color(0xFF1A1A1A),
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Container(
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              3,
-                              (index) => Row(
-                                children: [
-                                  AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 2500),
-                                    curve: Curves
-                                        .easeInOut, // Smoother curve for transitions
-                                    child: GestureDetector(
-                                      child: Transform.scale(
-                                        scale: currentIndex == index
-                                            ? 1.0
-                                            : 1.0, // Scale effect for the current step
-                                        child: Container(
-                                          width: 30,
-                                          height: 30,
-                                          margin: const EdgeInsets.all(10),
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            color: currentIndex >= index
-                                                ? AppColors
-                                                    .yellow // Yellow color for completed/current steps
-                                                : Colors.transparent,
-                                            border: Border.all(
-                                              color: AppColors
-                                                  .yellow, // Border color
-                                              width: 2.0,
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Text(
-                                            '${index + 1}',
-                                            style: TextStyle(
+        child: SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(top: 20, bottom: 30),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+              color: Color(0xFF1A1A1A),
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(top: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                3,
+                                (index) => Row(
+                                  children: [
+                                    AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 2500),
+                                      curve: Curves
+                                          .easeInOut, // Smoother curve for transitions
+                                      child: GestureDetector(
+                                        child: Transform.scale(
+                                          scale: currentIndex == index
+                                              ? 1.0
+                                              : 1.0, // Scale effect for the current step
+                                          child: Container(
+                                            width: 30,
+                                            height: 30,
+                                            margin: const EdgeInsets.all(10),
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
                                               color: currentIndex >= index
-                                                  ? Colors
-                                                      .black // Black text for completed steps
-                                                  : Colors
-                                                      .white, // White text for upcoming steps
-                                              fontWeight: FontWeight.bold,
+                                                  ? AppColors
+                                                      .yellow // Yellow color for completed/current steps
+                                                  : Colors.transparent,
+                                              border: Border.all(
+                                                color: AppColors
+                                                    .yellow, // Border color
+                                                width: 2.0,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Text(
+                                              '${index + 1}',
+                                              style: TextStyle(
+                                                color: currentIndex >= index
+                                                    ? Colors
+                                                        .black // Black text for completed steps
+                                                    : Colors
+                                                        .white, // White text for upcoming steps
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  if (index < 2) // Connecting line
-                                    TweenAnimationBuilder(
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      tween: ColorTween(
-                                        begin: Colors.white,
-                                        end: currentIndex > index
-                                            ? AppColors
-                                                .yellow // Yellow for completed lines
-                                            : Colors.grey,
-                                      ),
-                                      builder: (context, Color? color, _) {
-                                        return Container(
-                                          width: 90,
-                                          height: 2,
-                                          color: color,
-                                        );
-                                      },
-                                    )
-                                ],
+                                    if (index < 2) // Connecting line
+                                      TweenAnimationBuilder(
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        tween: ColorTween(
+                                          begin: Colors.white,
+                                          end: currentIndex > index
+                                              ? AppColors
+                                                  .yellow // Yellow for completed lines
+                                              : Colors.grey,
+                                        ),
+                                        builder: (context, Color? color, _) {
+                                          return Container(
+                                            width: 90,
+                                            height: 2,
+                                            color: color,
+                                          );
+                                        },
+                                      )
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(
-                      height: 40,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Welcome to X-Algos! 👋",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            "Please sign up to create a new account",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    // Page content
-                    Flexible(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: pages[currentIndex.clamp(
-                            0, pages.length - 1)], // Clamp to valid range
+
+                      SizedBox(
+                        height: 40,
                       ),
-                    ),
-                  ],
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Welcome to X-Algos! 👋",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              "Please sign up to create a new account",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Page content
+                      Flexible(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: pages[currentIndex.clamp(
+                              0, pages.length - 1)], // Clamp to valid range
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -968,9 +1005,14 @@ class _SignUpState extends State<SignUp> {
 class OtpInputRow extends StatelessWidget {
   final List<FocusNode> focusNodes;
   final List<TextEditingController> controllers;
+  final bool isOtpWrong; // Add the isOtpWrong flag
 
-  const OtpInputRow(
-      {super.key, required this.focusNodes, required this.controllers});
+  const OtpInputRow({
+    super.key,
+    required this.focusNodes,
+    required this.controllers,
+    required this.isOtpWrong, // Receive the flag as a parameter
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -998,11 +1040,20 @@ class OtpInputRow extends StatelessWidget {
               decoration: InputDecoration(
                 counterText: "",
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white, width: 1),
+                  borderSide: BorderSide(
+                    color:
+                        isOtpWrong ? Colors.red : Colors.white, // Dynamic color
+                    width: 1,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.yellow, width: 2),
+                  borderSide: BorderSide(
+                    color: isOtpWrong
+                        ? Colors.red
+                        : AppColors.yellow, // Dynamic color
+                    width: 2,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),

@@ -96,7 +96,7 @@ class MyAccountPage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => LiveTrade()),
+                    MaterialPageRoute(builder: (context) => LiveTradePage()),
                   );
                 },
               ),

@@ -41,6 +41,7 @@ dependencies:
   shared_preferences: ^2.4.0
   flash: ^3.1.1
   flutter_secure_storage: ^9.2.4
+  webview_flutter: ^4.10.0
 
 dev_dependencies:
   flutter_test:

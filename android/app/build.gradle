@@ -7,8 +7,9 @@ plugins {
 
 android {
     namespace = "com.example.xalgo"
-    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+
+    buildToolsVersion = "26.0.2"  // Optional, you can remove it if not necessary
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -20,20 +21,16 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.xalgo"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21  // Set minSdkVersion to your desired minimum, but must be at least 21
+        compileSdk = 34  // Set compileSdkVersion to 34 or higher
+        targetSdk = 34  // Set targetSdkVersion to 34 or higher
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
         }
     }

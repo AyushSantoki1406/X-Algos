@@ -39,10 +39,10 @@ class _MyAccountPageState extends State<MyAccountPage> {
     final FlutterSecureStorage secureStorage = FlutterSecureStorage();
     try {
       String? userEmail = await secureStorage.read(key: 'Email');
-      print('Email retrieved from storage: $userEmail');
+      // print('Email retrieved from storage: $userEmail');
       return userEmail;
     } catch (e) {
-      print('Error retrieving email: $e');
+      // print('Error retrieving email: $e');
     }
     return null;
   }
@@ -65,16 +65,16 @@ class _MyAccountPageState extends State<MyAccountPage> {
 
         // Access XalgoID from the parsed response
         final String? algoID = responseBody['XalgoID'];
-        print('Backend response XalgoID: $algoID');
+        // print('Backend response XalgoID: $algoID');
 
         // Return the XalgoID
         return algoID;
       } else {
-        print('Failed to call backend. Status code: ${response.statusCode}');
+        // print('Failed to call backend. Status code: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error calling backend: $e');
+      // print('Error calling backend: $e');
       return null;
     }
   }
@@ -88,7 +88,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
     await prefs.setBool('isLoggedIn', false);
 
     bool? isLoggedIn = prefs.getBool('isLoggedIn');
-    print('Is Logged In: $isLoggedIn');
+    // print('Is Logged In: $isLoggedIn');
 
     Navigator.pushReplacement(
       context,
@@ -114,7 +114,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
       body: FutureBuilder<String?>(
         future: getEmail(),
         builder: (context, snapshot) {
-          print('Snapshot data: ${snapshot.data}');
+          // print('Snapshot data: ${snapshot.data}');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {

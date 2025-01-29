@@ -36,7 +36,7 @@ class SignIn extends StatefulWidget {
   State<SignIn> createState() => _SignInState();
 }
 
-class _SignInState extends State<SignIn> {
+class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   bool isLoading = false;
   int currentIndex = 0;
   bool isOtpWrong = false;
@@ -44,6 +44,35 @@ class _SignInState extends State<SignIn> {
   TextEditingController _controller = TextEditingController();
   TextEditingController _pin = TextEditingController();
   String realOTP = "";
+
+  late AnimationController _animationController;
+  late Animation<double> _shakeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Use the SingleTickerProviderStateMixin for the vsync parameter
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _shakeAnimation = Tween<double>(begin: 0, end: 10)
+        .chain(CurveTween(curve: Curves.elasticIn))
+        .animate(_animationController);
+  }
+
+  void triggerShakeAnimation() {
+    _animationController
+        .forward(from: 0)
+        .then((_) => _animationController.stop());
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -386,91 +415,95 @@ class _SignInState extends State<SignIn> {
       ),
       // Step 2 Content
       Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Verify your Gmail and Mobile OTP',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.white, // White text for dark mode
-                fontWeight: FontWeight.w600,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 1000),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Verify your Gmail and Mobile OTP',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white, // White text for dark mode
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  Text(
-                    'Mobile OTP',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey, // Grey label color
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  OtpInputRow(
-                    focusNodes: mobileOtpFocusNodes,
-                    controllers: mobileOtpControllers,
-                    isOtpWrong: isOtpWrong, // Pass the flag
-                  ),
-                  SizedBox(height: 20),
-                  SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                              checkOTP();
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.yellow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                      ),
-                      child: Text(
-                        "Next",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20),
+                    Text(
+                      'Mobile OTP',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey, // Grey label color
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("New on our platform?"),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => MyApp()),
-                          );
-                        },
+                    SizedBox(height: 10),
+                    OtpInputRow(
+                      focusNodes: mobileOtpFocusNodes,
+                      controllers: mobileOtpControllers,
+                      isOtpWrong: isOtpWrong,
+                      animation: _shakeAnimation,
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                checkOTP();
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.yellow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                        ),
                         child: Text(
-                          " Create an account",
-                          style: TextStyle(color: AppColors.yellow),
+                          "Next",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                  Text("OTP is $realOTP")
-                ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("New on our platform?"),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyApp()),
+                            );
+                          },
+                          child: Text(
+                            " Create an account",
+                            style: TextStyle(color: AppColors.yellow),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text("OTP is $realOTP")
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       // Step 3 Content
@@ -712,56 +745,77 @@ class _SignInState extends State<SignIn> {
 class OtpInputRow extends StatelessWidget {
   final List<FocusNode> focusNodes;
   final List<TextEditingController> controllers;
-  final bool isOtpWrong; // Flag for incorrect OTP
+  final bool isOtpWrong;
+  final Animation<double> animation;
 
   const OtpInputRow({
     super.key,
     required this.focusNodes,
     required this.controllers,
     required this.isOtpWrong,
+    required this.animation,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(
-        6,
-        (index) => SizedBox(
-          width: 45,
-          child: TextField(
-            controller: controllers[index],
-            focusNode: focusNodes[index],
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            maxLength: 1,
-            decoration: InputDecoration(
-              counterText: "",
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: isOtpWrong
-                      ? Colors.red
-                      : Colors.white, // Red if incorrect
-                  width: 1,
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(animation.value, 0),
+          child: child,
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(
+          6,
+          (index) => SizedBox(
+            width: 45,
+            child: RawKeyboardListener(
+              focusNode: FocusNode(), // FocusNode for the RawKeyboardListener
+              onKey: (event) {
+                // Detect backspace key press
+                if (event is RawKeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.backspace) {
+                  if (controllers[index].text.isEmpty && index > 0) {
+                    // Move focus to the previous field if empty
+                    focusNodes[index - 1].requestFocus();
+                  }
+                }
+              },
+              child: TextField(
+                controller: controllers[index],
+                focusNode: focusNodes[index],
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                maxLength: 1,
+                decoration: InputDecoration(
+                  counterText: "",
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isOtpWrong ? Colors.red : Colors.white,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isOtpWrong ? Colors.red : AppColors.yellow,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: isOtpWrong
-                      ? Colors.red
-                      : AppColors.yellow, // Red if incorrect
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(8),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+                onChanged: (value) {
+                  if (value.isNotEmpty && index < 5) {
+                    // Move focus to the next field if input is entered
+                    focusNodes[index + 1].requestFocus();
+                  }
+                },
               ),
             ),
-            style: const TextStyle(color: Colors.white, fontSize: 18),
-            onChanged: (value) {
-              if (value.isNotEmpty && index < 5) {
-                focusNodes[index + 1].requestFocus();
-              }
-            },
           ),
         ),
       ),

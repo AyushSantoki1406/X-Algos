@@ -98,167 +98,175 @@ class _MyAccountPageState extends State<MyAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("My Account"),
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Home()),
-            );
-          },
-          child: Icon(Icons.arrow_back),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          print("Back gesture detected but ignored.");
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("My Account"),
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Home()),
+              );
+            },
+            child: Icon(Icons.arrow_back),
+          ),
         ),
-      ),
-      body: FutureBuilder<String?>(
-        future: getEmail(),
-        builder: (context, snapshot) {
-          // print('Snapshot data: ${snapshot.data}');
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (snapshot.hasData) {
-            String email = snapshot.data!;
-            // Call backend route and pass the email
-            return FutureBuilder<String?>(
-              future: callBackendRoute(email),
-              builder: (context, backendSnapshot) {
-                if (backendSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (backendSnapshot.hasError) {
-                  return Center(
-                      child: Text(
-                          "Error calling backend: ${backendSnapshot.error}"));
-                } else if (backendSnapshot.hasData) {
-                  String? algoID = backendSnapshot.data;
-                  return ListView(
-                    children: [
-                      ListTile(
-                        title: Text("$email",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text("User ID: $algoID"),
-                      ),
-                      Divider(),
-
-                      // Dashboard
-                      _buildListTile(Icons.settings, "Dashboard", onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Home()),
-                        );
-                      }),
-
-                      // Order ExpansionTile
-                      ExpansionTile(
-                        leading: Icon(Icons.person, color: Colors.white),
-                        title: Text("Order"),
-                        children: [
-                          _buildSubListTile(
-                            "Live Trade",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LiveTradePage()),
-                              );
-                            },
-                          ),
-                          _buildSubListTile(
-                            "Executed Trade",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ExecutedTrade()),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-
-                      // Strategies ExpansionTile
-                      ExpansionTile(
-                        leading: Icon(Icons.analytics, color: Colors.white),
-                        title: Text("Strategies"),
-                        children: [
-                          _buildSubListTile(
-                            "Subscribed",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Subcribed()),
-                              );
-                            },
-                          ),
-                          _buildSubListTile(
-                            "Deployed",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Deployed()),
-                              );
-                            },
-                          ),
-                          _buildSubListTile(
-                            "Marketplace",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MarketPlace()),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-
-                      // Other menu options
-                      _buildListTile(
-                        Icons.account_balance,
-                        "Paper Trade",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PaperTrade()),
-                          );
-                        },
-                      ),
-                      _buildListTile(
-                        Icons.share,
-                        "Manage Broker",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ManageBroker()),
-                          );
-                        },
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ElevatedButton(
-                          onPressed: () => logout(context),
-                          child: Text('Logout'),
+        body: FutureBuilder<String?>(
+          future: getEmail(),
+          builder: (context, snapshot) {
+            // print('Snapshot data: ${snapshot.data}');
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            } else if (snapshot.hasData) {
+              String email = snapshot.data!;
+              // Call backend route and pass the email
+              return FutureBuilder<String?>(
+                future: callBackendRoute(email),
+                builder: (context, backendSnapshot) {
+                  if (backendSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (backendSnapshot.hasError) {
+                    return Center(
+                        child: Text(
+                            "Error calling backend: ${backendSnapshot.error}"));
+                  } else if (backendSnapshot.hasData) {
+                    String? algoID = backendSnapshot.data;
+                    return ListView(
+                      children: [
+                        ListTile(
+                          title: Text("$email",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text("User ID: $algoID"),
                         ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return Center(child: Text("No data found from backend"));
-                }
-              },
-            );
-          } else {
-            return Center(child: Text("No email found"));
-          }
-        },
+                        Divider(),
+
+                        // Dashboard
+                        _buildListTile(Icons.settings, "Dashboard", onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home()),
+                          );
+                        }),
+
+                        // Order ExpansionTile
+                        ExpansionTile(
+                          leading: Icon(Icons.person, color: Colors.white),
+                          title: Text("Order"),
+                          children: [
+                            _buildSubListTile(
+                              "Live Trade",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LiveTradePage()),
+                                );
+                              },
+                            ),
+                            _buildSubListTile(
+                              "Executed Trade",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ExecutedTrade()),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // Strategies ExpansionTile
+                        ExpansionTile(
+                          leading: Icon(Icons.analytics, color: Colors.white),
+                          title: Text("Strategies"),
+                          children: [
+                            _buildSubListTile(
+                              "Subscribed",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Subcribed()),
+                                );
+                              },
+                            ),
+                            _buildSubListTile(
+                              "Deployed",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Deployed()),
+                                );
+                              },
+                            ),
+                            _buildSubListTile(
+                              "Marketplace",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MarketPlace()),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // Other menu options
+                        _buildListTile(
+                          Icons.account_balance,
+                          "Paper Trade",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PaperTrade()),
+                            );
+                          },
+                        ),
+                        _buildListTile(
+                          Icons.share,
+                          "Manage Broker",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ManageBroker()),
+                            );
+                          },
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ElevatedButton(
+                            onPressed: () => logout(context),
+                            child: Text('Logout'),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Center(child: Text("No data found from backend"));
+                  }
+                },
+              );
+            } else {
+              return Center(child: Text("No email found"));
+            }
+          },
+        ),
       ),
     );
   }

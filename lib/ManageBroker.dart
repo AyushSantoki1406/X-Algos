@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ManageBroker extends StatefulWidget {
   const ManageBroker({super.key});
@@ -31,7 +32,7 @@ class _ManageBrokerState extends State<ManageBroker> {
   String alertMessage = '';
   String alertMessage2 = '';
   late Map<String, dynamic> userSchema;
-  late Map<String, dynamic> clientData;
+  Map<String, dynamic> clientData = {};
   late Map<String, dynamic> accountAliases;
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
@@ -44,6 +45,7 @@ class _ManageBrokerState extends State<ManageBroker> {
   Future<String?> getEmail() async {
     try {
       String? userEmail = await secureStorage.read(key: 'Email');
+      print("fetching emaail");
       print('Email>>>>>>>>>>:$userEmail');
       return userEmail;
     } catch (e) {
@@ -52,12 +54,19 @@ class _ManageBrokerState extends State<ManageBroker> {
     return null;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
   Future<void> fetchData() async {
     String? email = await getEmail();
 
     setState(() {
       tableLoader = true;
     });
+
     try {
       // Fetch user data
       var response = await http.post(
@@ -83,12 +92,43 @@ class _ManageBrokerState extends State<ManageBroker> {
         headers: {'Content-Type': 'application/json'},
       );
 
+      var responseBody = json.decode(dbSchemaResponse.body);
+      print(
+          'Response Body: $responseBody'); // Log the response to see its structure.
+
       if (dbSchemaResponse.statusCode == 200) {
-        userSchema = json.decode(dbSchemaResponse.body);
-        accountAliases = userSchema['AccountAliases'] ?? {};
-      } else {
-        // Handle unsuccessful response
-        throw Exception('Failed to load DB schema');
+        var responseBody = json.decode(dbSchemaResponse.body);
+
+        // Ensure responseBody is a Map<String, dynamic>
+        if (responseBody is Map<String, dynamic>) {
+          setState(() {
+            userSchema = responseBody; // Update userSchema if needed
+          });
+
+          // Extract client data (Assuming it's a Map<String, dynamic>)
+          Map<String, dynamic> clientData = userSchema;
+
+          // Extract AngelBrokerData and DeltaBrokerSchema as lists
+          List<dynamic> angelBrokerData = clientData['AngelBrokerData'] ?? [];
+          List<dynamic> deltaBrokerSchema =
+              clientData['DeltaBrokerSchema'] ?? [];
+
+          // Print the extracted data
+          print('Client Data: $clientData');
+          print('Angel Broker Data: $angelBrokerData');
+          print('Delta Broker Schema: $deltaBrokerSchema');
+
+          // Optionally, print individual elements
+          if (angelBrokerData.isNotEmpty) {
+            print('First Angel Broker Data: ${angelBrokerData[0]}');
+          }
+          if (deltaBrokerSchema.isNotEmpty) {
+            print('Delta Broker Schema: $deltaBrokerSchema');
+          }
+        } else {
+          print(
+              'Unexpected response format: Expected a Map but got ${responseBody.runtimeType}');
+        }
       }
     } catch (error) {
       // Handle error
@@ -497,62 +537,173 @@ class _ManageBrokerState extends State<ManageBroker> {
           ),
         ],
       ),
-      drawer: AppDrawer(), // Optional: left drawer
-      endDrawer: AppDrawer(), // Right drawer (End drawer)
-      body: Container(
-        padding: const EdgeInsets.all(16),
-        color: Color(0xFF000000),
-        child: SingleChildScrollView(
-          padding:
-              const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
-          child: Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Container(
+      drawer: AppDrawer(),
+      endDrawer: AppDrawer(),
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {},
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          color: Color(0xFF000000),
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Container(
+                        margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                        child: DropdownButton<String>(
+                          value: selectBroker,
+                          onChanged: onBrokerChange,
+                          isExpanded: true,
+                          style: TextStyle(color: Colors.grey),
+                          items: [
+                            DropdownMenuItem(
+                                value: "1", child: Text("AngelOne")),
+                            DropdownMenuItem(value: "2", child: Text("Delta")),
+                            DropdownMenuItem(value: "3", child: Text("Upstox")),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Render the form based on the selected broker
+                    Padding(
+                        padding: EdgeInsets.all(8), child: buildBrokerForm()),
+                    Container(
                       margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                      child: DropdownButton<String>(
-                        value: selectBroker,
-                        onChanged: onBrokerChange,
-                        isExpanded: true,
-                        style: TextStyle(color: Colors.grey),
-                        items: [
-                          DropdownMenuItem(value: "1", child: Text("AngelOne")),
-                          DropdownMenuItem(value: "2", child: Text("Delta")),
-                          DropdownMenuItem(value: "3", child: Text("Upstox")),
-                        ],
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFFBD535),
+                          minimumSize:
+                              Size(double.infinity, 50), // Full width button
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                          side: BorderSide.none, // Remove border
+                        ),
+                        onPressed:
+                            existingAlias || angelIdExist ? null : addBrokerBtn,
+                        child: Text(
+                          'Add Broker',
+                          style: TextStyle(color: Colors.black), // Text color
+                        ),
                       ),
                     ),
-                  ),
-                  // Render the form based on the selected broker
-                  Padding(padding: EdgeInsets.all(8), child: buildBrokerForm()),
-                  Container(
-                    margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFFBD535),
-                        minimumSize:
-                            Size(double.infinity, 50), // Full width button
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        side: BorderSide.none, // Remove border
-                      ),
-                      onPressed: existingAlias || angelIdExist
-                          ? null
-                          : addBrokerBtn, // Disable button if conditions are met
-                      child: Text(
-                        'Add Broker',
-                        style: TextStyle(color: Colors.black), // Text color
-                      ),
-                    ),
-                  )
-                ],
+                    tableLoader
+                        ? Column(
+                            children: List.generate(
+                              4,
+                              (index) => Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  height: 60,
+                                  width: double.infinity,
+                                  margin: EdgeInsets.symmetric(vertical: 8),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.only(top: 16),
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                columnSpacing: 20,
+                                columns: [
+                                  DataColumn(
+                                      label: Center(child: Text('Client ID'))),
+                                  DataColumn(
+                                      label:
+                                          Center(child: Text('Account Alias'))),
+                                  DataColumn(
+                                      label: Center(child: Text('Name'))),
+                                  DataColumn(
+                                      label: Center(child: Text('Date'))),
+                                  DataColumn(
+                                      label:
+                                          Center(child: Text('Broker Name'))),
+                                  DataColumn(
+                                      label: Center(child: Text('Action'))),
+                                ],
+                                rows: clientData.entries
+                                    .map((MapEntry<String, dynamic> entry) {
+                                  // Access the value of the entry
+                                  var item = entry.value;
+                                  print(item);
+                                  String clientId = item['userData']?['data']
+                                          ?['clientcode'] ??
+                                      item['balances']?['result'][0]
+                                          ?['user_id'] ??
+                                      "N/A";
+
+                                  String accountAlias = item['userData']
+                                          ?['data']?['clientcode'] ??
+                                      item['balances']?['result'][0]
+                                          ?['user_id'] ??
+                                      "N/A";
+
+                                  String name = item['userData']?['data']
+                                              ?['name']
+                                          ?.toUpperCase() ??
+                                      ((item['userDetails']?['result']
+                                                      ?['first_name'] ??
+                                                  "N/A") +
+                                              " " +
+                                              (item['userDetails']?['result']
+                                                      ?['last_name'] ??
+                                                  "N/A"))
+                                          .toUpperCase();
+
+                                  String date =
+                                      "N/A"; // Customize as per your schema
+
+                                  String brokerName = item['userData'] != null
+                                      ? "AngelOne"
+                                      : item['deltaApiKey'] != null
+                                          ? "Delta"
+                                          : "Loading...";
+
+                                  return DataRow(cells: [
+                                    DataCell(Center(child: Text(clientId))),
+                                    DataCell(Center(child: Text(accountAlias))),
+                                    DataCell(Center(
+                                        child: Text(
+                                      name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ))),
+                                    DataCell(Center(child: Text(date))),
+                                    DataCell(Center(child: Text(brokerName))),
+                                    DataCell(
+                                      Center(
+                                          // child: IconButton(
+                                          //   icon: Icon(Icons.delete,
+                                          //       color: Colors.red),
+                                          //   onPressed: () => deleteBrokerFunction(
+                                          //       clientData.indexOf(item), clientId),
+                                          // ),
+                                          ),
+                                    ),
+                                  ]);
+                                }).toList(),
+                              ),
+                            ),
+                          )
+                  ],
+                ),
               ),
             ),
           ),

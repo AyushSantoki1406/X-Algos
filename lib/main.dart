@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:xalgo/SignUpPage.dart';
-import 'package:xalgo/HomePage.dart'; // Assuming you have a HomePage widget.
+import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,13 +31,33 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   bool isLoggedIn = false;
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
+
+    // Initialize animation
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    )..forward();
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   // Function to check if the user is logged in
@@ -46,14 +66,12 @@ class _SplashScreenState extends State<SplashScreen> {
     bool? loggedIn = prefs.getBool('isLoggedIn');
 
     setState(() {
-      // If isLoggedIn is not set, default it to false
       isLoggedIn = loggedIn ?? false;
     });
 
     Timer(
-      Duration(seconds: 3),
+      Duration(seconds: 3), // Adjusted time
       () {
-        // Navigate based on the value of isLoggedIn
         if (isLoggedIn) {
           Navigator.pushReplacement(
             context,
@@ -71,8 +89,55 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: AppColors.bd_black,
-        child: FlutterLogo(size: MediaQuery.of(context).size.height));
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {},
+      child: Scaffold(
+        backgroundColor: AppColors.bd_black,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: Duration(seconds: 1),
+                curve: Curves.easeInOut,
+                height: 300,
+                width: 300,
+                child: Image.asset(
+                  'assets/images/lightlogo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(height: 20),
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  children: [
+                    Text(
+                      "Welcome to X Algos",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Smart trading, powered by algorithms.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey[300],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

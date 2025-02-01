@@ -523,6 +523,9 @@ class _ManageBrokerState extends State<ManageBroker> {
 
   @override
   Widget build(BuildContext context) {
+    List<bool> switchStates = List.generate(matchedClients.length,
+        (index) => true); // Initialize the switch state for each item
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -620,41 +623,112 @@ class _ManageBrokerState extends State<ManageBroker> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Container(
-                          child: Card(
-                            child: Column(
-                              children:
-                                  List.generate(matchedClients.length, (index) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
+                            child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: matchedClients.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
+                              child: Card(
+                                color: switchStates[index]
+                                    ? Colors.transparent
+                                    : Colors
+                                        .blue, // Change card color based on switch state
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                                'Client ID: ${matchedClients[index]['clientid']}'),
-                                            Text(
-                                                'Account: ${matchedClients[index]['account_alice']}'),
-                                            Text(
-                                                'Name: ${matchedClients[index]['name']}'),
-                                            Text(
-                                                'Date: ${matchedClients[index]['date']}'),
-                                            Text(
-                                                'Broker: ${matchedClients[index]['broker_name']}'),
-                                          ],
+                                      // Row 1: Broker Name & Switch
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            '${matchedClients[index]['broker_name']}',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 20),
+                                          ),
+                                          Transform.scale(
+                                            scale: 0.8, // Reduce switch size
+                                            child: Switch(
+                                              value: switchStates[
+                                                  index], // Use specific state for each switch
+                                              activeColor: Colors.green,
+                                              inactiveTrackColor:
+                                                  Colors.grey[400],
+                                              inactiveThumbColor: Colors.white,
+                                              onChanged: (bool value) {
+                                                setState(() {
+                                                  switchStates[index] =
+                                                      value; // Update the state of the specific switch
+                                                  print(
+                                                      "Switch ${index + 1} changed to: $value"); // Print the switch state (true/false)
+                                                });
+                                              },
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      Divider(thickness: 1, color: Colors.grey),
+                                      SizedBox(height: 5),
+
+                                      // Row 2: Account Alice
+                                      _buildRow("Account Alice",
+                                          '${matchedClients[index]['account_alice']}'),
+
+                                      // Row 3: Name
+                                      _buildRow(
+                                        "Name",
+                                        matchedClients[index]['name'].length >
+                                                10
+                                            ? matchedClients[index]['name']
+                                                    .substring(0, 10) +
+                                                '..'
+                                            : matchedClients[index]['name'],
+                                      ),
+
+                                      // Row 4: Client ID
+                                      _buildRow("Client ID",
+                                          '${matchedClients[index]['clientid']}'),
+
+                                      // Row 5: Date
+                                      _buildRow("Date",
+                                          '${matchedClients[index]['date']}'),
+
+                                      SizedBox(height: 10),
+
+                                      // Delete Button
+                                      Container(
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.delete,
+                                              color: Colors.white),
+                                          onPressed: () {
+                                            // Handle delete action
+                                          },
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
+                                ),
+                              ),
+                            );
+                          },
+                        )),
                       ),
                     ),
                   ],
@@ -664,6 +738,31 @@ class _ManageBrokerState extends State<ManageBroker> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRow(String title, String value) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+            ),
+            Text(
+              value,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+            ),
+          ],
+        ),
+        Divider(thickness: 1, color: Colors.grey),
+        SizedBox(height: 5),
+      ],
     );
   }
 }

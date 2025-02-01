@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -40,6 +41,13 @@ class _SignUpState extends State<SignUp> {
   String? realGmailOtp;
   String? realMobileOtp;
 
+  int _emailSecondsRemaining = 30;
+  int _mobileSecondsRemaining = 30;
+  bool _isEmailResendAvailable = true;
+  bool _isMobileResendAvailable = true;
+  Timer? _emailTimer;
+  Timer? _mobileTimer;
+
   TextEditingController _fname = TextEditingController();
   TextEditingController _lname = TextEditingController();
   TextEditingController _email = TextEditingController();
@@ -59,6 +67,76 @@ class _SignUpState extends State<SignUp> {
 
   bool isGmailOtpWrong = false;
   bool isMobileOtpWrong = false;
+
+  void _startEmailTimer() {
+    if (!_isEmailResendAvailable) return;
+
+    // Call API for email OTP
+    fetchStep1Data(
+      "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1", // Step 1 API endpoint
+      {
+        "email": _email.text,
+        "firstName": _fname.text,
+        "lastName": _lname.text,
+        "phone": _phoneNo.text,
+        "referralCode": _referCode.text,
+      },
+    );
+
+    setState(() {
+      _isEmailResendAvailable = false;
+      _emailSecondsRemaining = 30;
+    });
+
+    _emailTimer?.cancel();
+    _emailTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_emailSecondsRemaining > 0) {
+        setState(() {
+          _emailSecondsRemaining--;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          _isEmailResendAvailable = true;
+        });
+      }
+    });
+  }
+
+  void _startMobileTimer() {
+    if (!_isMobileResendAvailable) return;
+
+    // Call API for mobile OTP
+    fetchStep1Data(
+      "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1",
+      {
+        "email": _email.text,
+        "firstName": _fname.text,
+        "lastName": _lname.text,
+        "phone": _phoneNo.text,
+        "referralCode": _referCode.text,
+      },
+    );
+
+    setState(() {
+      _isMobileResendAvailable = false;
+      _mobileSecondsRemaining = 30;
+    });
+
+    _mobileTimer?.cancel();
+    _mobileTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_mobileSecondsRemaining > 0) {
+        setState(() {
+          _mobileSecondsRemaining--;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          _isMobileResendAvailable = true;
+        });
+      }
+    });
+  }
 
   Future<void> fetchStep1Data(String route, Map<String, dynamic> body) async {
     setState(() {
@@ -92,9 +170,6 @@ class _SignUpState extends State<SignUp> {
           realMobileOtp = response2['mobileNumberOtp'];
           print(realGmailOtp);
           print(realMobileOtp);
-          setState(() {
-            currentIndex++;
-          });
         } else {
           print(">>>>>>>>>>>>");
         }
@@ -105,11 +180,19 @@ class _SignUpState extends State<SignUp> {
         );
       } finally {
         setState(() {
+          currentIndex++;
           isLoading:
           false;
         });
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _emailTimer?.cancel();
+    _mobileTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> fetchStep3Data(String route, Map<String, dynamic> body) async {
@@ -155,6 +238,38 @@ class _SignUpState extends State<SignUp> {
 
   String getMobileOtp() {
     return mobileOtpControllers.map((controller) => controller.text).join();
+  }
+
+  void handlecheck() {
+    String gmailOtp = getGmailOtp();
+    String mobileOtp = getMobileOtp();
+    print('Gmail OTP: $gmailOtp');
+    print('Mobile OTP: $mobileOtp');
+    print('Gmail OTP: $realGmailOtp');
+    print('Mobile OTP: $realMobileOtp');
+
+    setState(() {
+      // Validate Gmail OTP
+      if (gmailOtp.toString() == realGmailOtp.toString()) {
+        isGmailOtpWrong = false; // Correct Gmail OTP
+      } else {
+        isGmailOtpWrong = true; // Incorrect Gmail OTP
+      }
+
+      // Validate Mobile OTP
+      if (mobileOtp.toString() == realMobileOtp.toString()) {
+        isMobileOtpWrong = false; // Correct Mobile OTP
+      } else {
+        isMobileOtpWrong = true; // Incorrect Mobile OTP
+      }
+
+      // Proceed if both OTPs are correct
+      if (!isGmailOtpWrong && !isMobileOtpWrong) {
+        setState(() {
+          currentIndex++;
+        });
+      }
+    });
   }
 
   @override
@@ -551,35 +666,7 @@ class _SignUpState extends State<SignUp> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          String gmailOtp = getGmailOtp();
-                          String mobileOtp = getMobileOtp();
-                          print('Gmail OTP: $gmailOtp');
-                          print('Mobile OTP: $mobileOtp');
-                          print('Gmail OTP: $realGmailOtp');
-                          print('Mobile OTP: $realMobileOtp');
-
-                          setState(() {
-                            // Validate Gmail OTP
-                            if (gmailOtp.toString() ==
-                                realGmailOtp.toString()) {
-                              isGmailOtpWrong = false; // Correct Gmail OTP
-                            } else {
-                              isGmailOtpWrong = true; // Incorrect Gmail OTP
-                            }
-
-                            // Validate Mobile OTP
-                            if (mobileOtp.toString() ==
-                                realMobileOtp.toString()) {
-                              isMobileOtpWrong = false; // Correct Mobile OTP
-                            } else {
-                              isMobileOtpWrong = true; // Incorrect Mobile OTP
-                            }
-
-                            // Proceed if both OTPs are correct
-                            if (!isGmailOtpWrong && !isMobileOtpWrong) {
-                              currentIndex++; // Move to the next step
-                            }
-                          });
+                          handlecheck();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.yellow,
@@ -1005,14 +1092,30 @@ class _SignUpState extends State<SignUp> {
 class OtpInputRow extends StatelessWidget {
   final List<FocusNode> focusNodes;
   final List<TextEditingController> controllers;
-  final bool isOtpWrong; // Add the isOtpWrong flag
+  final bool isOtpWrong;
 
   const OtpInputRow({
     super.key,
     required this.focusNodes,
     required this.controllers,
-    required this.isOtpWrong, // Receive the flag as a parameter
+    required this.isOtpWrong,
   });
+
+  void _handlePaste(String pastedText) {
+    if (pastedText.length == 6) {
+      for (int i = 0; i < 6; i++) {
+        controllers[i].text = pastedText[i];
+      }
+      focusNodes[5].unfocus(); // Move focus out after pasting
+    }
+  }
+
+  void _clearAll() {
+    for (var controller in controllers) {
+      controller.clear();
+    }
+    focusNodes[0].requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1021,48 +1124,58 @@ class OtpInputRow extends StatelessWidget {
       children: List.generate(6, (index) {
         return SizedBox(
           width: 45,
-          child: RawKeyboardListener(
-            focusNode: FocusNode(),
-            onKey: (RawKeyEvent event) {
-              if (event is RawKeyDownEvent &&
-                  event.logicalKey == LogicalKeyboardKey.backspace &&
-                  controllers[index].text.isEmpty &&
-                  index > 0) {
-                focusNodes[index - 1].requestFocus();
-              }
-            },
-            child: TextField(
-              controller: controllers[index],
-              focusNode: focusNodes[index],
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              decoration: InputDecoration(
-                counterText: "",
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color:
-                        isOtpWrong ? Colors.red : Colors.white, // Dynamic color
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: isOtpWrong
-                        ? Colors.red
-                        : AppColors.yellow, // Dynamic color
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              style: TextStyle(color: Colors.white, fontSize: 18),
-              onChanged: (value) {
-                if (value.isNotEmpty && index < 5) {
-                  focusNodes[index + 1].requestFocus();
+          child: GestureDetector(
+            onLongPress: _clearAll, // Clear all fields on long press
+            child: RawKeyboardListener(
+              focusNode: FocusNode(),
+              onKey: (RawKeyEvent event) {
+                if (event is RawKeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.backspace &&
+                    controllers[index].text.isEmpty &&
+                    index > 0) {
+                  focusNodes[index - 1].requestFocus();
                 }
               },
+              child: TextField(
+                controller: controllers[index],
+                focusNode: focusNodes[index],
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                maxLength: 1,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  counterText: "",
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isOtpWrong ? Colors.red : Colors.white,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isOtpWrong ? Colors.red : AppColors.yellow,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                style: TextStyle(color: Colors.white, fontSize: 18),
+                onChanged: (value) {
+                  if (value.length == 6) {
+                    _handlePaste(value);
+                    return;
+                  }
+                  if (value.isNotEmpty && index < 5) {
+                    focusNodes[index + 1].requestFocus();
+                  }
+                },
+                onTap: () {
+                  if (isOtpWrong) {
+                    HapticFeedback.vibrate(); // Vibrate on wrong OTP
+                  }
+                },
+              ),
             ),
           ),
         );

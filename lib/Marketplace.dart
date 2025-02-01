@@ -671,7 +671,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                     hint: Text(
                                       "Select Broker",
                                       style: TextStyle(
-                                          color: Colors.white, fontSize: 16),
+                                          color: Colors.black, fontSize: 16),
                                     ),
                                     dropdownColor: Colors.grey,
                                     elevation: 5,

@@ -13,7 +13,11 @@ class _PaperTradeState extends State<PaperTrade> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {},
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -24,9 +28,9 @@ class _PaperTradeState extends State<PaperTrade> {
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(50), // Circular placeholder
+              borderRadius: BorderRadius.circular(50),
               child: Image.asset(
-                'assets/images/darklogo.png', // Replace with your image path
+                'assets/images/darklogo.png',
                 fit: BoxFit.cover,
               ),
             ),

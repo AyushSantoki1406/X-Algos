@@ -31,10 +31,14 @@ class _ManageBrokerState extends State<ManageBroker> {
   bool loading = false;
   String alertMessage = '';
   String alertMessage2 = '';
-  late Map<String, dynamic> userSchema;
-  Map<String, dynamic> clientData = {};
+  late Map<String, dynamic> userSchema = {};
+  List<Map<String, dynamic>> clientData = []; // Declare clientData as a list
+  late List<dynamic> angelBrokerData = [];
+  late List<dynamic> deltaBrokerSchema = [];
   late Map<String, dynamic> accountAliases;
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  List<Map<String, dynamic>> matchedClients = [];
+  List<dynamic> allClientsData = []; // Create a list to store all users
 
   void onBrokerChange(String? newValue) {
     setState(() {
@@ -45,8 +49,6 @@ class _ManageBrokerState extends State<ManageBroker> {
   Future<String?> getEmail() async {
     try {
       String? userEmail = await secureStorage.read(key: 'Email');
-      print("fetching emaail");
-      print('Email>>>>>>>>>>:$userEmail');
       return userEmail;
     } catch (e) {
       print('Error retrieving email:$e');
@@ -60,6 +62,14 @@ class _ManageBrokerState extends State<ManageBroker> {
     fetchData();
   }
 
+  void checkAccountAlias(String accountName) {
+    final aliases = userSchema['AccountAliases'] ?? {};
+
+    setState(() {
+      existingAlias = aliases.containsValue(accountName);
+    });
+  }
+
   Future<void> fetchData() async {
     String? email = await getEmail();
 
@@ -68,7 +78,7 @@ class _ManageBrokerState extends State<ManageBroker> {
     });
 
     try {
-      // Fetch user data
+      //client data is here userinfo route show client id and all things for <<<<<<<<<< ANGLE ONE >>>>>>>>>>>>>>
       var response = await http.post(
         Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/userinfo'),
         body: json.encode({'Email': email}),
@@ -77,15 +87,30 @@ class _ManageBrokerState extends State<ManageBroker> {
 
       if (response.statusCode == 200) {
         setState(() {
-          userSchema = json.decode(response.body); // Decoding response data
+          List<dynamic> usersList = json.decode(response.body);
+          List<Map<String, dynamic>> allClientsData =
+              []; // Store all user data as a list
+
+          for (var user in usersList) {
+            var userData = user['userData'];
+            print("userdata is here >>>>>>>>>>>>>>>>>>>>>>>>$userData");
+
+            if (userData != null && userData['data'] != null) {
+              allClientsData.add(Map<String, dynamic>.from(
+                  userData['data'])); // Ensure it's a map
+            }
+
+            print("AngleOne data is fetched from db");
+          }
+
+          clientData = allClientsData; // Assign list to clientData
           tableLoader = false;
         });
       } else {
-        // Handle unsuccessful response
         throw Exception('Failed to load user data');
       }
 
-      // Simulate database schema fetch
+      //client data is here userinfo route show client id and all things for <<<<<<<<<< ANGLE ONE AND DELTA >>>>>>>>>>>>>>
       var dbSchemaResponse = await http.post(
         Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/dbSchema'),
         body: json.encode({'Email': email}),
@@ -93,8 +118,6 @@ class _ManageBrokerState extends State<ManageBroker> {
       );
 
       var responseBody = json.decode(dbSchemaResponse.body);
-      print(
-          'Response Body: $responseBody'); // Log the response to see its structure.
 
       if (dbSchemaResponse.statusCode == 200) {
         var responseBody = json.decode(dbSchemaResponse.body);
@@ -102,29 +125,40 @@ class _ManageBrokerState extends State<ManageBroker> {
         // Ensure responseBody is a Map<String, dynamic>
         if (responseBody is Map<String, dynamic>) {
           setState(() {
-            userSchema = responseBody; // Update userSchema if needed
+            userSchema = responseBody;
+            angelBrokerData = responseBody['AngelBrokerData'] ?? [];
+            deltaBrokerSchema = responseBody['DeltaBrokerSchema'] ?? [];
+            print(">>>>>>>>>>>>>bbbbbbbbbbbbbbbb>>>>>>>");
+            print(clientData);
+            print(">>>>>>>>>>>>>bbbbbbbbbbbbbbbb>>>>>>>");
+
+            for (var client in clientData) {
+              String clientId = client['clientcode'];
+
+              // Find matching broker
+              var matchedBroker = angelBrokerData.firstWhere(
+                (broker) => broker['AngelId'] == clientId,
+                orElse: () => null,
+              );
+
+              // Get account alias
+              String accountAlice =
+                  userSchema['AccountAliases'][clientId] ?? "No Alias Found";
+
+              print("Client ID: $clientId, Account Alias: $accountAlice");
+
+              if (matchedBroker != null) {
+                matchedClients.add({
+                  "clientid": clientId,
+                  "account_alice": accountAlice,
+                  "name": client['name'],
+                  "date": matchedBroker['Date'],
+                  "broker_name": "AngelOne"
+                });
+              }
+              print("😶$matchedClients");
+            }
           });
-
-          // Extract client data (Assuming it's a Map<String, dynamic>)
-          Map<String, dynamic> clientData = userSchema;
-
-          // Extract AngelBrokerData and DeltaBrokerSchema as lists
-          List<dynamic> angelBrokerData = clientData['AngelBrokerData'] ?? [];
-          List<dynamic> deltaBrokerSchema =
-              clientData['DeltaBrokerSchema'] ?? [];
-
-          // Print the extracted data
-          print('Client Data: $clientData');
-          print('Angel Broker Data: $angelBrokerData');
-          print('Delta Broker Schema: $deltaBrokerSchema');
-
-          // Optionally, print individual elements
-          if (angelBrokerData.isNotEmpty) {
-            print('First Angel Broker Data: ${angelBrokerData[0]}');
-          }
-          if (deltaBrokerSchema.isNotEmpty) {
-            print('Delta Broker Schema: $deltaBrokerSchema');
-          }
         } else {
           print(
               'Unexpected response format: Expected a Map but got ${responseBody.runtimeType}');
@@ -161,14 +195,6 @@ class _ManageBrokerState extends State<ManageBroker> {
       setState(() {
         alertMessage2 = '';
       });
-    });
-  }
-
-  void checkAccountAlias(String accountName) {
-    final aliases = userSchema['AccountAliases'] ?? {};
-
-    setState(() {
-      existingAlias = aliases.containsValue(accountName);
     });
   }
 
@@ -277,7 +303,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             TextField(
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -306,7 +332,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             TextField(
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -335,7 +361,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             TextField(
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -364,7 +390,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             TextField(
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -393,17 +419,13 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
           ],
         );
       case '2': // Delta
         return Column(
           children: [
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
               decoration: InputDecoration(
                 labelText: "Account Name",
                 labelStyle: TextStyle(
@@ -427,12 +449,8 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
               decoration: InputDecoration(
                 labelText: "API Key",
                 labelStyle: TextStyle(
@@ -456,12 +474,8 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
               decoration: InputDecoration(
                 labelText: "API Secret",
                 labelStyle: TextStyle(
@@ -485,7 +499,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
           ],
         );
       case '3': // Upstox
@@ -543,14 +557,14 @@ class _ManageBrokerState extends State<ManageBroker> {
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {},
         child: Container(
-          padding: const EdgeInsets.all(16),
-          color: Color(0xFF000000),
+          padding: const EdgeInsets.all(4),
           child: SingleChildScrollView(
             padding:
-                const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
+                const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
             child: Card(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
+              color: Colors.transparent,
               elevation: 4,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -559,7 +573,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Container(
-                        margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                        margin: EdgeInsets.only(left: 20, right: 20),
                         child: DropdownButton<String>(
                           value: selectBroker,
                           onChanged: onBrokerChange,
@@ -596,112 +610,53 @@ class _ManageBrokerState extends State<ManageBroker> {
                         ),
                       ),
                     ),
-                    tableLoader
-                        ? Column(
-                            children: List.generate(
-                              4,
-                              (index) => Shimmer.fromColors(
-                                baseColor: Colors.grey[300]!,
-                                highlightColor: Colors.grey[100]!,
-                                child: Container(
-                                  height: 60,
-                                  width: double.infinity,
-                                  margin: EdgeInsets.symmetric(vertical: 8),
-                                  color: Colors.white,
-                                ),
-                              ),
+                    Container(
+                      margin: EdgeInsets.only(top: 16),
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).cardColor,
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Container(
+                          child: Card(
+                            child: Column(
+                              children:
+                                  List.generate(matchedClients.length, (index) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                                'Client ID: ${matchedClients[index]['clientid']}'),
+                                            Text(
+                                                'Account: ${matchedClients[index]['account_alice']}'),
+                                            Text(
+                                                'Name: ${matchedClients[index]['name']}'),
+                                            Text(
+                                                'Date: ${matchedClients[index]['date']}'),
+                                            Text(
+                                                'Broker: ${matchedClients[index]['broker_name']}'),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
                             ),
-                          )
-                        : Container(
-                            margin: EdgeInsets.only(top: 16),
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Theme.of(context).cardColor,
-                            ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: DataTable(
-                                columnSpacing: 20,
-                                columns: [
-                                  DataColumn(
-                                      label: Center(child: Text('Client ID'))),
-                                  DataColumn(
-                                      label:
-                                          Center(child: Text('Account Alias'))),
-                                  DataColumn(
-                                      label: Center(child: Text('Name'))),
-                                  DataColumn(
-                                      label: Center(child: Text('Date'))),
-                                  DataColumn(
-                                      label:
-                                          Center(child: Text('Broker Name'))),
-                                  DataColumn(
-                                      label: Center(child: Text('Action'))),
-                                ],
-                                rows: clientData.entries
-                                    .map((MapEntry<String, dynamic> entry) {
-                                  // Access the value of the entry
-                                  var item = entry.value;
-                                  print(item);
-                                  String clientId = item['userData']?['data']
-                                          ?['clientcode'] ??
-                                      item['balances']?['result'][0]
-                                          ?['user_id'] ??
-                                      "N/A";
-
-                                  String accountAlias = item['userData']
-                                          ?['data']?['clientcode'] ??
-                                      item['balances']?['result'][0]
-                                          ?['user_id'] ??
-                                      "N/A";
-
-                                  String name = item['userData']?['data']
-                                              ?['name']
-                                          ?.toUpperCase() ??
-                                      ((item['userDetails']?['result']
-                                                      ?['first_name'] ??
-                                                  "N/A") +
-                                              " " +
-                                              (item['userDetails']?['result']
-                                                      ?['last_name'] ??
-                                                  "N/A"))
-                                          .toUpperCase();
-
-                                  String date =
-                                      "N/A"; // Customize as per your schema
-
-                                  String brokerName = item['userData'] != null
-                                      ? "AngelOne"
-                                      : item['deltaApiKey'] != null
-                                          ? "Delta"
-                                          : "Loading...";
-
-                                  return DataRow(cells: [
-                                    DataCell(Center(child: Text(clientId))),
-                                    DataCell(Center(child: Text(accountAlias))),
-                                    DataCell(Center(
-                                        child: Text(
-                                      name,
-                                      overflow: TextOverflow.ellipsis,
-                                    ))),
-                                    DataCell(Center(child: Text(date))),
-                                    DataCell(Center(child: Text(brokerName))),
-                                    DataCell(
-                                      Center(
-                                          // child: IconButton(
-                                          //   icon: Icon(Icons.delete,
-                                          //       color: Colors.red),
-                                          //   onPressed: () => deleteBrokerFunction(
-                                          //       clientData.indexOf(item), clientId),
-                                          // ),
-                                          ),
-                                    ),
-                                  ]);
-                                }).toList(),
-                              ),
-                            ),
-                          )
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

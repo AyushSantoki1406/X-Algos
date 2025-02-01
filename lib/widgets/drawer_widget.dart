@@ -1,8 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:xalgo/Deployed.dart';
 import 'package:xalgo/ExecutedTrade.dart';
 import 'package:xalgo/HomePage.dart';
@@ -11,9 +11,7 @@ import 'package:xalgo/ManageBroker.dart';
 import 'package:xalgo/Marketplace.dart';
 import 'package:xalgo/PaperTrade.dart';
 import 'package:xalgo/Subcribed.dart';
-import 'package:xalgo/main.dart'; // Ensure SplashScreen is defined or imported
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:xalgo/main.dart';
 
 void main() => runApp(AppDrawer());
 
@@ -34,62 +32,39 @@ class MyAccountPage extends StatefulWidget {
 }
 
 class _MyAccountPageState extends State<MyAccountPage> {
-  // Method to fetch email from secure storage
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+
   Future<String?> getEmail() async {
-    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
     try {
-      String? userEmail = await secureStorage.read(key: 'Email');
-      // print('Email retrieved from storage: $userEmail');
-      return userEmail;
+      return await secureStorage.read(key: 'Email');
     } catch (e) {
-      // print('Error retrieving email: $e');
+      return null;
     }
-    return null;
   }
 
-  // Method to call backend route and send the email
   Future<String?> callBackendRoute(String email) async {
     final url =
         Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/dbschema');
-
     try {
       final response = await http.post(
         url,
         body: json.encode({'Email': email}),
         headers: {'Content-Type': 'application/json'},
       );
-
       if (response.statusCode == 200) {
-        // Parse the response body into a Dart map
         final responseBody = jsonDecode(response.body);
-
-        // Access XalgoID from the parsed response
-        final String? algoID = responseBody['XalgoID'];
-        // print('Backend response XalgoID: $algoID');
-
-        // Return the XalgoID
-        return algoID;
-      } else {
-        // print('Failed to call backend. Status code: ${response.statusCode}');
-        return null;
+        return responseBody['XalgoID'];
       }
     } catch (e) {
-      // print('Error calling backend: $e');
       return null;
     }
+    return null;
   }
 
-  // Logout method
   Future<void> logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
-
     await secureStorage.deleteAll();
     await prefs.setBool('isLoggedIn', false);
-
-    bool? isLoggedIn = prefs.getBool('isLoggedIn');
-    // print('Is Logged In: $isLoggedIn');
-
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => SplashScreen()),
@@ -100,9 +75,9 @@ class _MyAccountPageState extends State<MyAccountPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
-          print("Back gesture detected but ignored.");
+          return;
         }
       },
       child: Scaffold(
@@ -112,7 +87,11 @@ class _MyAccountPageState extends State<MyAccountPage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Home()),
+                MaterialPageRoute(
+                  builder: (context) => Home(),
+                  settings: RouteSettings(), // Required for popGestureEnabled
+                  fullscreenDialog: false,
+                ),
               );
             },
             child: Icon(Icons.arrow_back),
@@ -121,14 +100,12 @@ class _MyAccountPageState extends State<MyAccountPage> {
         body: FutureBuilder<String?>(
           future: getEmail(),
           builder: (context, snapshot) {
-            // print('Snapshot data: ${snapshot.data}');
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text("Error: ${snapshot.error}"));
             } else if (snapshot.hasData) {
               String email = snapshot.data!;
-              // Call backend route and pass the email
               return FutureBuilder<String?>(
                 future: callBackendRoute(email),
                 builder: (context, backendSnapshot) {
@@ -137,117 +114,112 @@ class _MyAccountPageState extends State<MyAccountPage> {
                     return Center(child: CircularProgressIndicator());
                   } else if (backendSnapshot.hasError) {
                     return Center(
-                        child: Text(
-                            "Error calling backend: ${backendSnapshot.error}"));
+                        child: Text("Error: ${backendSnapshot.error}"));
                   } else if (backendSnapshot.hasData) {
                     String? algoID = backendSnapshot.data;
                     return ListView(
                       children: [
                         ListTile(
-                          title: Text("$email",
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text("User ID: $algoID"),
+                          title: Text(
+                            "$email",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text("UserID: $algoID"),
                         ),
                         Divider(),
-
-                        // Dashboard
                         _buildListTile(Icons.settings, "Dashboard", onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Home()),
+                            MaterialPageRoute(
+                              builder: (context) => Home(),
+                              settings: RouteSettings(),
+                              fullscreenDialog: false,
+                            ),
                           );
                         }),
-
-                        // Order ExpansionTile
                         ExpansionTile(
                           leading: Icon(Icons.person, color: Colors.white),
                           title: Text("Order"),
                           children: [
-                            _buildSubListTile(
-                              "Live Trade",
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => LiveTradePage()),
-                                );
-                              },
-                            ),
-                            _buildSubListTile(
-                              "Executed Trade",
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ExecutedTrade()),
-                                );
-                              },
-                            ),
+                            _buildSubListTile("LiveTrade", onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LiveTradePage(),
+                                  settings: RouteSettings(),
+                                  fullscreenDialog: false,
+                                ),
+                              );
+                            }),
+                            _buildSubListTile("ExecutedTrade", onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExecutedTrade(),
+                                  settings: RouteSettings(),
+                                  fullscreenDialog: false,
+                                ),
+                              );
+                            }),
                           ],
                         ),
-
-                        // Strategies ExpansionTile
                         ExpansionTile(
                           leading: Icon(Icons.analytics, color: Colors.white),
                           title: Text("Strategies"),
                           children: [
-                            _buildSubListTile(
-                              "Subscribed",
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Subcribed()),
-                                );
-                              },
-                            ),
-                            _buildSubListTile(
-                              "Deployed",
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Deployed()),
-                                );
-                              },
-                            ),
-                            _buildSubListTile(
-                              "Marketplace",
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MarketPlace()),
-                                );
-                              },
-                            ),
+                            _buildSubListTile("Subscribed", onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Subcribed(),
+                                  settings: RouteSettings(),
+                                  fullscreenDialog: false,
+                                ),
+                              );
+                            }),
+                            _buildSubListTile("Deployed", onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Deployed(),
+                                  settings: RouteSettings(),
+                                  fullscreenDialog: false,
+                                ),
+                              );
+                            }),
+                            _buildSubListTile("Marketplace", onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MarketPlace(),
+                                  settings: RouteSettings(),
+                                  fullscreenDialog: false,
+                                ),
+                              );
+                            }),
                           ],
                         ),
-
-                        // Other menu options
-                        _buildListTile(
-                          Icons.account_balance,
-                          "Paper Trade",
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => PaperTrade()),
-                            );
-                          },
-                        ),
-                        _buildListTile(
-                          Icons.share,
-                          "Manage Broker",
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ManageBroker()),
-                            );
-                          },
-                        ),
-
+                        _buildListTile(Icons.account_balance, "PaperTrade",
+                            onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaperTrade(),
+                              settings: RouteSettings(),
+                              fullscreenDialog: false,
+                            ),
+                          );
+                        }),
+                        _buildListTile(Icons.share, "ManageBroker", onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ManageBroker(),
+                              settings: RouteSettings(),
+                              fullscreenDialog: false,
+                            ),
+                          );
+                        }),
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: ElevatedButton(
@@ -271,7 +243,6 @@ class _MyAccountPageState extends State<MyAccountPage> {
     );
   }
 
-  // Helper method to create ListTile
   Widget _buildListTile(IconData icon, String title, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.white),
@@ -279,16 +250,15 @@ class _MyAccountPageState extends State<MyAccountPage> {
       onTap: onTap,
     );
   }
-}
 
-// Helper method to create sub-items in ExpansionTile
-Widget _buildSubListTile(String title, {VoidCallback? onTap}) {
-  return Padding(
-    padding: const EdgeInsets.only(left: 55),
-    child: ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(title),
-      onTap: onTap,
-    ),
-  );
+  Widget _buildSubListTile(String title, {VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 55),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(title),
+        onTap: onTap,
+      ),
+    );
+  }
 }

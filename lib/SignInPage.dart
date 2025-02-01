@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
@@ -48,6 +49,11 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _shakeAnimation;
 
+  int _secondsRemaining = 30;
+  bool _isResendAvailable = true;
+  Timer? _timer;
+  bool _isResendClicked = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +77,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -145,6 +152,34 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
         isLoading = false;
       });
     }
+  }
+
+  void _startTimer() {
+    if (!_isResendAvailable) return;
+
+    // Call the API when user clicks "Resend OTP"
+    fetchStep2Data("https://oyster-app-4y3eb.ondigitalocean.app/signin-step-2");
+
+    setState(() {
+      _isResendAvailable = false;
+      _isResendClicked = true;
+      _secondsRemaining = 30;
+    });
+
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          _isResendAvailable = true;
+          _isResendClicked = false;
+        });
+      }
+    });
   }
 
   // Step 2 API Call - Fetch OTP
@@ -449,7 +484,6 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                       animation: _shakeAnimation,
                     ),
                     SizedBox(height: 20),
-                    SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -479,25 +513,20 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                     SizedBox(
                       height: 10,
                     ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("New on our platform?"),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => MyApp()),
-                            );
-                          },
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: _isResendAvailable ? _startTimer : null,
                           child: Text(
-                            " Create an account",
-                            style: TextStyle(color: AppColors.yellow),
+                            _isResendClicked
+                                ? "Resend in $_secondsRemaining sec"
+                                : "Resend OTP",
+                            style: TextStyle(
+                              color: AppColors.yellow,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        )),
                     Text("OTP is $realOTP")
                   ],
                 ),
@@ -585,25 +614,6 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                 ),
                 SizedBox(
                   height: 10,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("New on our platform?"),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => MyApp()),
-                        );
-                      },
-                      child: Text(
-                        " Create an account",
-                        style: TextStyle(color: AppColors.yellow),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

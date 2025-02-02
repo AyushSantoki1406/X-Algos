@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:xalgo/app_colors.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -39,6 +40,8 @@ class _ManageBrokerState extends State<ManageBroker> {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   List<Map<String, dynamic>> matchedClients = [];
   List<dynamic> allClientsData = []; // Create a list to store all users
+
+  int? selectedIndex;
 
   TextEditingController _accountName = TextEditingController();
   TextEditingController _clientId = TextEditingController();
@@ -93,26 +96,26 @@ class _ManageBrokerState extends State<ManageBroker> {
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          List<dynamic> usersList = json.decode(response.body);
-          List<Map<String, dynamic>> allClientsData =
-              []; // Store all user data as a list
+        if (mounted) {
+          setState(() {
+            List<dynamic> usersList = json.decode(response.body);
+            List<Map<String, dynamic>> allClientsData = [];
 
-          for (var user in usersList) {
-            var userData = user['userData'];
-            print("userdata is here >>>>>>>>>>>>>>>>>>>>>>>>$userData");
+            for (var user in usersList) {
+              var userData = user['userData'];
+              print("userdata is here >>>>>>>>>>>>>>>>>>>>>>>>$userData");
 
-            if (userData != null && userData['data'] != null) {
-              allClientsData.add(Map<String, dynamic>.from(
-                  userData['data'])); // Ensure it's a map
+              if (userData != null && userData['data'] != null) {
+                allClientsData.add(Map<String, dynamic>.from(userData['data']));
+              }
+
+              print("AngleOne data is fetched from db");
             }
 
-            print("AngleOne data is fetched from db");
-          }
-
-          clientData = allClientsData; // Assign list to clientData
-          tableLoader = false;
-        });
+            clientData = allClientsData;
+            tableLoader = false;
+          });
+        }
       } else {
         throw Exception('Failed to load user data');
       }
@@ -127,57 +130,56 @@ class _ManageBrokerState extends State<ManageBroker> {
       var responseBody = json.decode(dbSchemaResponse.body);
 
       if (dbSchemaResponse.statusCode == 200) {
-        var responseBody = json.decode(dbSchemaResponse.body);
-
-        // Ensure responseBody is a Map<String, dynamic>
-        if (responseBody is Map<String, dynamic>) {
+        if (mounted) {
           setState(() {
-            userSchema = responseBody;
-            angelBrokerData = responseBody['AngelBrokerData'] ?? [];
-            deltaBrokerSchema = responseBody['DeltaBrokerSchema'] ?? [];
-            print(">>>>>>>>>>>>>bbbbbbbbbbbbbbbb>>>>>>>");
-            print(clientData);
-            print(">>>>>>>>>>>>>bbbbbbbbbbbbbbbb>>>>>>>");
+            if (responseBody is Map<String, dynamic>) {
+              userSchema = responseBody;
+              angelBrokerData = responseBody['AngelBrokerData'] ?? [];
+              deltaBrokerSchema = responseBody['DeltaBrokerSchema'] ?? [];
+              print(">>>>>>>>>>>>>bbbbbbbbbbbbbbbb>>>");
+              print(clientData);
+              print(">>>>>>>>>>>>>bbbbbbbbbbbbbbbb>>>");
 
-            for (var client in clientData) {
-              String clientId = client['clientcode'];
+              for (var client in clientData) {
+                String clientId = client['clientcode'];
 
-              // Find matching broker
-              var matchedBroker = angelBrokerData.firstWhere(
-                (broker) => broker['AngelId'] == clientId,
-                orElse: () => null,
-              );
+                var matchedBroker = angelBrokerData.firstWhere(
+                  (broker) => broker['AngelId'] == clientId,
+                  orElse: () => null,
+                );
 
-              // Get account alias
-              String accountAlice =
-                  userSchema['AccountAliases'][clientId] ?? "No Alias Found";
+                String accountAlice =
+                    userSchema['AccountAliases'][clientId] ?? "No Alias Found";
 
-              print("Client ID: $clientId, Account Alias: $accountAlice");
+                print("Client ID: $clientId, Account Alias: $accountAlice");
 
-              if (matchedBroker != null) {
-                matchedClients.add({
-                  "clientid": clientId,
-                  "account_alice": accountAlice,
-                  "name": client['name'],
-                  "date": matchedBroker['Date'],
-                  "broker_name": "AngelOne"
-                });
+                if (matchedBroker != null) {
+                  matchedClients.add({
+                    "clientid": clientId,
+                    "account_alice": accountAlice,
+                    "name": client['name'],
+                    "date": matchedBroker['Date'],
+                    "broker_name": "AngelOne"
+                  });
+                }
+                print("😶$matchedClients");
               }
-              print("😶$matchedClients");
+            } else {
+              print(
+                  'Unexpected response format: Expected a Map but got ${responseBody.runtimeType}');
             }
           });
-        } else {
-          print(
-              'Unexpected response format: Expected a Map but got ${responseBody.runtimeType}');
         }
       }
     } catch (error) {
       // Handle error
       print('Error: $error');
     } finally {
-      setState(() {
-        tableLoader = false;
-      });
+      if (mounted) {
+        setState(() {
+          tableLoader = false;
+        });
+      }
     }
   }
 
@@ -202,7 +204,6 @@ class _ManageBrokerState extends State<ManageBroker> {
 
     Future.delayed(Duration(milliseconds: duration), () {
       if (mounted) {
-        // ✅ Check again before updating UI
         setState(() {
           alertMessage2 = '';
         });
@@ -349,14 +350,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -375,14 +376,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -410,14 +411,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -436,14 +437,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -462,14 +463,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -493,14 +494,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -519,14 +520,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -545,14 +546,13 @@ class _ManageBrokerState extends State<ManageBroker> {
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                fillColor: Color(0xFF1A1A1A),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Color(0xFF3D3E57), width: 0.5),
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -582,8 +582,8 @@ class _ManageBrokerState extends State<ManageBroker> {
 
   @override
   Widget build(BuildContext context) {
-    List<bool> switchStates = List.generate(matchedClients.length,
-        (index) => true); // Initialize the switch state for each item
+    String? selectedValue;
+    String? selectedAccount;
 
     return Scaffold(
       appBar: AppBar(
@@ -626,8 +626,7 @@ class _ManageBrokerState extends State<ManageBroker> {
             child: Card(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
-              color: Colors.transparent,
-              elevation: 4,
+              elevation: 5,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -673,127 +672,141 @@ class _ManageBrokerState extends State<ManageBroker> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 16),
+                      margin: EdgeInsets.only(top: 0),
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: Theme.of(context).cardColor,
                       ),
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
-                        child: Container(
-                            child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: matchedClients.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              child: Card(
-                                color: switchStates[index]
-                                    ? Colors.transparent
-                                    : Colors
-                                        .blue, // Change card color based on switch state
-                                elevation: 5,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Row 1: Broker Name & Switch
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            '${matchedClients[index]['broker_name']}',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 20),
-                                          ),
-                                          Transform.scale(
-                                            scale: 0.8, // Reduce switch size
-                                            child: Switch(
-                                              value: switchStates[
-                                                  index], // Use specific state for each switch
-                                              activeColor: Colors.green,
-                                              inactiveTrackColor:
-                                                  Colors.grey[400],
-                                              inactiveThumbColor: Colors.white,
-                                              onChanged: (bool value) {
-                                                setState(() {
-                                                  switchStates[index] =
-                                                      value; // Update the state of the specific switch
-                                                  print(
-                                                      "Switch ${index + 1} changed to: $value"); // Print the switch state (true/false)
-                                                });
-                                              },
+                        child: Column(
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: matchedClients.length,
+                              itemBuilder: (context, index) {
+                                bool isSelected = selectedIndex == index;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedIndex = isSelected ? null : index;
+                                    });
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(vertical: 5),
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.yellow
+                                            : Colors.grey,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        // Row containing account name and dropdown icon
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8.0),
+                                              child: Text(
+                                                "Account Name : ${matchedClients[index]['account_alice']}",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isSelected
+                                                      ? AppColors.yellow
+                                                      : Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                          )
-                                        ],
-                                      ),
-                                      Divider(thickness: 1, color: Colors.grey),
-                                      SizedBox(height: 5),
-
-                                      // Row 2: Account Alice
-                                      _buildRow("Account Alice",
-                                          '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
-
-                                      // Row 3: Name
-                                      _buildRow(
-                                        "Name",
-                                        matchedClients[index]['name'].length >
-                                                10
-                                            ? matchedClients[index]['name']
-                                                    .substring(0, 10) +
-                                                '..'
-                                            : matchedClients[index]['name'],
-                                      ),
-
-                                      // Row 4: Client ID
-                                      _buildRow("Client ID",
-                                          '${matchedClients[index]['clientid']}'),
-
-                                      // Row 5: Date
-                                      _buildRow("Date",
-                                          '${matchedClients[index]['date']}'),
-
-                                      SizedBox(height: 10),
-
-                                      // Delete Button
-                                      Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                            Spacer(),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 8.0),
+                                              child: Icon(
+                                                isSelected
+                                                    ? Icons.arrow_drop_up
+                                                    : Icons.arrow_drop_down,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        child: IconButton(
-                                          icon: Icon(Icons.delete,
-                                              color: Colors.white),
-                                          onPressed: () {
-                                            deleteBroker(
-                                                index,
-                                                matchedClients != null
-                                                    ? matchedClients[index]
-                                                        ['clientid']
-                                                    : matchedClients[index]
-                                                        ['clientid']);
-                                          },
+
+                                        // Dropdown List (inside the same yellow border)
+                                        AnimatedSize(
+                                          duration: Duration(milliseconds: 300),
+                                          child: isSelected
+                                              ? Column(
+                                                  children: [
+                                                    Divider(
+                                                        color: Colors
+                                                            .grey), // Separator line
+                                                    _buildRow("Broker Name",
+                                                        '${matchedClients[index]['broker_name']}'),
+                                                    _buildRow("Account Alice",
+                                                        '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
+
+                                                    // Row 3: Name
+                                                    _buildRow(
+                                                      "Name",
+                                                      matchedClients[index]
+                                                                      ['name']
+                                                                  .length >
+                                                              10
+                                                          ? matchedClients[
+                                                                          index]
+                                                                      ['name']
+                                                                  .substring(
+                                                                      0, 10) +
+                                                              '..'
+                                                          : matchedClients[
+                                                              index]['name'],
+                                                    ),
+                                                    _buildRow("Client ID",
+                                                        '${matchedClients[index]['clientid']}'),
+                                                    _buildRow("Date",
+                                                        '${matchedClients[index]['date']}'),
+                                                    SizedBox(height: 10),
+                                                    Container(
+                                                      width: double.infinity,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.red,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
+                                                      child: IconButton(
+                                                        icon: Icon(Icons.delete,
+                                                            color:
+                                                                Colors.white),
+                                                        onPressed: () {
+                                                          deleteBroker(
+                                                              index,
+                                                              matchedClients[
+                                                                      index]
+                                                                  ['clientid']);
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : SizedBox
+                                                  .shrink(), // Keeps layout intact
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        )),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

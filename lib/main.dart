@@ -75,7 +75,11 @@ class _SplashScreenState extends State<SplashScreen>
         if (isLoggedIn) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Home()),
+            MaterialPageRoute(
+              builder: (context) => Home(),
+              settings: RouteSettings(),
+              fullscreenDialog: false,
+            ),
           );
         } else {
           Navigator.pushReplacement(

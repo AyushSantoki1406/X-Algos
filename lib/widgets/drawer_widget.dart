@@ -128,7 +128,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                         ),
                         Divider(),
                         _buildListTile(Icons.settings, "Dashboard", onTap: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => Home(),

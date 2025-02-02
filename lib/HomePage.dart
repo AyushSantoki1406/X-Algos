@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import 'package:xalgo/widgets/drawer_widget.dart';
-// import 'package:xalgo/widgets/user_detail_dashboard.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -91,7 +89,10 @@ class _HomeState extends State<Home> {
               builder: (context) => IconButton(
                 icon: const Icon(Icons.menu),
                 onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => AppDrawer()),
+                  );
                 },
               ),
             ),

@@ -40,6 +40,13 @@ class _ManageBrokerState extends State<ManageBroker> {
   List<Map<String, dynamic>> matchedClients = [];
   List<dynamic> allClientsData = []; // Create a list to store all users
 
+  TextEditingController _accountName = TextEditingController();
+  TextEditingController _clientId = TextEditingController();
+  TextEditingController _clientIdPIN = TextEditingController();
+  TextEditingController _clientAPIKey = TextEditingController();
+  TextEditingController _clientTotpKey = TextEditingController();
+  TextEditingController _clientApiSecret = TextEditingController();
+
   void onBrokerChange(String? newValue) {
     setState(() {
       selectBroker = newValue!;
@@ -205,22 +212,29 @@ class _ManageBrokerState extends State<ManageBroker> {
 
     bool userExist = false;
 
+    //only fetch user, angle accounts chek its there or not
     if (userSchema['AngelBrokerData'] != null) {
       for (var item in userSchema['AngelBrokerData']) {
         if (item['AngelId'] == id) {
           userExist = true;
+          print("😟");
         }
       }
     }
 
+    print(userSchema);
+
+    //only fetch user, delta accounts chek its there or not
     if (userSchema['DeltaBrokerSchema'] != null) {
       for (var item in userSchema['DeltaBrokerSchema']) {
         if (item['deltaApiKey'] == deltaKey) {
           userExist = true;
+          print("🥹");
         }
       }
     }
 
+    //change case to uppercase
     if (userSchema['AccountAliases'] != null) {
       existingAlias = userSchema['AccountAliases']
           .values
@@ -231,41 +245,84 @@ class _ManageBrokerState extends State<ManageBroker> {
       showAlertWithTimeout("Account Name is not available", 2000);
       setState(() {
         loading = false;
+        print("😂");
       });
     } else if (userExist) {
       showAlertWithTimeout("Broker already added", 2000);
       setState(() {
         loading = false;
+        print("😁");
       });
     } else {
+      print("😊 Emojis here 😊");
       try {
-        final url = 'http://localhost:5000/addbroker';
+        String? email = await getEmail();
+
         final response = await http.post(
-          Uri.parse(url),
+          Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/addbroker'),
           body: json.encode({
             'First': true,
-            'id': id,
-            'pass': pass,
+            'id': _clientId.text,
+            'pass': _clientIdPIN.text,
             'email': email,
-            'secretKey': secretKey,
+            'secretKey': _clientTotpKey.text,
             'userSchema': userSchema,
-            'ApiKey': apikey,
-            'accountName': accountName,
+            'ApiKey': _clientAPIKey.text,
+            'accountName': _accountName.text,
           }),
+          headers: {'Content-Type': 'application/json'},
         );
+
+        print("🚀 Emojis here 🚀");
 
         if (response.statusCode == 200) {
           showAlertWithTimeout2("Successfully added", 3000);
           // Handle the successful response
+
+          print("done");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    ManageBroker()), // Replace with your screen widget
+          );
         } else {
           showAlertWithTimeout("Invalid id or password", 5000);
+          print("not done");
         }
       } catch (e) {
+        print("not>>> done");
         showAlertWithTimeout("Error occurred: $e", 5000);
       }
       setState(() {
         loading = false;
       });
+    }
+  }
+
+  Future<void> deleteBroker(int index, String clientId) async {
+    String? email = await getEmail();
+
+    final response = await http.post(
+      Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/removeClient'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "Email": email,
+        "index": index,
+        "clientId": clientId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                ManageBroker()), // Replace with your screen widget
+      );
+      print("Client removed successfully");
+    } else {
+      print("Failed to remove client: ${response.body}");
     }
   }
 
@@ -276,10 +333,7 @@ class _ManageBrokerState extends State<ManageBroker> {
         return Column(
           children: [
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
+              controller: _accountName,
               decoration: InputDecoration(
                 labelText: "Account Name",
                 labelStyle: TextStyle(
@@ -305,10 +359,7 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
             SizedBox(height: 10),
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
+              controller: _clientId,
               decoration: InputDecoration(
                 labelText: "Client ID",
                 labelStyle: TextStyle(
@@ -331,9 +382,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               ),
+              onChanged: (value) {
+                setState(() {
+                  id = value; // Updates the variable dynamically
+                });
+              },
             ),
             SizedBox(height: 10),
             TextField(
+              controller: _clientIdPIN,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(4),
@@ -363,10 +420,7 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
             SizedBox(height: 10),
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
+              controller: _clientTotpKey,
               decoration: InputDecoration(
                 labelText: "Totp Key",
                 labelStyle: TextStyle(
@@ -392,10 +446,7 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
             SizedBox(height: 10),
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(4),
-              ],
+              controller: _clientAPIKey,
               decoration: InputDecoration(
                 labelText: "Api Key",
                 labelStyle: TextStyle(
@@ -426,6 +477,7 @@ class _ManageBrokerState extends State<ManageBroker> {
         return Column(
           children: [
             TextField(
+              controller: _accountName,
               decoration: InputDecoration(
                 labelText: "Account Name",
                 labelStyle: TextStyle(
@@ -451,6 +503,7 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
             SizedBox(height: 10),
             TextField(
+              controller: _clientAPIKey,
               decoration: InputDecoration(
                 labelText: "API Key",
                 labelStyle: TextStyle(
@@ -476,6 +529,7 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
             SizedBox(height: 10),
             TextField(
+              controller: _clientApiSecret,
               decoration: InputDecoration(
                 labelText: "API Secret",
                 labelStyle: TextStyle(
@@ -683,7 +737,7 @@ class _ManageBrokerState extends State<ManageBroker> {
 
                                       // Row 2: Account Alice
                                       _buildRow("Account Alice",
-                                          '${matchedClients[index]['account_alice']}'),
+                                          '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
 
                                       // Row 3: Name
                                       _buildRow(
@@ -718,7 +772,13 @@ class _ManageBrokerState extends State<ManageBroker> {
                                           icon: Icon(Icons.delete,
                                               color: Colors.white),
                                           onPressed: () {
-                                            // Handle delete action
+                                            deleteBroker(
+                                                index,
+                                                matchedClients != null
+                                                    ? matchedClients[index]
+                                                        ['clientid']
+                                                    : matchedClients[index]
+                                                        ['clientid']);
                                           },
                                         ),
                                       ),

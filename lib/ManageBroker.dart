@@ -194,14 +194,19 @@ class _ManageBrokerState extends State<ManageBroker> {
   }
 
   void showAlertWithTimeout2(String message, int duration) {
+    if (!mounted) return; // ✅ Ensure widget is still in the tree
+
     setState(() {
       alertMessage2 = message;
     });
 
     Future.delayed(Duration(milliseconds: duration), () {
-      setState(() {
-        alertMessage2 = '';
-      });
+      if (mounted) {
+        // ✅ Check again before updating UI
+        setState(() {
+          alertMessage2 = '';
+        });
+      }
     });
   }
 

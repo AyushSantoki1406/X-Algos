@@ -582,234 +582,249 @@ class _ManageBrokerState extends State<ManageBroker> {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
     String? selectedValue;
     String? selectedAccount;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Manage Broker',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(50), // Circular placeholder
-            child: Image.asset(
-              'assets/images/darklogo.png', // Replace with your image path
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
-            ),
-          ),
-        ],
-      ),
-      drawer: AppDrawer(),
+      key: _scaffoldKey, // Assign the key to Scaffold
       endDrawer: AppDrawer(),
       body: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {},
-        child: Container(
-          padding: const EdgeInsets.all(4),
-          child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 5,
-              child: Padding(
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              pinned: true,
+              backgroundColor: Colors.black,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              centerTitle: true,
+              title: Text(
+                'Manage Broker',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              leading: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Container(
-                        margin: EdgeInsets.only(left: 20, right: 20),
-                        child: DropdownButton<String>(
-                          value: selectBroker,
-                          onChanged: onBrokerChange,
-                          isExpanded: true,
-                          style: TextStyle(color: Colors.grey),
-                          items: [
-                            DropdownMenuItem(
-                                value: "1", child: Text("AngelOne")),
-                            DropdownMenuItem(value: "2", child: Text("Delta")),
-                            DropdownMenuItem(value: "3", child: Text("Upstox")),
-                          ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.asset('assets/images/darklogo.png',
+                      fit: BoxFit.cover),
+                ),
+              ),
+              actions: [
+                Builder(
+                  // Ensure correct context
+                  builder: (context) => IconButton(
+                    icon: Icon(Icons.menu),
+                    onPressed: () {
+                      Scaffold.of(context).openEndDrawer();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+          body: Container(
+            padding: const EdgeInsets.all(4),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(8),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Container(
+                          margin: EdgeInsets.only(left: 20, right: 20),
+                          child: DropdownButton<String>(
+                            value: selectBroker,
+                            onChanged: onBrokerChange,
+                            isExpanded: true,
+                            style: TextStyle(color: Colors.grey),
+                            items: [
+                              DropdownMenuItem(
+                                  value: "1", child: Text("AngelOne")),
+                              DropdownMenuItem(
+                                  value: "2", child: Text("Delta")),
+                              DropdownMenuItem(
+                                  value: "3", child: Text("Upstox")),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    // Render the form based on the selected broker
-                    Padding(
-                        padding: EdgeInsets.all(8), child: buildBrokerForm()),
-                    Container(
-                      margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFFBD535),
-                          minimumSize:
-                              Size(double.infinity, 50), // Full width button
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          side: BorderSide.none, // Remove border
-                        ),
-                        onPressed:
-                            existingAlias || angelIdExist ? null : addBrokerBtn,
-                        child: Text(
-                          'Add Broker',
-                          style: TextStyle(color: Colors.black), // Text color
+                      // Render the form based on the selected broker
+                      Padding(
+                          padding: EdgeInsets.all(8), child: buildBrokerForm()),
+                      Container(
+                        margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFFBD535),
+                            minimumSize:
+                                Size(double.infinity, 50), // Full width button
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            side: BorderSide.none, // Remove border
+                          ),
+                          onPressed: existingAlias || angelIdExist
+                              ? null
+                              : addBrokerBtn,
+                          child: Text(
+                            'Add Broker',
+                            style: TextStyle(color: Colors.black), // Text color
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 0),
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Column(
-                          children: [
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: matchedClients.length,
-                              itemBuilder: (context, index) {
-                                bool isSelected = selectedIndex == index;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedIndex = isSelected ? null : index;
-                                    });
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.symmetric(vertical: 5),
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.yellow
-                                            : Colors.grey,
-                                        width: 1,
+                      Container(
+                        margin: EdgeInsets.only(top: 0),
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            children: [
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: matchedClients.length,
+                                itemBuilder: (context, index) {
+                                  bool isSelected = selectedIndex == index;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedIndex =
+                                            isSelected ? null : index;
+                                      });
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.symmetric(vertical: 5),
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? AppColors.yellow
+                                              : Colors.grey,
+                                          width: 1,
+                                        ),
                                       ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        // Row containing account name and dropdown icon
-                                        Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8.0),
-                                              child: Text(
-                                                "Account Name : ${matchedClients[index]['account_alice']}",
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isSelected
-                                                      ? AppColors.yellow
-                                                      : Colors.white,
+                                      child: Column(
+                                        children: [
+                                          // Row containing account name and dropdown icon
+                                          Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 8.0),
+                                                child: Text(
+                                                  "Account Name : ${matchedClients[index]['account_alice']}",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: isSelected
+                                                        ? AppColors.yellow
+                                                        : Colors.white,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Spacer(),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 8.0),
-                                              child: Icon(
-                                                isSelected
-                                                    ? Icons.arrow_drop_up
-                                                    : Icons.arrow_drop_down,
-                                                color: Colors.white,
+                                              Spacer(),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0),
+                                                child: Icon(
+                                                  isSelected
+                                                      ? Icons.arrow_drop_up
+                                                      : Icons.arrow_drop_down,
+                                                  color: Colors.white,
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
+                                            ],
+                                          ),
 
-                                        // Dropdown List (inside the same yellow border)
-                                        AnimatedSize(
-                                          duration: Duration(milliseconds: 300),
-                                          child: isSelected
-                                              ? Column(
-                                                  children: [
-                                                    Divider(
-                                                        color: Colors
-                                                            .grey), // Separator line
-                                                    _buildRow("Broker Name",
-                                                        '${matchedClients[index]['broker_name']}'),
-                                                    _buildRow("Account Alice",
-                                                        '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
+                                          // Dropdown List (inside the same yellow border)
+                                          AnimatedSize(
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            child: isSelected
+                                                ? Column(
+                                                    children: [
+                                                      Divider(
+                                                          color: Colors
+                                                              .grey), // Separator line
+                                                      _buildRow("Broker Name",
+                                                          '${matchedClients[index]['broker_name']}'),
+                                                      _buildRow("Account Alice",
+                                                          '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
 
-                                                    // Row 3: Name
-                                                    _buildRow(
-                                                      "Name",
-                                                      matchedClients[index]
-                                                                      ['name']
-                                                                  .length >
-                                                              10
-                                                          ? matchedClients[
-                                                                          index]
-                                                                      ['name']
-                                                                  .substring(
-                                                                      0, 10) +
-                                                              '..'
-                                                          : matchedClients[
-                                                              index]['name'],
-                                                    ),
-                                                    _buildRow("Client ID",
-                                                        '${matchedClients[index]['clientid']}'),
-                                                    _buildRow("Date",
-                                                        '${matchedClients[index]['date']}'),
-                                                    SizedBox(height: 10),
-                                                    Container(
-                                                      width: double.infinity,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.red,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
+                                                      // Row 3: Name
+                                                      _buildRow(
+                                                        "Name",
+                                                        matchedClients[index]
+                                                                        ['name']
+                                                                    .length >
+                                                                10
+                                                            ? matchedClients[
+                                                                            index]
+                                                                        ['name']
+                                                                    .substring(
+                                                                        0, 10) +
+                                                                '..'
+                                                            : matchedClients[
+                                                                index]['name'],
                                                       ),
-                                                      child: IconButton(
-                                                        icon: Icon(Icons.delete,
-                                                            color:
-                                                                Colors.white),
-                                                        onPressed: () {
-                                                          deleteBroker(
-                                                              index,
-                                                              matchedClients[
-                                                                      index]
-                                                                  ['clientid']);
-                                                        },
+                                                      _buildRow("Client ID",
+                                                          '${matchedClients[index]['clientid']}'),
+                                                      _buildRow("Date",
+                                                          '${matchedClients[index]['date']}'),
+                                                      SizedBox(height: 10),
+                                                      Container(
+                                                        width: double.infinity,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.red,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                        ),
+                                                        child: IconButton(
+                                                          icon: Icon(
+                                                              Icons.delete,
+                                                              color:
+                                                                  Colors.white),
+                                                          onPressed: () {
+                                                            deleteBroker(
+                                                                index,
+                                                                matchedClients[
+                                                                        index][
+                                                                    'clientid']);
+                                                          },
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                )
-                                              : SizedBox
-                                                  .shrink(), // Keeps layout intact
-                                        ),
-                                      ],
+                                                    ],
+                                                  )
+                                                : SizedBox
+                                                    .shrink(), // Keeps layout intact
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

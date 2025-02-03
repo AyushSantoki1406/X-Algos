@@ -2,11 +2,24 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:xalgo/SignUpPage.dart';
 import 'package:xalgo/HomePage.dart';
-import 'package:xalgo/app_colors.dart';
+import 'package:xalgo/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xalgo/theme/theme_manage.dart';
 
-void main() {
-  runApp(MyApp());
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:xalgo/SignUpPage.dart';
+import 'package:xalgo/HomePage.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeManager(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,13 +27,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'X Algos',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      home: SplashScreen(),
-      debugShowCheckedModeBanner: false,
+    return Consumer<ThemeManager>(
+      builder: (context, themeManager, child) {
+        return MaterialApp(
+          title: 'X Algos',
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: themeManager.themeMode, // Dynamically update theme
+          home: const Home(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

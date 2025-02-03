@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/SignUpPage.dart';
 import 'package:xalgo/main.dart';
-import 'package:xalgo/app_colors.dart';
+import 'package:xalgo/theme/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

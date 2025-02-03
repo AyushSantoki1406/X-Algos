@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/SignInPage.dart';
-import 'package:xalgo/app_colors.dart';
+import 'package:xalgo/theme/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 

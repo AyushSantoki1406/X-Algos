@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:xalgo/app_colors.dart';
+import 'package:xalgo/theme/app_colors.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
+import 'package:xalgo/theme/theme_manage.dart';
 
 class ManageBroker extends StatefulWidget {
   const ManageBroker({super.key});
@@ -334,6 +336,8 @@ class _ManageBrokerState extends State<ManageBroker> {
 
   // Method to conditionally show different forms
   Widget buildBrokerForm() {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     switch (selectBroker) {
       case '1': // AngelOne
         return Column(
@@ -343,8 +347,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "Account Name",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -353,11 +359,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 1),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -369,8 +379,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "Client ID",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -379,11 +391,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -404,8 +420,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "Enter Pin",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -414,11 +432,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -430,8 +452,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "Totp Key",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -440,11 +464,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -456,8 +484,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "Api Key",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -466,11 +496,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -487,8 +521,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "Account Name",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -497,11 +533,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -513,8 +553,10 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "API Key",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
@@ -523,11 +565,15 @@ class _ManageBrokerState extends State<ManageBroker> {
                 fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -539,20 +585,27 @@ class _ManageBrokerState extends State<ManageBroker> {
               decoration: InputDecoration(
                 labelText: "API Secret",
                 labelStyle: TextStyle(
-                  fontSize: 13,
-                ),
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                 ),
                 filled: true,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
+                fillColor: Colors.transparent,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
-                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
                 ),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -565,13 +618,36 @@ class _ManageBrokerState extends State<ManageBroker> {
         return Column(
           children: [
             TextField(
-              decoration: InputDecoration(labelText: 'Upstox API Key'),
-              onChanged: (value) {
-                setState(() {
-                  apikey = value;
-                });
-              },
+              decoration: InputDecoration(
+                labelText: "Upstox API",
+                labelStyle: TextStyle(
+                    fontSize: 13,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.2),
+                ),
+                filled: true,
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                fillColor: Colors.transparent,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.2),
+                  borderSide: BorderSide(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      width: 0.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.2),
+                  borderSide: BorderSide(color: AppColors.yellow, width: 0.5),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+              ),
             ),
+            SizedBox(height: 10)
             // Add more fields related to Upstox if needed
           ],
         );
@@ -583,6 +659,7 @@ class _ManageBrokerState extends State<ManageBroker> {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final themeManager = Provider.of<ThemeManager>(context);
 
     String? selectedValue;
     String? selectedAccount;
@@ -597,27 +674,44 @@ class _ManageBrokerState extends State<ManageBroker> {
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               pinned: true,
-              backgroundColor: Colors.black,
+              backgroundColor: themeManager.themeMode == ThemeMode.dark
+                  ? AppColors.darkPrimary
+                  : AppColors.lightPrimary,
               elevation: 0,
               scrolledUnderElevation: 0,
               centerTitle: true,
               title: Text(
                 'Manage Broker',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: themeManager.themeMode == ThemeMode.dark
+                        ? AppColors.lightPrimary
+                        : AppColors.darkPrimary),
               ),
               leading: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(50),
-                  child: Image.asset('assets/images/darklogo.png',
-                      fit: BoxFit.cover),
+                  child: themeManager.themeMode == ThemeMode.dark
+                      ? Image.asset(
+                          'assets/images/darklogo.png',
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          'assets/images/lightlogo.png',
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
               actions: [
                 Builder(
                   // Ensure correct context
                   builder: (context) => IconButton(
-                    icon: Icon(Icons.menu),
+                    icon: Icon(Icons.menu,
+                        color: themeManager.themeMode == ThemeMode.dark
+                            ? AppColors.lightPrimary
+                            : AppColors.darkPrimary),
                     onPressed: () {
                       Scaffold.of(context).openEndDrawer();
                     },
@@ -627,10 +721,16 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
           ],
           body: Container(
+            color: themeManager.themeMode == ThemeMode.dark
+                ? AppColors.darkPrimary
+                : AppColors.lightPrimary,
             padding: const EdgeInsets.all(4),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(8),
               child: Card(
+                color: themeManager.themeMode == ThemeMode.dark
+                    ? AppColors.bd_black
+                    : AppColors.bd_white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 elevation: 5,
@@ -643,21 +743,70 @@ class _ManageBrokerState extends State<ManageBroker> {
                         child: Container(
                           margin: EdgeInsets.only(left: 20, right: 20),
                           child: DropdownButton<String>(
+                            dropdownColor:
+                                themeManager.themeMode == ThemeMode.dark
+                                    ? AppColors.darkBackground
+                                    : AppColors.lightPrimary,
                             value: selectBroker,
                             onChanged: onBrokerChange,
                             isExpanded: true,
                             style: TextStyle(color: Colors.grey),
+                            iconEnabledColor: themeManager.themeMode ==
+                                    ThemeMode.dark
+                                ? AppColors
+                                    .lightPrimary // Icon color in dark mode
+                                : AppColors
+                                    .darkPrimary, // Icon color in light mode
+                            underline: Container(
+                              height: 2,
+                              color: themeManager.themeMode == ThemeMode.dark
+                                  ? AppColors
+                                      .lightPrimary // Underline color in dark mode
+                                  : AppColors
+                                      .darkPrimary, // Underline color in light mode
+                            ),
                             items: [
                               DropdownMenuItem(
-                                  value: "1", child: Text("AngelOne")),
+                                value: "1",
+                                child: Text(
+                                  "AngelOne",
+                                  style: TextStyle(
+                                    color:
+                                        themeManager.themeMode == ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary,
+                                  ),
+                                ),
+                              ),
                               DropdownMenuItem(
-                                  value: "2", child: Text("Delta")),
+                                value: "2",
+                                child: Text(
+                                  "Delta",
+                                  style: TextStyle(
+                                    color:
+                                        themeManager.themeMode == ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary,
+                                  ),
+                                ),
+                              ),
                               DropdownMenuItem(
-                                  value: "3", child: Text("Upstox")),
+                                value: "3",
+                                child: Text(
+                                  "Upstox",
+                                  style: TextStyle(
+                                    color:
+                                        themeManager.themeMode == ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ),
+
                       // Render the form based on the selected broker
                       Padding(
                           padding: EdgeInsets.all(8), child: buildBrokerForm()),
@@ -677,7 +826,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                               : addBrokerBtn,
                           child: Text(
                             'Add Broker',
-                            style: TextStyle(color: Colors.black), // Text color
+                            style: TextStyle(
+                                color: themeManager.themeMode == ThemeMode.dark
+                                    ? AppColors.darkPrimary
+                                    : AppColors.lightPrimary), // Text color
                           ),
                         ),
                       ),
@@ -711,9 +863,12 @@ class _ManageBrokerState extends State<ManageBroker> {
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
                                           color: isSelected
-                                              ? AppColors.yellow
+                                              ? (themeManager.themeMode ==
+                                                      ThemeMode.dark
+                                                  ? AppColors.lightPrimary
+                                                  : AppColors.darkPrimary)
                                               : Colors.grey,
-                                          width: 1,
+                                          width: 2,
                                         ),
                                       ),
                                       child: Column(
@@ -723,7 +878,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                                             children: [
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    left: 8.0),
+                                                    left: 0.0),
                                                 child: Text(
                                                   "Account Name : ${matchedClients[index]['account_alice']}",
                                                   style: TextStyle(
@@ -731,7 +886,13 @@ class _ManageBrokerState extends State<ManageBroker> {
                                                     fontWeight: FontWeight.bold,
                                                     color: isSelected
                                                         ? AppColors.yellow
-                                                        : Colors.white,
+                                                        : (themeManager
+                                                                    .themeMode ==
+                                                                ThemeMode.dark
+                                                            ? AppColors
+                                                                .lightPrimary
+                                                            : AppColors
+                                                                .darkPrimary),
                                                   ),
                                                 ),
                                               ),
@@ -835,6 +996,8 @@ class _ManageBrokerState extends State<ManageBroker> {
   }
 
   Widget _buildRow(String title, String value) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Column(
       children: [
         Row(
@@ -842,14 +1005,24 @@ class _ManageBrokerState extends State<ManageBroker> {
           children: [
             Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 17,
+                  color: themeManager.themeMode == ThemeMode.dark
+                      ? AppColors.lightPrimary
+                      : AppColors.darkPrimary),
             ),
             Text(
               value,
               softWrap: false,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+              style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 17,
+                  color: themeManager.themeMode == ThemeMode.dark
+                      ? AppColors.lightPrimary
+                      : AppColors.darkPrimary),
             ),
           ],
         ),

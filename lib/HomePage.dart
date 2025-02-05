@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shimmer/main.dart';
+import 'package:xalgo/main.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
 import 'package:xalgo/theme/app_colors.dart';
+import 'package:xalgo/secret/secret.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,31 +20,50 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Future<Map<String, dynamic>> fetchProfile() async {
-    final url =
-        Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/dbschema');
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
-    final Map<String, String> body = {
-      'Email': 'ayushsantoki1462004@gmail.com',
-    };
-    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  //function for gmai
+  Future<String?> getEmail() async {
+    try {
+      String? email = await secureStorage.read(key: 'Email');
+      String? userSchemaJson = await secureStorage.read(key: "backendData");
+
+      if (userSchemaJson != null) {
+        Map<String, dynamic> userData = jsonDecode(userSchemaJson);
+      } else {
+        print('No backendData found in storage.');
+      }
+
+      return email;
+    } catch (e) {
+      print('Error fetching email: $e');
+      return null;
+    }
+  }
+
+  //fetch userdata from backend and store to shared prefences
+  Future<Map<String, dynamic>> fetchProfile() async {
+    String? email = await getEmail();
+    final url = Uri.parse('${Secret.backendUrl}/dbschema');
+
+    final Map<String, String> body = {'Email': email.toString()};
+    final response = await http.post(url, body: body);
 
     Future<void> loadUserSchema() async {
       try {
-        // Retrieve the JSON string from secure storage
-        String? userSchemaJson = await secureStorage.read(key: 'backendData');
+        if (response != null) {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          Map<String, dynamic> userSchema = jsonDecode(response.body);
+          await secureStorage.write(
+              key: 'backendData', value: jsonEncode(userSchema));
 
-        if (userSchemaJson != null) {
-          // Decode the JSON string back to a map
-          Map<String, dynamic> userSchema = jsonDecode(userSchemaJson);
-
-          print('User Name: ${userSchema}');
-          print('User Email: ${userSchema['Email']}');
+          // Also store in SharedPreferences for fast access
+          await prefs.setString('userSchema', jsonEncode(userSchema));
         } else {
-          print('No user schema found in storage.');
+          log('No user schema found in storage.');
         }
       } catch (e) {
-        print('Error loading user schema: $e');
+        log('Error loading user schema: $e');
       }
     }
 
@@ -218,9 +242,15 @@ class _HomeState extends State<Home> {
                     ),
                   );
                 } else {
-                  return const Center(
-                    child: Text('No data available'),
-                  );
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SplashScreen(),
+                      ),
+                    );
+                  });
+                  return Container(); // This ensures a Widget is always returned
                 }
               },
             ),

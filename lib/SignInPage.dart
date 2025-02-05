@@ -251,7 +251,6 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
       // Decode response body
       final Map<String, dynamic> a = jsonDecode(response.body);
 
-      print(a);
       if (a['pin'] != false && a['userSchema'] is Map<String, dynamic>) {
         // Access user schema data
         final String email = a['userSchema']['Email'] ?? "Unknown";
@@ -262,6 +261,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
 
         // Save email in secure storage
         await secureStorage.write(key: 'Email', value: email);
+        await secureStorage.write(key: 'backendData', value: userSchemaJson);
 
         // Send login mail
         await sendLoginMail(email, userAgent);
@@ -393,14 +393,19 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                     child: ElevatedButton(
                       onPressed: isLoading
                           ? null
-                          : () {
-                              fetchStep1Data(
-                                "https://oyster-app-4y3eb.ondigitalocean.app/signin-step-1", // Step 1 API endpoint
-                                {
-                                  "userInput": _controller
-                                      .text, // Pass the text from the controller
-                                },
+                          : () async {
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              await fetchStep1Data(
+                                "https://oyster-app-4y3eb.ondigitalocean.app/signin-step-1",
+                                {"userInput": _controller.text},
                               );
+
+                              setState(() {
+                                isLoading = false;
+                              });
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.yellow,
@@ -410,14 +415,23 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 12),
                       ),
-                      child: const Text(
-                        "Proceed",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.black,
+                              ),
+                            )
+                          : const Text(
+                              "Proceed",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
                     ),
                   ),
                   SizedBox(
@@ -489,8 +503,16 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                       child: ElevatedButton(
                         onPressed: isLoading
                             ? null
-                            : () {
+                            : () async {
+                                setState(() {
+                                  isLoading = true;
+                                });
+
                                 checkOTP();
+
+                                setState(() {
+                                  isLoading = false;
+                                });
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.yellow,
@@ -500,14 +522,23 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                         ),
-                        child: Text(
-                          "Next",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black,
+                                ),
+                              )
+                            : const Text(
+                                "Next",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
                       ),
                     ),
                     SizedBox(
@@ -592,8 +623,20 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed:
-                        isLoading ? null : () => verifyPin(context, _pin),
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            await verifyPin(context,
+                                _pin); // Use await only if verifyPin returns a Future
+
+                            setState(() {
+                              isLoading = false;
+                            });
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.yellow,
                       shape: RoundedRectangleBorder(
@@ -602,14 +645,23 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                     ),
-                    child: Text(
-                      "Submit",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.yellow,
+                            ),
+                          )
+                        : const Text(
+                            "Submit",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
                   ),
                 ),
                 SizedBox(

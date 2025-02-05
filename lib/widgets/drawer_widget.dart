@@ -15,8 +15,18 @@ import 'package:xalgo/theme/app_colors.dart';
 import 'package:xalgo/main.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(AppDrawer());
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
+      ],
+      child: AppDrawer(),
+    ),
+  );
+}
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -37,37 +47,56 @@ class MyAccountPage extends StatefulWidget {
 class _MyAccountPageState extends State<MyAccountPage> {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
+  //function to get gmail
+
   Future<String?> getEmail() async {
     try {
-      return await secureStorage.read(key: 'Email');
+      String? email = await secureStorage.read(key: 'Email');
+      if (email == null) {
+        print('No email found in secure storage.');
+      } else {
+        print('Email retrieved: $email');
+      }
+      return email;
     } catch (e) {
+      print('Error reading email from secure storage: $e');
       return null;
     }
   }
 
-  Future<String?> callBackendRoute(String email) async {
-    final url =
-        Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/dbschema');
+  Future<String?> callBackendRoute() async {
     try {
-      final response = await http.post(
-        url,
-        body: json.encode({'Email': email}),
-        headers: {'Content-Type': 'application/json'},
-      );
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        return responseBody['XalgoID'];
+      final SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      String? userSchemaJson = await secureStorage.read(key: "backendData");
+
+      if (userSchemaJson == null) {
+        return null;
       }
+
+      Map<String, dynamic> userData = jsonDecode(userSchemaJson);
+      print(userData['']);
+
+      return userData['XalgoID'];
     } catch (e) {
       return null;
     }
-    return null;
   }
 
   Future<void> logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Deleting all secure storage data, including email and backend data
     await secureStorage.deleteAll();
+
+    // Optionally, you can also delete specific keys if needed:
+    await secureStorage.delete(key: 'Email');
+    await secureStorage.delete(key: 'backendData'); // Adjust key name if needed
+
+    // Set the login status to false in SharedPreferences
     await prefs.setBool('isLoggedIn', false);
+
+    // Navigate to the SplashScreen
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => SplashScreen()),
@@ -148,6 +177,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                 body: FutureBuilder<String?>(
                   future: getEmail(),
                   builder: (context, snapshot) {
+                    print(snapshot);
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
@@ -155,7 +185,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                     } else if (snapshot.hasData) {
                       String email = snapshot.data!;
                       return FutureBuilder<String?>(
-                        future: callBackendRoute(email),
+                        future: callBackendRoute(),
                         builder: (context, backendSnapshot) {
                           if (backendSnapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -163,7 +193,8 @@ class _MyAccountPageState extends State<MyAccountPage> {
                           } else if (backendSnapshot.hasError) {
                             return Center(
                                 child: Text("Error: ${backendSnapshot.error}"));
-                          } else if (backendSnapshot.hasData) {
+                          } else if (backendSnapshot.connectionState ==
+                              ConnectionState.done) {
                             String? algoID = backendSnapshot.data;
                             return ListView(
                               children: [
@@ -303,8 +334,8 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                     ),
                                   );
                                 }),
-                                _buildListTile(Icons.share, "ManageBroker",
-                                    onTap: () {
+                                _buildListTile(Icons.manage_accounts_rounded,
+                                    "ManageBroker", onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

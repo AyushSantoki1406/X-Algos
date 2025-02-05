@@ -7,6 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
+import 'package:xalgo/secret/secret.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MarketPlace extends StatefulWidget {
   const MarketPlace({super.key});
@@ -21,7 +23,6 @@ class _MarketPlaceState extends State<MarketPlace> {
   Map<String, dynamic> userSchema =
       {}; // Map<String, dynamic> for handling dynamic data
   bool isLoading = true;
-  final String url = "https://oyster-app-4y3eb.ondigitalocean.app";
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   String? selectedStrategyId;
   List<String> dropDownItems = [];
@@ -52,7 +53,7 @@ class _MarketPlaceState extends State<MarketPlace> {
     String? email = await getEmail();
     try {
       final response = await http.post(
-        Uri.parse('$url/getMarketPlaceData'),
+        Uri.parse('${Secret.backendUrl}/getMarketPlaceData'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );
@@ -82,7 +83,7 @@ class _MarketPlaceState extends State<MarketPlace> {
     print(strategyId);
     try {
       final response = await http.post(
-        Uri.parse('$url/updateSubscribe'),
+        Uri.parse('${Secret.backendUrl}/updateSubscribe'),
         body: jsonEncode({
           'strategyId': int.tryParse(strategyId) ?? strategyId,
           'email': email,
@@ -185,7 +186,7 @@ class _MarketPlaceState extends State<MarketPlace> {
       print(a);
       print(selectedStrategyId); // Sending a POST request
       final response = await http.post(
-        Uri.parse('$url/addDeployed'),
+        Uri.parse('${Secret.backendUrl}/addDeployed'),
         body: json.encode({
           'Email': email,
           'selectedStrategyId': selectedStrategyId,

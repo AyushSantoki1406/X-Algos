@@ -33,8 +33,8 @@ class MyApp extends StatelessWidget {
           title: 'X Algos',
           theme: ThemeData.light(),
           darkTheme: ThemeData.dark(),
-          themeMode: themeManager.themeMode, // Dynamically update theme
-          home: const Home(),
+          themeMode: themeManager.themeMode,
+          home: const SplashScreen(), // Start with SplashScreen
           debugShowCheckedModeBanner: false,
         );
       },
@@ -57,6 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+
     _checkLoginStatus();
 
     // Initialize animation
@@ -84,6 +85,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     setState(() {
       isLoggedIn = loggedIn ?? false;
+      print(isLoggedIn);
     });
 
     Timer(
@@ -110,6 +112,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    print("😟");
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {},

@@ -533,13 +533,12 @@ class _SignUpState extends State<SignUp> {
                         onPressed: isLoading
                             ? null
                             : () {
-                                // Set loading to true when initiating the request
                                 setState(() {
                                   isLoading = true;
                                 });
 
                                 fetchStep1Data(
-                                  "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1", // Step 1 API endpoint
+                                  "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1",
                                   {
                                     "email": _email.text,
                                     "firstName": _fname.text,
@@ -550,15 +549,14 @@ class _SignUpState extends State<SignUp> {
                                 ).then((_) {
                                   setState(() {
                                     isLoading = false;
-                                    // currentIndex++; // Move to the next step
+                                    // currentIndex++; // Uncomment if you want to move to the next step
                                   });
                                 }).catchError((error) {
                                   setState(() {
-                                    isLoading =
-                                        false; // Ensure loading is false even on error
+                                    isLoading = false;
                                   });
-                                  // Handle the error here, show a snack bar or other UI feedback
-                                  print("Error fetching data: $error");
+                                  print(
+                                      "Error fetching data: $error"); // Handle error (show Snackbar, etc.)
                                 });
                               },
                         style: ElevatedButton.styleFrom(
@@ -569,14 +567,23 @@ class _SignUpState extends State<SignUp> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                         ),
-                        child: const Text(
-                          "Proceed",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1A1A),
-                          ),
-                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black,
+                                ),
+                              )
+                            : const Text(
+                                "Proceed",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                              ),
                       ),
                     ),
                     SizedBox(

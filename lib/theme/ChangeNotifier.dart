@@ -5,6 +5,6 @@ class ThemeProvider extends ChangeNotifier {
 
   void toggleTheme() {
     themeMode = themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    notifyListeners(); // Notify UI to rebuild
+    notifyListeners();
   }
 }

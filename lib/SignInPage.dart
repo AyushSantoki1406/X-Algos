@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/SignUpPage.dart';
 import 'package:xalgo/main.dart';
+import 'package:xalgo/secret/secret.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
@@ -131,8 +132,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
         // If canSendOtp is true, proceed to Step 2
         if (responseData['canSendOtp'] == true) {
           setState(() {
-            fetchStep2Data(
-                "https://oyster-app-4y3eb.ondigitalocean.app/signin-step-2");
+            fetchStep2Data("${Secret.backendUrl}/signin-step-2");
             currentIndex++; // Move to the next step
           });
         }
@@ -158,7 +158,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
     if (!_isResendAvailable) return;
 
     // Call the API when user clicks "Resend OTP"
-    fetchStep2Data("https://oyster-app-4y3eb.ondigitalocean.app/signin-step-2");
+    fetchStep2Data("${Secret.backendUrl}/signin-step-2");
 
     setState(() {
       _isResendAvailable = false;
@@ -229,7 +229,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
     String userAgent = await getUserAgent(); // Ensure getUserAgent() is defined
 
     // API endpoint
-    String url = "https://oyster-app-4y3eb.ondigitalocean.app/verify-pin";
+    String url = "${Secret.backendUrl}/verify-pin";
     print(_pin.text);
     // The request body with the user agent
     Map<String, dynamic> body = {
@@ -271,7 +271,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
         await prefs.setBool('isLoggedIn', true);
 
         // Navigate to the Home screen
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) => Home()), // Replace Home with your widget
@@ -285,8 +285,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   }
 
   Future<void> sendLoginMail(String email, String userAgent) async {
-    final String url =
-        'https://oyster-app-4y3eb.ondigitalocean.app/sendLoginMail';
+    final String url = '${Secret.backendUrl}/sendLoginMail';
 
     try {
       final response = await http.post(
@@ -399,7 +398,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                               });
 
                               await fetchStep1Data(
-                                "https://oyster-app-4y3eb.ondigitalocean.app/signin-step-1",
+                                "${Secret.backendUrl}/signin-step-1",
                                 {"userInput": _controller.text},
                               );
 
@@ -421,7 +420,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.black,
+                                color: AppColors.yellow,
                               ),
                             )
                           : const Text(
@@ -528,7 +527,7 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.black,
+                                  color: AppColors.yellow,
                                 ),
                               )
                             : const Text(
@@ -678,122 +677,125 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFF1A1A1A),
       body: SafeArea(
-        child: Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(10),
-          margin: EdgeInsets.only(top: 30, bottom: 30),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            elevation: 0,
-            color: Color(0xFF1A1A1A),
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Container(
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              3,
-                              (index) => Row(
-                                children: [
-                                  GestureDetector(
-                                    child: Container(
-                                      width: 30,
-                                      height: 30,
-                                      margin: const EdgeInsets.all(10),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: currentIndex >= index
-                                            ? AppColors
-                                                .yellow // Yellow color for completed/current steps
-                                            : Colors.transparent,
-                                        border: Border.all(
-                                          color:
-                                              AppColors.yellow, // Border color
-                                          width: 2.0,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          color: currentIndex >= index
-                                              ? Colors
-                                                  .black // Black text for completed steps
-                                              : Colors
-                                                  .white, // Black text for white steps
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  if (index < 2) // Connecting line
-                                    Container(
-                                      width: 90,
-                                      height: 2,
-                                      color: currentIndex > index
-                                          ? AppColors
-                                              .yellow // Purple for completed lines
-                                          : Colors
-                                              .white, // Default white for upcoming lines
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(
-                      height: 40,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+        child: SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(top: 30, bottom: 30),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+              color: Color(0xFF1A1A1A),
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Column(
                         children: [
-                          Text(
-                            "Welcome to X-Algos! 👋",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            "Please sign up to create a new account",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                          Container(
+                            margin: EdgeInsets.only(top: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                3,
+                                (index) => Row(
+                                  children: [
+                                    GestureDetector(
+                                      child: Container(
+                                        width: 30,
+                                        height: 30,
+                                        margin: const EdgeInsets.all(10),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: currentIndex >= index
+                                              ? AppColors
+                                                  .yellow // Yellow color for completed/current steps
+                                              : Colors.transparent,
+                                          border: Border.all(
+                                            color: AppColors
+                                                .yellow, // Border color
+                                            width: 2.0,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          '${index + 1}',
+                                          style: TextStyle(
+                                            color: currentIndex >= index
+                                                ? Colors
+                                                    .black // Black text for completed steps
+                                                : Colors
+                                                    .white, // Black text for white steps
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    if (index < 2) // Connecting line
+                                      Container(
+                                        width: 90,
+                                        height: 2,
+                                        color: currentIndex > index
+                                            ? AppColors
+                                                .yellow // Purple for completed lines
+                                            : Colors
+                                                .white, // Default white for upcoming lines
+                                      ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    // Page content
-                    Flexible(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: pages[currentIndex], // Display the current page
+
+                      SizedBox(
+                        height: 40,
                       ),
-                    ),
-                  ],
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Welcome to X-Algos! 👋",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              "Please sign up to create a new account",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Page content
+                      Flexible(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child:
+                              pages[currentIndex], // Display the current page
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

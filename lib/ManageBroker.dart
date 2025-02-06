@@ -811,12 +811,12 @@ class _ManageBrokerState extends State<ManageBroker> {
                       Padding(
                           padding: EdgeInsets.all(8), child: buildBrokerForm()),
                       Container(
-                        margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                        margin: EdgeInsets.only(left: 8, right: 8),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFFBD535),
                             minimumSize:
-                                Size(double.infinity, 50), // Full width button
+                                Size(double.infinity, 50), // Full-width button
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                             side: BorderSide.none, // Remove border
@@ -827,23 +827,29 @@ class _ManageBrokerState extends State<ManageBroker> {
                           child: Text(
                             'Add Broker',
                             style: TextStyle(
-                                color: themeManager.themeMode == ThemeMode.dark
-                                    ? AppColors.darkPrimary
-                                    : AppColors.lightPrimary), // Text color
+                              color: themeManager.themeMode == ThemeMode.dark
+                                  ? AppColors.darkPrimary
+                                  : AppColors.lightPrimary,
+                            ), // Text color
                           ),
                         ),
                       ),
+
                       Container(
-                        margin: EdgeInsets.only(top: 0),
-                        padding: EdgeInsets.all(8),
+                        margin: EdgeInsets.zero,
+                        padding: EdgeInsets.all(0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: Column(
-                            children: [
-                              ListView.builder(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 0),
+                            ),
+                            SingleChildScrollView(
+                              child: ListView.builder(
                                 shrinkWrap: true,
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount: matchedClients.length,
@@ -873,26 +879,37 @@ class _ManageBrokerState extends State<ManageBroker> {
                                       ),
                                       child: Column(
                                         children: [
-                                          // Row containing account name and dropdown icon
                                           Row(
                                             children: [
+                                              Text(
+                                                "Accounts",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: themeManager
+                                                              .themeMode ==
+                                                          ThemeMode.dark
+                                                      ? AppColors
+                                                          .lightPrimary // Dark mode
+                                                      : AppColors
+                                                          .darkPrimary, // Light mode
+                                                ),
+                                              ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                     left: 0.0),
                                                 child: Text(
-                                                  "Account Name : ${matchedClients[index]['account_alice']}",
+                                                  "Account Name: ${matchedClients[index]['account_alice']}",
                                                   style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.bold,
-                                                    color: isSelected
-                                                        ? AppColors.yellow
-                                                        : (themeManager
-                                                                    .themeMode ==
-                                                                ThemeMode.dark
-                                                            ? AppColors
-                                                                .lightPrimary
-                                                            : AppColors
-                                                                .darkPrimary),
+                                                    color: themeManager
+                                                                .themeMode ==
+                                                            ThemeMode.dark
+                                                        ? AppColors
+                                                            .lightPrimary // Dark mode
+                                                        : AppColors
+                                                            .darkPrimary, // Light mode
                                                   ),
                                                 ),
                                               ),
@@ -909,8 +926,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                                               ),
                                             ],
                                           ),
-
-                                          // Dropdown List (inside the same yellow border)
+                                          // Dropdown list inside the same yellow border
                                           AnimatedSize(
                                             duration:
                                                 Duration(milliseconds: 300),
@@ -924,23 +940,8 @@ class _ManageBrokerState extends State<ManageBroker> {
                                                           '${matchedClients[index]['broker_name']}'),
                                                       _buildRow("Account Alice",
                                                           '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
-
-                                                      // Row 3: Name
-                                                      _buildRow(
-                                                        "Name",
-                                                        matchedClients[index]
-                                                                        ['name']
-                                                                    .length >
-                                                                10
-                                                            ? matchedClients[
-                                                                            index]
-                                                                        ['name']
-                                                                    .substring(
-                                                                        0, 10) +
-                                                                '..'
-                                                            : matchedClients[
-                                                                index]['name'],
-                                                      ),
+                                                      _buildRow("Name",
+                                                          '${matchedClients[index]['name'].length > 10 ? matchedClients[index]['name'].substring(0, 10) + '..' : matchedClients[index]['name']}'),
                                                       _buildRow("Client ID",
                                                           '${matchedClients[index]['clientid']}'),
                                                       _buildRow("Date",
@@ -971,8 +972,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                                                       ),
                                                     ],
                                                   )
-                                                : SizedBox
-                                                    .shrink(), // Keeps layout intact
+                                                : SizedBox.shrink(),
                                           ),
                                         ],
                                       ),
@@ -980,10 +980,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                   );
                                 },
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),

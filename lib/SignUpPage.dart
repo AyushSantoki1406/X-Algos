@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/SignInPage.dart';
+import 'package:xalgo/secret/secret.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -73,7 +74,7 @@ class _SignUpState extends State<SignUp> {
 
     // Call API for email OTP
     fetchStep1Data(
-      "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1", // Step 1 API endpoint
+      "${Secret.backendUrl}/signup-step-1", // Step 1 API endpoint
       {
         "email": _email.text,
         "firstName": _fname.text,
@@ -108,7 +109,7 @@ class _SignUpState extends State<SignUp> {
 
     // Call API for mobile OTP
     fetchStep1Data(
-      "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1",
+      "${Secret.backendUrl}/signup-step-1",
       {
         "email": _email.text,
         "firstName": _fname.text,
@@ -538,7 +539,7 @@ class _SignUpState extends State<SignUp> {
                                 });
 
                                 fetchStep1Data(
-                                  "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-1",
+                                  "${Secret.backendUrl}/signup-step-1",
                                   {
                                     "email": _email.text,
                                     "firstName": _fname.text,
@@ -573,7 +574,7 @@ class _SignUpState extends State<SignUp> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.black,
+                                  color: AppColors.yellow,
                                 ),
                               )
                             : const Text(
@@ -865,15 +866,14 @@ class _SignUpState extends State<SignUp> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: isLoading
-                            ? null
+                            ? null // Disable button when loading
                             : () {
-                                // Set loading to true when initiating the request
                                 setState(() {
                                   isLoading = true;
                                 });
 
                                 fetchStep3Data(
-                                  "https://oyster-app-4y3eb.ondigitalocean.app/signup-step-3", // Step 1 API endpoint
+                                  "${Secret.backendUrl}/signup-step-3",
                                   {
                                     "email": _email.text,
                                     "firstName": _fname.text,
@@ -892,7 +892,6 @@ class _SignUpState extends State<SignUp> {
                                     isLoading =
                                         false; // Ensure loading is false even on error
                                   });
-                                  // Handle the error here, show a snack bar or other UI feedback
                                   print("Error fetching data: $error");
                                 });
                               },
@@ -904,14 +903,23 @@ class _SignUpState extends State<SignUp> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                         ),
-                        child: Text(
-                          "Submit",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black, // Change color as needed
+                                ),
+                              )
+                            : const Text(
+                                "Submit",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
                       ),
                     ),
                     SizedBox(height: 10),

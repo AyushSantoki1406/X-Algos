@@ -166,6 +166,21 @@ class _HomeState extends State<Home> {
                   return Center(
                     child: Text('Error: ${snapshot.error}'),
                   );
+                } else if (!snapshot.hasData) {
+                  SharedPreferences.getInstance().then((prefs) {
+                    prefs.setBool('isLoggedIn', false);
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SplashScreen(),
+                        ),
+                      );
+                    });
+                  });
+
+                  return Container(); // Ensure a Widget is always returned
                 } else if (snapshot.hasData) {
                   final data = snapshot.data!;
                   return Container(

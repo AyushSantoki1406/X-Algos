@@ -6,7 +6,7 @@ class AppColors {
   static const Color lightBackground = Color(0xFFF5F5F5);
   static const Color lightHeading = Colors.black;
   static const Color lightText = Colors.grey;
-  static const Color bd_white = Color(0xFFF5F5F5); // Light grayish white
+  static const Color bd_white = Color(0xFFFAFAFA); // Very light white
 
   // Dark Mode Colors
   static const Color darkPrimary = Colors.black;

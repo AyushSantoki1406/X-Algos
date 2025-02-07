@@ -31,10 +31,8 @@ void main() {
 class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: MyAccountPage(),
+    return Scaffold(
+      body: MyAccountPage(),
     );
   }
 }
@@ -124,7 +122,6 @@ class _MyAccountPageState extends State<MyAccountPage> {
               canPop: false,
               onPopInvokedWithResult: (didPop, result) {},
               child: SafeArea(
-                
                 child: NestedScrollView(
                   headerSliverBuilder: (context, innerBoxIsScrolled) => [
                     SliverAppBar(

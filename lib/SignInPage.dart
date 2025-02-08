@@ -13,6 +13,9 @@ import 'package:xalgo/theme/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dio/dio.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 void main() {
   runApp(const SignInPage());
@@ -55,6 +58,13 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   Timer? _timer;
   bool _isResendClicked = false;
   bool isSessionActive = false;
+
+  final dio = Dio();
+  final cookieJar = CookieJar(); // Store cookies
+
+  void setupDio() {
+    dio.interceptors.add(CookieManager(cookieJar));
+  }
 
   @override
   void initState() {

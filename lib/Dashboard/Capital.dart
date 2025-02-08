@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -24,7 +25,11 @@ class Capital extends StatefulWidget {
 class _CapitalState extends State<Capital> {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
-  var sum = 0;
+  double sum = 0;
+
+  bool brokerLogin1 = false;
+  List<dynamic> capital = [];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -32,7 +37,7 @@ class _CapitalState extends State<Capital> {
     fetchData();
   }
 
-  //function for gmai
+  //function for gmail
   Future<String?> getEmail() async {
     try {
       String? email = await secureStorage.read(key: 'Email');
@@ -98,23 +103,119 @@ class _CapitalState extends State<Capital> {
     }
   }
 
+  //main function
   void fetchData() async {
+    isLoading = true;
     try {
       String? email = await getEmail();
-      final pr = await http.post(
+
+      ///////////////userinfo stored
+      final profileData = await http.post(
           Uri.parse('${Secret.backendUrl}/userinfo'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'Email': email}));
-      print(pr.body);
+      final data = profileData.body;
+      print(
+          "profile data is fetched DASHBOARD(Capital)>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+      await secureStorage.write(key: 'allClientData', value: data);
+
+      ////////////////////store dbschema
+      final dbschema = await http.post(
+          Uri.parse('${Secret.backendUrl}/dbSchema'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'Email': email}));
+
+      final data2 = dbschema.body;
+      print(
+          "dbschema data is fetched DASHBOARD(Capital)>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+      await secureStorage.write(key: 'userSchema', value: data2);
+
+      String? userSchemaString = await secureStorage.read(key: 'userSchema');
+
+      if (userSchemaString != null) {
+        Map<String, dynamic> userSchema = jsonDecode(userSchemaString);
+
+        int brokerCount = (userSchema['BrokerCount'] is int)
+            ? userSchema['BrokerCount']
+            : int.tryParse(userSchema['BrokerCount'].toString()) ?? 0;
+        print("finding Broker Count is true or false DASHBOARD(Capital)");
+        if (brokerCount > 0) {
+          await secureStorage.write(key: 'BrokerCount', value: 'true');
+          brokerLogin1 = true;
+        } else {
+          await secureStorage.write(key: 'BrokerCount', value: 'false');
+          brokerLogin1 = false;
+        }
+      } else {
+        print('No user schema found');
+      }
+
+      String? brokerCountStr = await secureStorage.read(key: 'BrokerCount');
+
+      if (brokerLogin1) {
+        final response = await http.post(
+          Uri.parse('${Secret.backendUrl}/addbroker'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(
+              {'First': false, "Email": email, "userSchema": userSchemaString}),
+        );
+
+        final a = jsonDecode(response.body);
+
+        List<dynamic> newCapital =
+            (a as List).map((user) => user['userData']['data']).toList();
+
+        double newSum = 0;
+
+        for (var item in newCapital) {
+          newSum += double.tryParse(item['net']?.toString() ?? '0') ?? 0.0;
+        }
+
+        setState(() {
+          sum = newSum;
+        });
+
+        print("Get sum in if part in DASHBOARD(Capital)${sum}");
+        await secureStorage.write(key: 'userSchema', value: userSchemaString);
+      } else {
+        String? clientDataString =
+            await secureStorage.read(key: 'allClientData');
+
+        if (clientDataString != null) {
+          List<dynamic> clientData = jsonDecode(clientDataString);
+
+          for (int index = 0; index < clientData.length; index++) {
+            var item = clientData[index];
+
+            if (item['userData'] != null) {
+              sum += double.tryParse(
+                      item['capital']?[index]?['net']?.toString() ?? '0') ??
+                  0.0;
+            } else {
+              sum += double.tryParse(item['balances']?['result']?[0]
+                              ?['balance_inr']
+                          ?.toString() ??
+                      '0') ??
+                  0.0;
+            }
+          }
+          print("Get sum in else part in DASHBOARD(Capital)${sum}");
+        }
+      }
     } catch (e) {
       print(e);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-
     return Scaffold(
         body: FutureBuilder<Map<String, dynamic>>(
       future: fetchProfile(),
@@ -196,16 +297,39 @@ class _CapitalState extends State<Capital> {
                             padding: const EdgeInsets.only(left: 8.0, right: 8),
                             child: Column(
                               children: [
-                                Text("Capital",
-                                    style: TextStyle(
-                                        color: themeManager.themeMode ==
-                                                ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary)),
                                 Text(
-                                  data['capital'] ?? '₹0.0',
-                                  style: TextStyle(color: Color(0xFF4CAF50)),
+                                  "Capital",
+                                  style: TextStyle(
+                                      color: themeManager.themeMode ==
+                                              ThemeMode.dark
+                                          ? AppColors.lightPrimary
+                                          : AppColors.darkPrimary),
                                 ),
+                                isLoading
+                                    ? Column(
+                                        children: [
+                                          SizedBox(height: 5),
+                                          const SizedBox(
+                                            height: 15,
+                                            width: 15,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppColors.yellow,
+                                            ),
+                                          ) // Show loader when isLoading is true
+                                        ],
+                                      )
+                                    : Text(
+                                        '₹${sum.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          color: sum < 0
+                                              ? Colors.red
+                                              : Colors
+                                                  .green, // Change text color
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                               ],
                             ),
                           ),
@@ -226,7 +350,7 @@ class _CapitalState extends State<Capital> {
               ),
             );
           });
-          return Container(); // This ensures a Widget is always returned
+          return Container();
         }
       },
     ));

@@ -289,6 +289,48 @@ class _ManageBrokerState extends State<ManageBroker> {
           // Handle the successful response
 
           print("done");
+
+          final response = await http.post(
+            Uri.parse("${Secret.backendUrl}/dbSchema"),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({"Email": email}),
+          );
+
+          final data = response.body; // No need to jsonEncode(response.body)
+
+          await secureStorage.write(key: 'userSchema', value: data);
+
+          String? userSchemaString =
+              await secureStorage.read(key: 'userSchema');
+          if (userSchemaString != null) {
+            // Decode the JSON string into a Map
+            Map<String, dynamic> userSchema = jsonDecode(userSchemaString);
+
+            print("???????????");
+            print(userSchema['BrokerCount']);
+
+            // Ensure 'BrokerCount' is a String before parsing to int
+            String brokerCountString = userSchema['BrokerCount'].toString();
+            print("brokerCountString ${brokerCountString}");
+            int brokerCount = int.tryParse(brokerCountString) ?? 0;
+            print("brokerCountString>>>>> ${brokerCount}");
+
+            if (brokerCount > 0) {
+              print("brokerCountString>>>>> 1");
+              await secureStorage.write(
+                  key: 'BrokerCount', value: true.toString());
+            } else {
+              print("brokerCountString>>>>> 2");
+              await secureStorage.write(
+                  key: 'BrokerCount', value: false.toString());
+            }
+
+            String? brokerCount2 = await secureStorage.read(key: 'BrokerCount');
+            print('BrokerCount is: $brokerCount2');
+          } else {
+            print('No user schema found');
+          }
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

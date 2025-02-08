@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shimmer/main.dart';
+import 'package:xalgo/Dashboard/DashboardAngel.dart';
+import 'package:xalgo/ErrorPages/ErrorPage.dart';
+import 'package:xalgo/ErrorPages/NoData.dart';
 import 'package:xalgo/main.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +17,8 @@ import 'package:xalgo/theme/app_colors.dart';
 import 'package:xalgo/secret/secret.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer';
+import 'package:xalgo/ErrorPages/ErrorPage.dart' as errorPage;
+import 'package:xalgo/ErrorPages/NoData.dart' as noData;
 
 class Capital extends StatefulWidget {
   const Capital({super.key});
@@ -30,6 +35,8 @@ class _CapitalState extends State<Capital> {
   bool brokerLogin1 = false;
   List<dynamic> capital = [];
   bool isLoading = false;
+  bool loader = false;
+  List<dynamic> newCapital = [];
 
   @override
   void initState() {
@@ -115,8 +122,7 @@ class _CapitalState extends State<Capital> {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'Email': email}));
       final data = profileData.body;
-      print(
-          "profile data is fetched DASHBOARD(Capital)>>>>>>>>>>>>>>>>>>>>>>>>>");
+      print("profile data is fetched DASHBOARD(Capital)");
 
       await secureStorage.write(key: 'allClientData', value: data);
 
@@ -127,8 +133,7 @@ class _CapitalState extends State<Capital> {
           body: jsonEncode({'Email': email}));
 
       final data2 = dbschema.body;
-      print(
-          "dbschema data is fetched DASHBOARD(Capital)>>>>>>>>>>>>>>>>>>>>>>>>>");
+      print("dbschema data is fetched DASHBOARD(Capital)");
 
       await secureStorage.write(key: 'userSchema', value: data2);
 
@@ -164,24 +169,30 @@ class _CapitalState extends State<Capital> {
 
         final a = jsonDecode(response.body);
 
-        List<dynamic> newCapital =
+        List<dynamic> gg =
             (a as List).map((user) => user['userData']['data']).toList();
 
         double newSum = 0;
 
-        for (var item in newCapital) {
+        for (var item in gg) {
           newSum += double.tryParse(item['net']?.toString() ?? '0') ?? 0.0;
         }
 
+        print("gg ${newSum}");
         setState(() {
           sum = newSum;
+          newCapital = gg;
         });
 
         print("Get sum in if part in DASHBOARD(Capital)${sum}");
         await secureStorage.write(key: 'userSchema', value: userSchemaString);
+        setState(() {
+          isLoading = false;
+        });
       } else {
         String? clientDataString =
             await secureStorage.read(key: 'allClientData');
+        print("Ayush${clientDataString}");
 
         if (clientDataString != null) {
           List<dynamic> clientData = jsonDecode(clientDataString);
@@ -202,14 +213,13 @@ class _CapitalState extends State<Capital> {
             }
           }
           print("Get sum in else part in DASHBOARD(Capital)${sum}");
+          setState(() {
+            isLoading = false;
+          });
         }
       }
     } catch (e) {
       print(e);
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
@@ -228,24 +238,9 @@ class _CapitalState extends State<Capital> {
             child: const Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasError) {
-          return Center(
-            child: Text('Error: ${snapshot.error}'),
-          );
+          return const errorPage.Errorpage();
         } else if (!snapshot.hasData) {
-          SharedPreferences.getInstance().then((prefs) {
-            prefs.setBool('isprintgedIn', false);
-
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SplashScreen(),
-                ),
-              );
-            });
-          });
-
-          return Container(); // Ensure a Widget is always returned
+          return const noData.Nodata();
         } else if (snapshot.hasData) {
           final data = snapshot.data!;
           return Container(
@@ -324,8 +319,7 @@ class _CapitalState extends State<Capital> {
                                         style: TextStyle(
                                           color: sum < 0
                                               ? Colors.red
-                                              : Colors
-                                                  .green, // Change text color
+                                              : Colors.green,
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -337,6 +331,16 @@ class _CapitalState extends State<Capital> {
                       ),
                     ),
                   ),
+                  Expanded(
+                    child: loader
+                        ? CircularProgressIndicator()
+                        : DashboardAngel(
+                            capital: newCapital,
+                            darkMode: themeManager.themeMode == ThemeMode.dark
+                                ? true
+                                : false,
+                          ),
+                  )
                 ],
               ),
             ),

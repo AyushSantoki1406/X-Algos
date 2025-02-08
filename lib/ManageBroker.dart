@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:xalgo/secret/secret.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:http/http.dart' as http;
@@ -92,7 +93,7 @@ class _ManageBrokerState extends State<ManageBroker> {
     try {
       //client data is here userinfo route show client id and all things for <<<<<<<<<< ANGLE ONE >>>>>>>>>>>>>>
       var response = await http.post(
-        Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/userinfo'),
+        Uri.parse('${Secret.backendUrl}/userinfo'),
         body: json.encode({'Email': email}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -124,7 +125,7 @@ class _ManageBrokerState extends State<ManageBroker> {
 
       //client data is here userinfo route show client id and all things for <<<<<<<<<< ANGLE ONE AND DELTA >>>>>>>>>>>>>>
       var dbSchemaResponse = await http.post(
-        Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/dbSchema'),
+        Uri.parse('${Secret.backendUrl}/dbSchema'),
         body: json.encode({'Email': email}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -267,7 +268,7 @@ class _ManageBrokerState extends State<ManageBroker> {
         String? email = await getEmail();
 
         final response = await http.post(
-          Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/addbroker'),
+          Uri.parse('${Secret.backendUrl}/addbroker'),
           body: json.encode({
             'First': true,
             'id': _clientId.text,
@@ -312,7 +313,7 @@ class _ManageBrokerState extends State<ManageBroker> {
     String? email = await getEmail();
 
     final response = await http.post(
-      Uri.parse('https://oyster-app-4y3eb.ondigitalocean.app/removeClient'),
+      Uri.parse('${Secret.backendUrl}/removeClient'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "Email": email,

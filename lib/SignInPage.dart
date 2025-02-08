@@ -54,11 +54,14 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   bool _isResendAvailable = true;
   Timer? _timer;
   bool _isResendClicked = false;
+  bool isSessionActive = false;
 
   @override
   void initState() {
     super.initState();
-    // Use the SingleTickerProviderStateMixin for the vsync parameter
+
+    checkSession();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -67,6 +70,49 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
     _shakeAnimation = Tween<double>(begin: 0, end: 10)
         .chain(CurveTween(curve: Curves.elasticIn))
         .animate(_animationController);
+  }
+
+  Future<String?> getEmail() async {
+    try {
+      String? email = await secureStorage.read(key: 'Email');
+      String? userSchemaJson = await secureStorage.read(key: "backendData");
+
+      if (userSchemaJson != null) {
+        Map<String, dynamic> userData = jsonDecode(userSchemaJson);
+      } else {
+        print('No backendData found in storage.');
+      }
+
+      return email;
+    } catch (e) {
+      print('Error fetching email: $e');
+      return null;
+    }
+  }
+
+  Future<void> checkSession() async {
+    final url = '${Secret.backendUrl}/check-session';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print(data);
+      if (data['activeSession'] == false) {
+        print('Session expired');
+      } else {
+        isSessionActive = true;
+        _controller = data['user']['clientId'];
+        currentIndex++;
+        print(data['user']['clientId']);
+        print('Session is valid');
+      }
+    } else {
+      print('Error checking session');
+    }
   }
 
   void triggerShakeAnimation() {
@@ -225,10 +271,8 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
 
   Future<void> verifyPin(
       BuildContext context, TextEditingController _pin) async {
-    // Get the user agent string asynchronously
-    String userAgent = await getUserAgent(); // Ensure getUserAgent() is defined
+    String userAgent = await getUserAgent();
 
-    // API endpoint
     String url = "${Secret.backendUrl}/verify-pin";
     print(_pin.text);
     // The request body with the user agent

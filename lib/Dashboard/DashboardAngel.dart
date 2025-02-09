@@ -1,10 +1,15 @@
 import 'dart:convert'; // Add this import for jsonDecode
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 import 'package:xalgo/Dashboard/Capital.dart';
 import 'package:http/http.dart' as http;
 import 'package:xalgo/ExtraFunction/MultiCalendar.dart';
 import 'package:xalgo/secret/secret.dart';
+import 'package:xalgo/theme/app_colors.dart';
+import 'dart:developer';
+
+import 'package:xalgo/theme/theme_manage.dart';
 
 class DashboardAngel extends StatefulWidget {
   final List<dynamic> capital; // Define the capital parameter
@@ -20,7 +25,8 @@ class DashboardAngel extends StatefulWidget {
   State<DashboardAngel> createState() => _DashboardAngel();
 }
 
-class _DashboardAngel extends State<DashboardAngel> {
+class _DashboardAngel extends State<DashboardAngel>
+    with SingleTickerProviderStateMixin {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   List? brokerInfo = [];
   Map<String, dynamic>? userSchema; // Change to a Map to hold userSchema data
@@ -40,11 +46,18 @@ class _DashboardAngel extends State<DashboardAngel> {
   Map<String, dynamic> selectedStrategies = {};
   List<String> ids = [];
   bool isLoading = false;
+  late AnimationController _controller;
+  late Animation<int> _dotAnimation;
 
   @override
   void initState() {
     super.initState();
     fetchData(); // Call fetchData on init
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 1))
+          ..repeat();
+    _dotAnimation = IntTween(begin: 0, end: 2)
+        .animate(_controller); // For 3 dots, cycling through 0, 1, 2
   }
 
   void fetchData() async {
@@ -251,6 +264,7 @@ class _DashboardAngel extends State<DashboardAngel> {
             monthlyRoi[month] = roi;
           });
 
+          print('aacur ${monthlyAccuracy}');
           return {
             ...sheet,
             'pnlByDate': pnlByDate,
@@ -261,8 +275,7 @@ class _DashboardAngel extends State<DashboardAngel> {
           };
         }).toList();
 
-        print(
-            "Updated Sheet Data: $updatedSheetData"); // Debug print to check updated sheet data
+        log("updatedAllSheetData is null, not a Map, or does not contain 'sheetData'.updatedAllSheetData is null, not a Map, or does not contain 'sheetData'.${updatedSheetData.toString()}"); // Debug print to check updated sheet data
         Map<dynamic, Set<String>> strategyMap = {};
 
         // Loop through the updatedSheetData and populate strategyMap
@@ -298,8 +311,9 @@ class _DashboardAngel extends State<DashboardAngel> {
           setState(() {
             updatedAllSheetData = updatedSheetData;
             clientStrategyMap = Map<String, List<String>>.from(
-                strategyMapWithArrays.map(
-                    (key, value) => MapEntry(key, value))); // key is a string
+                strategyMapWithArrays
+                    .map((key, value) => MapEntry(key, value)));
+            isLoading = false;
           });
         }
       }
@@ -310,12 +324,6 @@ class _DashboardAngel extends State<DashboardAngel> {
 
   @override
   Widget build(BuildContext context) {
-    void toggleExpand() {
-      setState(() {
-        isExpanded = !isExpanded;
-      });
-    }
-
     return ListView.builder(
       itemCount: brokerInfo?.length ?? 0, // ✅ Prevent out-of-range access
       itemBuilder: (context, index) {
@@ -339,126 +347,313 @@ class _DashboardAngel extends State<DashboardAngel> {
 
         print("xyz ${updatedAllSheetData}");
 
+        var lastSheet = updatedAllSheetData?.isNotEmpty == true
+            ? updatedAllSheetData!.last
+            : null;
+        var sheetData = lastSheet?['sheetData'];
+        var lastObject = sheetData?.isNotEmpty == true ? sheetData!.last : null;
+
+        var lastValue = lastObject != null ? lastObject[10] : null;
+
+        print("poi $lastValue");
+
+        final themeManager = Provider.of<ThemeManager>(context);
+
         return Container(
           padding: EdgeInsets.only(left: 8, right: 8),
+          margin: EdgeInsets.only(bottom: 10),
           child: Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.only(left: 8, right: 8),
-                  child: Row(
-                    children: [
-                      Text("Account Information"),
-                      IconButton(
-                        icon: isExpanded
-                            ? Icon(Icons.expand_less)
-                            : Icon(Icons.expand_more),
-                        onPressed: toggleExpand,
-                      ),
-                    ],
-                  ),
-                ),
                 Column(
                   children: [
-                    Column(
-                      children: [
-                        _buildAccountItem(
-                            "Name",
-                            item['userData'] != null
-                                ? item['userData']['data']['name']
-                                : (item['userDetails']['result']['first_name'] +
-                                        item['userDetails']['result']
-                                            ['last_name']) ??
-                                    "N/A"),
-                        _buildAccountItem("Broker",
-                            item['userData'] != null ? "AngelOne" : "Delta"),
-                        _buildAccountItem(
-                            "UserId",
-                            item['userData'] != null
-                                ? item['userData']['data']['clientcode']
-                                : item['balances']['result'][0]['user_id'] ??
-                                    "N/A"),
-                        _buildAccountItem(
-                          "Active Strategy",
-                          userSchema?['ActiveStrategys']?.toString() ?? "N/A",
-                        )
-                      ],
-                    ),
-                    Card(
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
                       child: Column(
                         children: [
-                          _statItem(
-                            "Account Balance",
-                            item['userData'] != null &&
-                                    index < widget.capital.length
-                                ? Container(
-                                    color: (double.tryParse(widget
-                                                    .capital[index]['net']
-                                                    .toString()) ??
-                                                0.0) <
-                                            0
-                                        ? Colors.red
-                                        : Colors.green,
-                                    child: Text(
-                                      '₹${(double.tryParse(widget.capital[index]['net'].toString()) ?? 0.0).toStringAsFixed(2)}',
-                                    ),
-                                  )
-                                : Container(
-                                    color: (double.tryParse(item?['balances']
-                                                        ?.result[0]
-                                                        ?.balance_inr
-                                                        ?.toString() ??
-                                                    "0.0") ??
-                                                0.0) <
-                                            0
-                                        ? Colors.red
-                                        : Colors.green,
-                                    child: Text(
-                                      '₹${double.tryParse(item?['balances']?.result[0]?.balance_inr?.toString() ?? "0.0")?.toStringAsFixed(2) ?? ""}',
-                                    ),
-                                  ),
+                          _buildAccountItem(
+                            "Name",
+                            item['userData'] != null
+                                ? (item['userData']['data']['name']?.length ?? 0) >
+                                        30
+                                    ? item['userData']['data']['name']!
+                                            .substring(0, 30) +
+                                        "..."
+                                    : item['userData']['data']['name']
+                                : (item['userDetails']['result']['first_name'] +
+                                                item['userDetails']['result']
+                                                    ['last_name'])
+                                            ?.length ??
+                                        0 > 30
+                                    ? (item['userDetails']['result']['first_name'] +
+                                                item['userDetails']['result']
+                                                    ['last_name'])
+                                            .substring(0, 30) +
+                                        "..."
+                                    : (item['userDetails']['result']
+                                                ['first_name'] +
+                                            item['userDetails']['result']
+                                                ['last_name']) ??
+                                        "N/A",
                           ),
-                          _statItem("Overall gain", Text('0')),
-                          _statItem("Monthly gain", Text('0%')),
-                          _statItem("Today's gain", Text('0%')),
+                          _buildAccountItem("Broker",
+                              item['userData'] != null ? "AngelOne" : "Delta"),
+                          _buildAccountItem(
+                              "UserId",
+                              item['userData'] != null
+                                  ? item['userData']['data']['clientcode']
+                                  : item['balances']['result'][0]['user_id'] ??
+                                      "N/A"),
+                          _buildAccountItem(
+                            "Active Strategy",
+                            userSchema?['ActiveStrategys']?.toString() ?? "N/A",
+                          )
                         ],
                       ),
                     ),
-                    isExpanded
-                        ? Container(
-                            margin: const EdgeInsets.only(top: 0),
-                            height: 37,
-                            width: MediaQuery.of(context).size.width * 0.2,
-                            color: Colors.grey[300], // Skeleton loading effect
-                          )
-                        : Row(
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Card(
+                        elevation: 3,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              top: 20, left: 20, right: 20, bottom: 20),
+                          child: Column(
                             children: [
-                              DropdownButton<String>(
-                                value: selectedStrategies[clientId] == null ||
-                                        (clientStrategyMap[clientId] ?? [])
-                                            .contains(
-                                                selectedStrategies[clientId])
-                                    ? selectedStrategies[clientId]
-                                    : null,
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedStrategies[clientId] = newValue!;
-                                  });
-                                },
-                                items: [
-                                  ...(clientStrategyMap[clientId] ?? [])
-                                      .map<DropdownMenuItem<String>>(
-                                        (strategy) => DropdownMenuItem<String>(
-                                          value: strategy,
-                                          child: Text(strategy),
-                                        ),
-                                      )
-                                      .toList(),
-                                ],
-                              )
+                              _statItem(
+                                  "Account Balance",
+                                  item['userData'] != null &&
+                                          index < widget.capital.length
+                                      ? Container(
+                                          child: Text(
+                                            '₹${(double.tryParse(widget.capital[index]['net'].toString()) ?? 0.0).toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: (item?['balances']
+                                                              ?.result[0]
+                                                              ?.balance_inr !=
+                                                          null &&
+                                                      double.tryParse(item?[
+                                                                      'balances']
+                                                                  ?.result[0]
+                                                                  ?.balance_inr
+                                                                  ?.toString() ??
+                                                              "0.0")! <
+                                                          0.0)
+                                                  ? Colors
+                                                      .red // Red if less than 0
+                                                  : Colors
+                                                      .green, // Green if greater than or equal to 0
+                                            ),
+                                          ),
+                                        )
+                                      : Text(
+                                          '₹${double.tryParse(item?['balances']?.result[0]?.balance_inr?.toString() ?? "0.0")?.toStringAsFixed(2) ?? ""}',
+                                          style: TextStyle(
+                                            color: (double.tryParse(item?[
+                                                                    'balances']
+                                                                ?.result[0]
+                                                                ?.balance_inr
+                                                                ?.toString() ??
+                                                            "0.0") ??
+                                                        0.0) >
+                                                    0.0
+                                                ? Colors
+                                                    .green // Green if greater than 0
+                                                : Colors
+                                                    .red, // Red if less than or equal to 0
+                                          ),
+                                        )),
+                              Divider(
+                                color: Colors.grey, // Line color
+                                thickness: 1, // Line thickness
+                                indent: 0, // Space before the line starts
+                                endIndent: 0, // Space after the line ends
+                              ),
+                              _statItem("Overall gain", Text('0')),
+                              Divider(
+                                color: Colors.grey, // Line color
+                                thickness: 1, // Line thickness
+                                indent: 0, // Space before the line starts
+                                endIndent: 0, // Space after the line ends
+                              ),
+                              _statItem("Monthly gain", Text('0%')),
+                              Divider(
+                                color: Colors.grey, // Line color
+                                thickness: 1, // Line thickness
+                                indent: 0, // Space before the line starts
+                                endIndent: 0, // Space after the line ends
+                              ),
+                              _statItem("Today's gain", Text('0%')),
+                              Divider(
+                                color: Colors.grey, // Line color
+                                thickness: 1, // Line thickness
+                                indent: 0, // Space before the line starts
+                                endIndent: 0, // Space after the line ends
+                              ),
                             ],
                           ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Center(
+                        // This centers the entire container
+                        child: isLoading
+                            ? Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                height: 37,
+                                width: MediaQuery.of(context).size.width * 0.2,
+                                child: Center(
+                                  // Center the content inside the loading spinner container
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      AnimatedBuilder(
+                                        animation: _dotAnimation,
+                                        builder: (context, child) {
+                                          return Text(
+                                            '.',
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                              color: _dotAnimation.value == 0
+                                                  ? Colors.white
+                                                  : Colors
+                                                      .grey, // White when it's 0, else gray
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      AnimatedBuilder(
+                                        animation: _dotAnimation,
+                                        builder: (context, child) {
+                                          return Text(
+                                            '.',
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                              color: _dotAnimation.value == 1
+                                                  ? Colors.white
+                                                  : Colors
+                                                      .grey, // White when it's 1, else gray
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      AnimatedBuilder(
+                                        animation: _dotAnimation,
+                                        builder: (context, child) {
+                                          return Text(
+                                            '.',
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                              color: _dotAnimation.value == 2
+                                                  ? Colors.white
+                                                  : Colors
+                                                      .grey, // White when it's 2, else gray
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Column(
+                                  // Use Column to provide a bounded width constraint
+                                  children: [
+                                    clientStrategyMap[clientId]?.isNotEmpty ==
+                                            true
+                                        ? Card(
+                                            elevation: 3,
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8, // Set a specific width constraint
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal:
+                                                      16), // Add some horizontal padding
+                                              margin: EdgeInsets.symmetric(
+                                                  vertical: 10),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(
+                                                    12), // Rounded corners for the container
+                                              ),
+                                              child: DropdownButton<String>(
+                                                isExpanded:
+                                                    true, // Ensure the dropdown expands to fit the container width
+                                                value: selectedStrategies[
+                                                                clientId] ==
+                                                            null ||
+                                                        !(clientStrategyMap[
+                                                                    clientId] ??
+                                                                [])
+                                                            .contains(
+                                                                selectedStrategies[
+                                                                    clientId])
+                                                    ? clientStrategyMap[
+                                                            clientId]![
+                                                        0] // Default to first item if none selected
+                                                    : selectedStrategies[
+                                                        clientId],
+                                                onChanged: (String? newValue) {
+                                                  setState(() {
+                                                    selectedStrategies[
+                                                        clientId] = newValue!;
+                                                  });
+                                                },
+                                                items: [
+                                                  ...(clientStrategyMap[
+                                                              clientId] ??
+                                                          [])
+                                                      .map<
+                                                          DropdownMenuItem<
+                                                              String>>(
+                                                        (strategy) =>
+                                                            DropdownMenuItem<
+                                                                String>(
+                                                          value: strategy,
+                                                          child: Text(
+                                                            strategy,
+                                                            style: TextStyle(
+                                                                fontSize:
+                                                                    16, // Text size for the dropdown
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500, // Medium weight for text
+                                                                color: themeManager
+                                                                            .themeMode ==
+                                                                        ThemeMode
+                                                                            .dark
+                                                                    ? AppColors
+                                                                        .lightPrimary
+                                                                    : AppColors
+                                                                        .darkPrimary),
+                                                          ),
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 10),
+                                            child:
+                                                Text("No strategies available"),
+                                          ),
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     Column(
                       children: allSheetData
@@ -495,26 +690,34 @@ class _DashboardAngel extends State<DashboardAngel> {
   Widget _buildAccountItem(String label, String value) {
     print("📝 $label: $value"); // Logging each item with emoji
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.0),
+      padding: EdgeInsets.only(top: 5, left: 20, right: 20),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(value),
+          Text(
+            "$label : ",
+          ),
+          Text(value, style: TextStyle(fontWeight: FontWeight.w800)),
         ],
       ),
     );
   }
 
   Widget _statItem(String title, Widget content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Text(title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(title, style: TextStyle(fontWeight: FontWeight.w800)),
         content,
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _controller
+        .dispose(); // Dispose of the controller before calling super.dispose()
+    super.dispose();
   }
 }
 

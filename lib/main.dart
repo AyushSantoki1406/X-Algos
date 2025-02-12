@@ -139,7 +139,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   children: [
                     Text(
-                      "Welcome to X Algos",
+                      "Welcome to X-Algo",
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

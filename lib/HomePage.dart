@@ -76,7 +76,6 @@ class _HomeState extends State<Home> {
         ],
         body: Column(
           children: [
-            // Wrap Capital widget inside Expanded or Container with defined height
             Expanded(child: Capital()),
           ],
         ),

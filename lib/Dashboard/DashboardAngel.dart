@@ -48,6 +48,8 @@ class _DashboardAngel extends State<DashboardAngel>
   bool isLoading = false;
   late AnimationController _controller;
   late Animation<int> _dotAnimation;
+  Map<String, String> monthlyAccuracy = {};
+  Map<String, String> monthlyRoi = {};
 
   @override
   void initState() {
@@ -325,6 +327,7 @@ class _DashboardAngel extends State<DashboardAngel>
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      padding: EdgeInsets.only(top: 5),
       itemCount: brokerInfo?.length ?? 0, // ✅ Prevent out-of-range access
       itemBuilder: (context, index) {
         if (brokerInfo == null || brokerInfo!.isEmpty) {
@@ -332,20 +335,16 @@ class _DashboardAngel extends State<DashboardAngel>
         }
 
         final item = brokerInfo![index]; // ✅ Safe access
-        print("from ${item}");
+        log("from ${item}");
         final clientId = item?['userData'] != null
             ? item['userData']['data']['clientcode']
             : item?['balances']?['result']?[0]?['user_id']?.toString();
-
-        print("xyz updatedAllSheetData value: $updatedAllSheetData");
 
         void handleStrategyChange(String clientId, String strategy) {
           setState(() {
             selectedStrategies[clientId] = strategy;
           });
         }
-
-        print("xyz ${updatedAllSheetData}");
 
         var lastSheet = updatedAllSheetData?.isNotEmpty == true
             ? updatedAllSheetData!.last
@@ -359,10 +358,15 @@ class _DashboardAngel extends State<DashboardAngel>
 
         final themeManager = Provider.of<ThemeManager>(context);
 
+        print("userdata ${userSchema!['AccountAliases']['']}");
+
         return Container(
-          padding: EdgeInsets.only(left: 8, right: 8),
-          margin: EdgeInsets.only(bottom: 10),
+          // padding: EdgeInsets.only(left: 8, right: 8, top: 0),
+          margin: EdgeInsets.only(bottom: 10, top: 0),
           child: Card(
+            color: themeManager.themeMode == ThemeMode.dark
+                ? AppColors.darkBackground
+                : AppColors.lightBackground,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -374,22 +378,33 @@ class _DashboardAngel extends State<DashboardAngel>
                         children: [
                           _buildAccountItem(
                             "Name",
+                            (item['userData']?['data']?['clientcode'] != null &&
+                                    userSchema?['AccountAliases']?.containsKey(
+                                            item['userData']?['data']
+                                                ?['clientcode']) ==
+                                        true)
+                                ? userSchema?['AccountAliases']
+                                    ?[item['userData']?['data']?['clientcode']]
+                                : null,
+                          ),
+                          _buildAccountItem(
+                            "Name",
                             item['userData'] != null
                                 ? (item['userData']['data']['name']?.length ?? 0) >
-                                        30
+                                        25
                                     ? item['userData']['data']['name']!
-                                            .substring(0, 30) +
+                                            .substring(0, 25) +
                                         "..."
                                     : item['userData']['data']['name']
                                 : (item['userDetails']['result']['first_name'] +
                                                 item['userDetails']['result']
                                                     ['last_name'])
                                             ?.length ??
-                                        0 > 30
+                                        0 > 25
                                     ? (item['userDetails']['result']['first_name'] +
                                                 item['userDetails']['result']
                                                     ['last_name'])
-                                            .substring(0, 30) +
+                                            .substring(0, 25) +
                                         "..."
                                     : (item['userDetails']['result']
                                                 ['first_name'] +
@@ -399,12 +414,12 @@ class _DashboardAngel extends State<DashboardAngel>
                           ),
                           _buildAccountItem("Broker",
                               item['userData'] != null ? "AngelOne" : "Delta"),
-                          _buildAccountItem(
-                              "UserId",
-                              item['userData'] != null
-                                  ? item['userData']['data']['clientcode']
-                                  : item['balances']['result'][0]['user_id'] ??
-                                      "N/A"),
+                          // _buildAccountItem(
+                          //     "UserId",
+                          //     item['userData'] != null
+                          //         ? item['userData']['data']['clientcode']
+                          //         : item['balances']['result'][0]['user_id'] ??
+                          //             "N/A"),
                           _buildAccountItem(
                             "Active Strategy",
                             userSchema?['ActiveStrategys']?.toString() ?? "N/A",
@@ -416,6 +431,9 @@ class _DashboardAngel extends State<DashboardAngel>
                       margin:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Card(
+                        color: themeManager.themeMode == ThemeMode.dark
+                            ? AppColors.darkBackground
+                            : AppColors.lightBackground,
                         elevation: 3,
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -423,7 +441,11 @@ class _DashboardAngel extends State<DashboardAngel>
                           child: Column(
                             children: [
                               _statItem(
-                                  "Account Balance",
+                                  Text("Account Balance",
+                                      style: TextStyle(
+                                          color: Color(0xFF777777),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16)),
                                   item['userData'] != null &&
                                           index < widget.capital.length
                                       ? Container(
@@ -471,212 +493,270 @@ class _DashboardAngel extends State<DashboardAngel>
                                 indent: 0, // Space before the line starts
                                 endIndent: 0, // Space after the line ends
                               ),
-                              _statItem("Overall gain", Text('0')),
+                              _statItem(
+                                  Text("over alll",
+                                      style: TextStyle(
+                                          color: Color(0xFF777777),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16)),
+                                  Text(
+                                    '0',
+                                    style: TextStyle(color: Colors.green),
+                                  )),
                               Divider(
                                 color: Colors.grey, // Line color
                                 thickness: 1, // Line thickness
                                 indent: 0, // Space before the line starts
                                 endIndent: 0, // Space after the line ends
                               ),
-                              _statItem("Monthly gain", Text('0%')),
+                              _statItem(
+                                  Text("Monthly gain",
+                                      style: TextStyle(
+                                          color: Color(0xFF777777),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16)),
+                                  Text('0%',
+                                      style: TextStyle(color: Colors.green))),
                               Divider(
                                 color: Colors.grey, // Line color
                                 thickness: 1, // Line thickness
                                 indent: 0, // Space before the line starts
                                 endIndent: 0, // Space after the line ends
                               ),
-                              _statItem("Today's gain", Text('0%')),
+                              _statItem(
+                                  Text("Today's gain",
+                                      style: TextStyle(
+                                          color: Color(0xFF777777),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16)),
+                                  Text('0%',
+                                      style: TextStyle(color: Colors.green))),
                               Divider(
                                 color: Colors.grey, // Line color
                                 thickness: 1, // Line thickness
                                 indent: 0, // Space before the line starts
                                 endIndent: 0, // Space after the line ends
                               ),
+                              Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Center(
+                                    // This centers the entire container
+                                    child: isLoading
+                                        ? Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 10),
+                                            height: 37,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.2,
+                                            child: Center(
+                                              // Center the content inside the loading spinner container
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  AnimatedBuilder(
+                                                    animation: _dotAnimation,
+                                                    builder: (context, child) {
+                                                      return Text(
+                                                        '.',
+                                                        style: TextStyle(
+                                                          fontSize: 30,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: _dotAnimation
+                                                                      .value ==
+                                                                  0
+                                                              ? Colors.white
+                                                              : Colors
+                                                                  .grey, // White when it's 0, else gray
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                  AnimatedBuilder(
+                                                    animation: _dotAnimation,
+                                                    builder: (context, child) {
+                                                      return Text(
+                                                        '.',
+                                                        style: TextStyle(
+                                                          fontSize: 30,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: _dotAnimation
+                                                                      .value ==
+                                                                  1
+                                                              ? Colors.white
+                                                              : Colors
+                                                                  .grey, // White when it's 1, else gray
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                  AnimatedBuilder(
+                                                    animation: _dotAnimation,
+                                                    builder: (context, child) {
+                                                      return Text(
+                                                        '.',
+                                                        style: TextStyle(
+                                                          fontSize: 30,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: _dotAnimation
+                                                                      .value ==
+                                                                  2
+                                                              ? Colors.white
+                                                              : Colors
+                                                                  .grey, // White when it's 2, else gray
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        : Center(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize
+                                                  .min, // Prevents unnecessary space
+                                              children: [
+                                                if (clientStrategyMap[clientId]
+                                                        ?.isNotEmpty ==
+                                                    true)
+                                                  Card(
+                                                    color: themeManager
+                                                                .themeMode ==
+                                                            ThemeMode.dark
+                                                        ? AppColors
+                                                            .darkBackground
+                                                        : AppColors
+                                                            .lightBackground,
+                                                    elevation: 3,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                      side: BorderSide(
+                                                          color:
+                                                              Color(0xFF777777),
+                                                          width:
+                                                              1), // White border
+                                                    ),
+                                                    child: Padding(
+                                                      padding: EdgeInsets.symmetric(
+                                                          horizontal:
+                                                              10), // Small padding
+                                                      child: DropdownButton<
+                                                          String>(
+                                                        dropdownColor: themeManager
+                                                                    .themeMode ==
+                                                                ThemeMode.dark
+                                                            ? AppColors.bd_black
+                                                            : AppColors
+                                                                .bd_white,
+                                                        isExpanded: true,
+                                                        underline:
+                                                            SizedBox(), // Removes the underline
+                                                        value: selectedStrategies[
+                                                                        clientId] ==
+                                                                    null ||
+                                                                !(clientStrategyMap[
+                                                                            clientId] ??
+                                                                        [])
+                                                                    .contains(
+                                                                        selectedStrategies[
+                                                                            clientId])
+                                                            ? clientStrategyMap[
+                                                                clientId]![0]
+                                                            : selectedStrategies[
+                                                                clientId],
+                                                        onChanged:
+                                                            (String? newValue) {
+                                                          setState(() {
+                                                            selectedStrategies[
+                                                                    clientId] =
+                                                                newValue!;
+                                                          });
+                                                        },
+                                                        items: (clientStrategyMap[
+                                                                    clientId] ??
+                                                                [])
+                                                            .map<
+                                                                DropdownMenuItem<
+                                                                    String>>(
+                                                              (strategy) =>
+                                                                  DropdownMenuItem<
+                                                                      String>(
+                                                                value: strategy,
+                                                                child: Text(
+                                                                  strategy,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    color: themeManager.themeMode ==
+                                                                            ThemeMode
+                                                                                .dark
+                                                                        ? Color.fromARGB(
+                                                                            255,
+                                                                            223,
+                                                                            223,
+                                                                            223)
+                                                                        : AppColors
+                                                                            .darkPrimary,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            )
+                                                            .toList(),
+                                                      ),
+                                                    ),
+                                                  )
+                                                else
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 10),
+                                                    child: Text(
+                                                        "No strategies available"),
+                                                  ),
+                                              ],
+                                            ),
+                                          )),
+                              ),
+                              const SizedBox(height: 10),
+                              Column(
+                                children: allSheetData
+                                    .where((sheet) =>
+                                        sheet["UserId"] == clientId &&
+                                        sheet["strategyName"] ==
+                                            selectedStrategies[clientId])
+                                    .map((filteredSheet) {
+                                  return Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(top: 10),
+                                    child: MultiCalendar(
+                                      index2: index,
+                                      allSheetData: allSheetData,
+                                      selectedStrategy:
+                                          selectedStrategies[clientId] ?? "",
+                                      clientId: clientId,
+                                      updatedAllSheetData:
+                                          updatedAllSheetData, // Now passing the data directly
+                                    ),
+                                  );
+                                }).toList(),
+                              )
                             ],
                           ),
                         ),
                       ),
                     ),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10),
-                      child: Center(
-                        // This centers the entire container
-                        child: isLoading
-                            ? Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                height: 37,
-                                width: MediaQuery.of(context).size.width * 0.2,
-                                child: Center(
-                                  // Center the content inside the loading spinner container
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      AnimatedBuilder(
-                                        animation: _dotAnimation,
-                                        builder: (context, child) {
-                                          return Text(
-                                            '.',
-                                            style: TextStyle(
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                              color: _dotAnimation.value == 0
-                                                  ? Colors.white
-                                                  : Colors
-                                                      .grey, // White when it's 0, else gray
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                      AnimatedBuilder(
-                                        animation: _dotAnimation,
-                                        builder: (context, child) {
-                                          return Text(
-                                            '.',
-                                            style: TextStyle(
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                              color: _dotAnimation.value == 1
-                                                  ? Colors.white
-                                                  : Colors
-                                                      .grey, // White when it's 1, else gray
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                      AnimatedBuilder(
-                                        animation: _dotAnimation,
-                                        builder: (context, child) {
-                                          return Text(
-                                            '.',
-                                            style: TextStyle(
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                              color: _dotAnimation.value == 2
-                                                  ? Colors.white
-                                                  : Colors
-                                                      .grey, // White when it's 2, else gray
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : Center(
-                                child: Column(
-                                  // Use Column to provide a bounded width constraint
-                                  children: [
-                                    clientStrategyMap[clientId]?.isNotEmpty ==
-                                            true
-                                        ? Card(
-                                            elevation: 3,
-                                            child: Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.8, // Set a specific width constraint
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal:
-                                                      16), // Add some horizontal padding
-                                              margin: EdgeInsets.symmetric(
-                                                  vertical: 10),
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(
-                                                    12), // Rounded corners for the container
-                                              ),
-                                              child: DropdownButton<String>(
-                                                isExpanded:
-                                                    true, // Ensure the dropdown expands to fit the container width
-                                                value: selectedStrategies[
-                                                                clientId] ==
-                                                            null ||
-                                                        !(clientStrategyMap[
-                                                                    clientId] ??
-                                                                [])
-                                                            .contains(
-                                                                selectedStrategies[
-                                                                    clientId])
-                                                    ? clientStrategyMap[
-                                                            clientId]![
-                                                        0] // Default to first item if none selected
-                                                    : selectedStrategies[
-                                                        clientId],
-                                                onChanged: (String? newValue) {
-                                                  setState(() {
-                                                    selectedStrategies[
-                                                        clientId] = newValue!;
-                                                  });
-                                                },
-                                                items: [
-                                                  ...(clientStrategyMap[
-                                                              clientId] ??
-                                                          [])
-                                                      .map<
-                                                          DropdownMenuItem<
-                                                              String>>(
-                                                        (strategy) =>
-                                                            DropdownMenuItem<
-                                                                String>(
-                                                          value: strategy,
-                                                          child: Text(
-                                                            strategy,
-                                                            style: TextStyle(
-                                                                fontSize:
-                                                                    16, // Text size for the dropdown
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500, // Medium weight for text
-                                                                color: themeManager
-                                                                            .themeMode ==
-                                                                        ThemeMode
-                                                                            .dark
-                                                                    ? AppColors
-                                                                        .lightPrimary
-                                                                    : AppColors
-                                                                        .darkPrimary),
-                                                          ),
-                                                        ),
-                                                      )
-                                                      .toList(),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : Container(
-                                            margin: const EdgeInsets.symmetric(
-                                                vertical: 10),
-                                            child:
-                                                Text("No strategies available"),
-                                          ),
-                                  ],
-                                ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Column(
-                      children: allSheetData
-                          .where((sheet) =>
-                              sheet["UserId"] == clientId &&
-                              sheet["strategyName"] ==
-                                  selectedStrategies[clientId])
-                          .map((filteredSheet) {
-                        return Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.only(top: 10),
-                          child: MultiCalendar(
-                            index2: index,
-                            allSheetData: allSheetData,
-                            selectedStrategy:
-                                selectedStrategies[clientId] ?? "",
-                            clientId: clientId,
-                            updatedAllSheetData:
-                                updatedAllSheetData, // Now passing the data directly
-                          ),
-                        );
-                      }).toList(),
-                    )
                   ],
                 )
               ],
@@ -688,6 +768,8 @@ class _DashboardAngel extends State<DashboardAngel>
   }
 
   Widget _buildAccountItem(String label, String value) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     print("📝 $label: $value"); // Logging each item with emoji
     return Padding(
       padding: EdgeInsets.only(top: 5, left: 20, right: 20),
@@ -695,20 +777,42 @@ class _DashboardAngel extends State<DashboardAngel>
         children: [
           Text(
             "$label : ",
+            style: TextStyle(
+                color: Color(0xFF777777),
+                fontWeight: FontWeight.w800,
+                fontSize: 16),
           ),
-          Text(value, style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(value,
+              style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: themeManager.themeMode == ThemeMode.dark
+                      ? AppColors.lightPrimary
+                      : AppColors.darkPrimary,
+                  fontSize: 16)),
         ],
       ),
     );
   }
 
-  Widget _statItem(String title, Widget content) {
+  Widget _statItem(Widget title, Widget content) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Ensures spacing
       children: [
-        Text(title, style: TextStyle(fontWeight: FontWeight.w800)),
-        content,
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft, // Aligns title to the left
+            child: title,
+          ),
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.center, // Centers content
+            child: content,
+          ),
+        ),
       ],
     );
   }

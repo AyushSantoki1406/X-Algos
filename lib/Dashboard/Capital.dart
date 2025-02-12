@@ -227,136 +227,149 @@ class _CapitalState extends State<Capital> {
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
     return Scaffold(
-        body: FutureBuilder<Map<String, dynamic>>(
-      future: fetchProfile(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            color: themeManager.themeMode == ThemeMode.dark
-                ? AppColors.darkPrimary
-                : AppColors.lightPrimary,
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        } else if (snapshot.hasError) {
-          return const errorPage.Errorpage();
-        } else if (!snapshot.hasData) {
-          return const noData.Nodata();
-        } else if (snapshot.hasData) {
-          final data = snapshot.data!;
-          return Container(
-            width: double.infinity,
-            color: themeManager.themeMode == ThemeMode.dark
-                ? AppColors.darkPrimary
-                : AppColors.lightPrimary,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    color: themeManager.themeMode == ThemeMode.dark
-                        ? AppColors.bd_black
-                        : AppColors.bd_white,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      width: double.infinity,
-                      padding: EdgeInsets.all(16),
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0, right: 8),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "P&L",
-                                  style: TextStyle(
-                                      color: themeManager.themeMode ==
-                                              ThemeMode.dark
-                                          ? AppColors.lightPrimary
-                                          : AppColors.darkPrimary),
-                                ),
-                                Text("₹",
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: fetchProfile(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              color: themeManager.themeMode == ThemeMode.dark
+                  ? AppColors.darkPrimary
+                  : AppColors.lightPrimary,
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          } else if (snapshot.hasError) {
+            return const errorPage.Errorpage();
+          } else if (!snapshot.hasData) {
+            return const noData.Nodata();
+          } else if (snapshot.hasData) {
+            final data = snapshot.data!;
+            return Container(
+              padding: EdgeInsets.all(0),
+              margin: EdgeInsets.all(0),
+              width: double.infinity,
+              color: themeManager.themeMode == ThemeMode.dark
+                  ? AppColors.darkPrimary
+                  : AppColors.lightPrimary,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min, // Change this line
+                  children: [
+                    Card(
+                      color: themeManager.themeMode == ThemeMode.dark
+                          ? AppColors.bd_black
+                          : AppColors.bd_white,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16),
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0), // Simplified padding
+                              child: Column(
+                                mainAxisSize: MainAxisSize
+                                    .min, // Prevent taking extra height
+                                children: [
+                                  Text(
+                                    "P&L",
                                     style: TextStyle(
                                         color: themeManager.themeMode ==
                                                 ThemeMode.dark
                                             ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary))
-                              ],
+                                            : AppColors.darkPrimary),
+                                  ),
+                                  Text("₹",
+                                      style: TextStyle(
+                                          color: themeManager.themeMode ==
+                                                  ThemeMode.dark
+                                              ? AppColors.lightPrimary
+                                              : AppColors.darkPrimary)),
+                                ],
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0, right: 8),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "Capital",
-                                  style: TextStyle(
-                                      color: themeManager.themeMode ==
-                                              ThemeMode.dark
-                                          ? AppColors.lightPrimary
-                                          : AppColors.darkPrimary),
-                                ),
-                                isLoading
-                                    ? Column(
-                                        children: [
-                                          SizedBox(height: 5),
-                                          const SizedBox(
-                                            height: 15,
-                                            width: 15,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: AppColors.yellow,
-                                            ),
-                                          ) // Show loader when isLoading is true
-                                        ],
-                                      )
-                                    : Text(
-                                        '₹${sum.toStringAsFixed(2)}',
-                                        style: TextStyle(
-                                          color: sum < 0
-                                              ? Colors.red
-                                              : Colors.green,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0), // Simplified padding
+                              child: Column(
+                                mainAxisSize: MainAxisSize
+                                    .min, // Prevent taking extra height
+                                children: [
+                                  Text(
+                                    "Capital",
+                                    style: TextStyle(
+                                        color: themeManager.themeMode ==
+                                                ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary),
+                                  ),
+                                  isLoading
+                                      ? Column(
+                                          children: [
+                                            SizedBox(height: 5),
+                                            const SizedBox(
+                                              height: 15,
+                                              width: 15,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.yellow,
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      : Text(
+                                          '₹${sum.toStringAsFixed(2)}',
+                                          style: TextStyle(
+                                            color: sum < 0
+                                                ? Colors.red
+                                                : Colors.green,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: loader
-                        ? CircularProgressIndicator()
-                        : DashboardAngel(
-                            capital: newCapital,
-                            darkMode: themeManager.themeMode == ThemeMode.dark
-                                ? true
-                                : false,
-                          ),
-                  )
-                ],
-              ),
-            ),
-          );
-        } else {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SplashScreen(),
+                    SizedBox(height: 0), // Ensure there's no spacing
+                    Flexible(
+                      child: Container(
+                        margin: EdgeInsets.zero, // No margin
+                        padding: EdgeInsets.zero, // No padding
+                        color: Colors
+                            .transparent, // Ensure background is transparent
+                        child: DashboardAngel(
+                          capital: newCapital,
+                          darkMode: themeManager.themeMode == ThemeMode.dark,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             );
-          });
-          return Container();
-        }
-      },
-    ));
+          } else {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SplashScreen(),
+                ),
+              );
+            });
+            return Container();
+          }
+        },
+      ),
+    );
   }
 }

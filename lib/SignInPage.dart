@@ -16,6 +16,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 
 void main() {
   runApp(const SignInPage());
@@ -153,10 +154,12 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     String userAgent = '';
 
-    if (Platform.isAndroid) {
+    if (kIsWeb) {
+      userAgent = 'Web'; // You can customize this for web if needed
+    } else if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
       userAgent =
-          'Android ${androidInfo.version.release}; ${androidInfo.model} Build/${androidInfo.version.codename}) ';
+          'Android ${androidInfo.version.release}; ${androidInfo.model} Build/${androidInfo.version.codename})';
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       userAgent =

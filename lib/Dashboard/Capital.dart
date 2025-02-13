@@ -235,7 +235,7 @@ class _CapitalState extends State<Capital> {
               color: themeManager.themeMode == ThemeMode.dark
                   ? AppColors.darkPrimary
                   : AppColors.lightPrimary,
-              child: const Center(child: CircularProgressIndicator()),
+              child: const Center(),
             );
           } else if (snapshot.hasError) {
             return const errorPage.Errorpage();

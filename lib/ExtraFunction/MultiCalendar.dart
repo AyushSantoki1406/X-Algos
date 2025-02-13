@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'dart:developer';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/app_colors.dart';
@@ -31,7 +32,8 @@ class _MultiCalendarState extends State<MultiCalendar> {
   List<Map<String, dynamic>> selectedDatesAndPnl = [];
   final Map<String, double> monthlyAccuracyMap = {};
   Map<String, double> monthlyRoiMap = {};
-  var selectedMonthRoi;
+  String? selectedMonthAccuracy = "0";
+  String? selectedMonthRoi = "0";
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
         List.generate(widget.allSheetData.length, (_) => DateTime.now());
     selectedYears =
         List.generate(widget.allSheetData.length, (_) => DateTime.now().year);
+    currentMonthlyAccuracy();
   }
 
   // Generate a map of date -> P&L
@@ -80,91 +83,111 @@ class _MultiCalendarState extends State<MultiCalendar> {
     return pnlMap;
   }
 
-  Map<String, double> getMonthlyAccuracy(List<dynamic> updatedAllSheetData) {
-    for (var sheet in updatedAllSheetData) {
-      if (sheet is Map && sheet.containsKey('monthlyAccuracy')) {
-        final monthlyAccuracy = sheet['monthlyAccuracy'];
+  void currentMonthlyAccuracy([String? passedMonthKey, String? passedYear]) {
+    var allUserIds =
+        widget.updatedAllSheetData.map((sheet) => sheet['UserId']).toList();
 
-        if (monthlyAccuracy is Map<String, dynamic>) {
-          for (var entry in monthlyAccuracy.entries) {
-            final month = entry.key;
-            final accuracy = entry.value;
+    if (allUserIds.contains(widget.clientId)) {
+      for (var sheet in widget.updatedAllSheetData) {
+        if (sheet['UserId'] == widget.clientId) {
+          log('User data: ${sheet['monthlyAccuracy']}');
 
-            if (accuracy is num) {
-              monthlyAccuracyMap[month] = accuracy.toDouble();
+          String currentMonthKey;
+          if (passedMonthKey == null && passedYear == null) {
+            final currentDate = DateTime.now();
+            currentMonthKey = "${currentDate.year}-${currentDate.month}";
+          } else {
+            currentMonthKey = passedYear != null
+                ? "$passedYear-${int.parse(passedMonthKey!)}"
+                : passedMonthKey!;
+            if (currentMonthKey.contains("-")) {
+              var parts = currentMonthKey.split("-");
+              currentMonthKey = "${parts[0]}-${int.parse(parts[1])}";
+            }
+          }
+
+          log("Using selected key: $currentMonthKey");
+
+          if (sheet['monthlyAccuracy'] is Map) {
+            Map<String, dynamic> monthlyAccuracyData = sheet['monthlyAccuracy'];
+            if (monthlyAccuracyData.containsKey(currentMonthKey)) {
+              var value = monthlyAccuracyData[currentMonthKey];
+              setState(() {
+                selectedMonthAccuracy = value.toStringAsFixed(2);
+              });
+              log("Found value for $currentMonthKey: $value");
+            } else {
+              log("Month not found for key: $currentMonthKey");
+              setState(() {
+                selectedMonthAccuracy = "null";
+              });
             }
           }
         }
       }
+    } else {
+      log('ClientId not found in list');
     }
 
-    // Sort map keys (months) in ascending order
-    final sortedMonthlyAccuracy = Map.fromEntries(
-      monthlyAccuracyMap.entries.toList()
-        ..sort((a, b) => a.key.compareTo(b.key)),
-    );
+    void currentMonthlyROI([String? passedMonthKey, String? passedYear]) {
+      var allUserIds =
+          widget.updatedAllSheetData.map((sheet) => sheet['UserId']).toList();
 
-    return sortedMonthlyAccuracy;
-  }
+      if (allUserIds.contains(widget.clientId)) {
+        for (var sheet in widget.updatedAllSheetData) {
+          if (sheet['UserId'] == widget.clientId) {
+            log('User data: ${sheet['monthlyRoi']}');
 
-  Map<String, double> getMonthlyRoi(List<dynamic> updatedAllSheetData) {
-    Map<String, double> monthlyRoiMap = {};
+            String currentMonthKey;
+            if (passedMonthKey == null && passedYear == null) {
+              final currentDate = DateTime.now();
+              currentMonthKey = "${currentDate.year}-${currentDate.month}";
+            } else {
+              currentMonthKey = passedYear != null
+                  ? "$passedYear-${int.parse(passedMonthKey!)}"
+                  : passedMonthKey!;
+              if (currentMonthKey.contains("-")) {
+                var parts = currentMonthKey.split("-");
+                currentMonthKey = "${parts[0]}-${int.parse(parts[1])}";
+              }
+            }
 
-    for (var sheet in updatedAllSheetData) {
-      if (sheet is Map && sheet.containsKey('monthlyRoi')) {
-        final monthlyRoi = sheet['monthlyRoi'];
+            log("Using selected key: $currentMonthKey");
 
-        if (monthlyRoi is Map<String, dynamic>) {
-          for (var entry in monthlyRoi.entries) {
-            final month = entry.key;
-            final roi = entry.value;
-
-            if (roi is num) {
-              monthlyRoiMap[month] = roi.toDouble();
+            if (sheet['monthlyRoi'] is Map) {
+              Map<String, dynamic> monthlyAccuracyData = sheet['monthlyRoi'];
+              if (monthlyAccuracyData.containsKey(currentMonthKey)) {
+                var value = monthlyAccuracyData[currentMonthKey];
+                setState(() {
+                  selectedMonthRoi = value.toStringAsFixed(2);
+                });
+                log("Found value for $currentMonthKey: $value");
+              } else {
+                log("Month not found for key: $currentMonthKey");
+                setState(() {
+                  selectedMonthRoi = "null";
+                });
+              }
             }
           }
         }
+      } else {
+        log('ClientId not found in list');
       }
     }
-
-    // Sort map keys (months) in ascending order
-    final sortedMonthlyRoi = Map.fromEntries(
-      monthlyRoiMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
-    );
-
-    return sortedMonthlyRoi;
   }
 
   @override
   Widget build(BuildContext context) {
-    log("po ${widget.updatedAllSheetData[1]['monthlyAccuracy']}");
-    print("zz ${widget.allSheetData}");
     return Column(
       children: widget.allSheetData
           .where((sheet) => sheet['UserId'] == widget.clientId)
           .map((filteredSheet) {
         final pnlByDate = generatePnlMap(filteredSheet['sheetData']);
-
-        log("Final Monthly Accuracy: ${getMonthlyAccuracy(widget.updatedAllSheetData)}");
+        final themeManager = Provider.of<ThemeManager>(context);
 
         var allUserIds =
             widget.updatedAllSheetData.map((sheet) => sheet['UserId']).toList();
-        log('All UserIds: $allUserIds');
-        log("Type of clientId: ${widget.clientId.runtimeType}");
-
-        for (var userId in allUserIds) {
-          log("Type of UserId: ${userId.runtimeType}");
-        }
-
-        if (allUserIds.contains(widget.clientId)) {
-          for (var sheet in widget.updatedAllSheetData) {
-            if (sheet['UserId'] == widget.clientId) {
-              log('User datass: ${sheet['monthlyAccuracy']}');
-            }
-          }
-        } else {
-          log('ClientId not found in list');
-        }
 
         final selectedMonth =
             selectedMonths[widget.allSheetData.indexOf(filteredSheet)];
@@ -174,149 +197,138 @@ class _MultiCalendarState extends State<MultiCalendar> {
             DateTime(selectedMonth.year, selectedMonth.month, 1);
         final endOfMonth =
             DateTime(selectedMonth.year, selectedMonth.month + 1, 0);
-        var selectedMonthAccuracy;
 
         final days = List.generate(
           endOfMonth.difference(startOfMonth).inDays + 1,
           (index) => startOfMonth.add(Duration(days: index)),
         );
 
-        final themeManager = Provider.of<ThemeManager>(context);
+        void currentMonthlyAccuracy(
+            [String? passedMonthKey, String? passedYear]) {
+          if (allUserIds.contains(widget.clientId)) {
+            for (var sheet in widget.updatedAllSheetData) {
+              if (sheet['UserId'] == widget.clientId) {
+                log('User data: ${sheet['monthlyAccuracy']}'); // Log user data for debugging
 
-        void printSelectedMonthAccuracy() {
-          final selectedMonth =
-              selectedMonths[widget.allSheetData.indexOf(filteredSheet)];
-          final selectedYear =
-              selectedYears[widget.allSheetData.indexOf(filteredSheet)];
+                // Use passedMonthKey and passedYear or calculate default
+                String currentMonthKey;
 
-          final monthKey = "${selectedYear}-${selectedMonth.month}";
+                if (passedMonthKey == null && passedYear == null) {
+                  final currentDate = DateTime.now();
+                  final currentMonth = currentDate.month;
+                  final currentYear = currentDate.year;
 
-          setState(() {
-            final monthlyAccuracy =
-                getMonthlyAccuracy(widget.updatedAllSheetData);
-            selectedMonthAccuracy = monthlyAccuracy[monthKey] ?? "--";
-          });
-        }
+                  // Format the current month as "YYYY-M" (no leading zero for the month)
+                  currentMonthKey = "$currentYear-${currentMonth}";
+                } else {
+                  // If passedMonthKey or passedYear is provided, format it dynamically
+                  currentMonthKey = passedYear != null
+                      ? "$passedYear-${int.parse(passedMonthKey!)}"
+                      : passedMonthKey!;
 
-        void printCurrentMonthAccuracy() {
-          final currentDate = DateTime.now();
-          final currentMonth = currentDate.month;
-          final currentYear = currentDate.year;
+                  // Remove leading zero from the month part if it exists
+                  if (currentMonthKey.contains("-")) {
+                    var parts = currentMonthKey.split("-"); // e.g., "2025-02"
+                    currentMonthKey =
+                        "${parts[0]}-${int.parse(parts[1]).toString()}"; // Remove leading zero
+                  }
+                }
 
-          // Construct a key for the current month with two-digit padding for the month
-          final currentMonthKey =
-              "$currentYear-${currentMonth.toString().padLeft(2, '0')}";
-          log("Constructed Current Month Key: $currentMonthKey");
+                log("Using selected key: $currentMonthKey"); // Log the selected key
 
-          // Get the accuracy map and extract the accuracy for the current month
-          final monthlyAccuracy =
-              getMonthlyAccuracy(widget.updatedAllSheetData);
-          log("Monthly Accuracy Map: $monthlyAccuracy");
+                if (sheet['monthlyAccuracy'] is Map) {
+                  Map<String, dynamic> monthlyAccuracyData =
+                      sheet['monthlyAccuracy'];
 
-          // Log each key to inspect if there's any discrepancy
-          log("Available keys in Monthly Accuracy Map: ${monthlyAccuracy.keys}");
-
-          // Declare a variable to hold the accuracy for the current month
-          double? currentMonthAccuracy;
-
-          for (var entry in monthlyAccuracy.entries) {
-            // Correctly normalize the month part of the key
-            final parts = entry.key.split('-');
-            final normalizedKey =
-                "${parts[0]}-${parts[1].padLeft(2, '0')}"; // Only pad the month part
-
-            log("Checking key: $normalizedKey");
-
-            if (normalizedKey == currentMonthKey) {
-              currentMonthAccuracy = entry.value;
-              break; // Exit the loop once the correct key is found
+                  // Look for the provided month key in the data
+                  if (monthlyAccuracyData.containsKey(currentMonthKey)) {
+                    var value = monthlyAccuracyData[currentMonthKey];
+                    setState(() {
+                      selectedMonthAccuracy = value.toStringAsFixed(2);
+                    });
+                    log("Found value for $currentMonthKey: $value");
+                  } else {
+                    log("Month not found for key: $currentMonthKey");
+                    setState(() {
+                      selectedMonthAccuracy = "null";
+                    });
+                  }
+                }
+              }
             }
-          }
-
-          // Log the result and update the UI state
-          if (currentMonthAccuracy != null) {
-            log("Current Month Accuracy for Key $currentMonthKey: $currentMonthAccuracy");
-
-            setState(() {
-              selectedMonthAccuracy = currentMonthAccuracy;
-            });
           } else {
-            log("No accuracy found for Current Month Key: $currentMonthKey");
-
-            setState(() {
-              selectedMonthAccuracy = "--"; // Default value if no data
-            });
+            log('ClientId not found in list'); // Log if client ID is not found
           }
-
-          // Print the final selectedMonthAccuracy value
-          log("Selected Month Accuracy: $selectedMonthAccuracy");
         }
 
-        void printCurrentMonthRoi() {
-          final currentDate = DateTime.now();
-          final currentMonth = currentDate.month;
-          final currentYear = currentDate.year;
+        void currentMonthlROI([String? passedMonthKey, String? passedYear]) {
+          if (allUserIds.contains(widget.clientId)) {
+            for (var sheet in widget.updatedAllSheetData) {
+              if (sheet['UserId'] == widget.clientId) {
+                log('User data: ${sheet['monthlyRoi']}'); // Log user data for debugging
 
-          // Construct a key for the current month with two-digit padding for the month
-          final currentMonthKey =
-              "$currentYear-${currentMonth.toString().padLeft(2, '0')}";
-          log("Constructed Current Month Key: $currentMonthKey");
+                // Use passedMonthKey and passedYear or calculate default
+                String currentMonthKey;
 
-          // Get the monthly ROI map and extract the ROI for the current month
-          final monthlyRoi = getMonthlyRoi(widget.updatedAllSheetData);
-          log("Monthly ROI Map: $monthlyRoi");
+                if (passedMonthKey == null && passedYear == null) {
+                  final currentDate = DateTime.now();
+                  final currentMonth = currentDate.month;
+                  final currentYear = currentDate.year;
 
-          // Log each key to inspect if there's any discrepancy
-          log("Available keys in Monthly ROI Map: ${monthlyRoi.keys}");
+                  // Format the current month as "YYYY-M" (no leading zero for the month)
+                  currentMonthKey = "$currentYear-${currentMonth}";
+                } else {
+                  // If passedMonthKey or passedYear is provided, format it dynamically
+                  currentMonthKey = passedYear != null
+                      ? "$passedYear-${int.parse(passedMonthKey!)}"
+                      : passedMonthKey!;
 
-          // Declare a variable to hold the ROI for the current month
-          double? currentMonthRoi;
+                  // Remove leading zero from the month part if it exists
+                  if (currentMonthKey.contains("-")) {
+                    var parts = currentMonthKey.split("-"); // e.g., "2025-02"
+                    currentMonthKey =
+                        "${parts[0]}-${int.parse(parts[1]).toString()}"; // Remove leading zero
+                  }
+                }
 
-          // Loop through the map entries and find the ROI for the current month
-          for (var entry in monthlyRoi.entries) {
-            // Correctly normalize the month part of the key
-            final parts = entry.key.split('-');
-            final normalizedKey =
-                "${parts[0]}-${parts[1].padLeft(2, '0')}"; // Only pad the month part
+                log("Using selected key: $currentMonthKey"); // Log the selected key
 
-            log("Checking key: $normalizedKey");
+                if (sheet['monthlyRoi'] is Map) {
+                  Map<String, dynamic> monthlyAccuracyData =
+                      sheet['monthlyRoi'];
 
-            if (normalizedKey == currentMonthKey) {
-              currentMonthRoi = entry.value;
-              break; // Exit the loop once the correct key is found
+                  // Look for the provided month key in the data
+                  if (monthlyAccuracyData.containsKey(currentMonthKey)) {
+                    var value = monthlyAccuracyData[currentMonthKey];
+                    setState(() {
+                      selectedMonthRoi = value.toStringAsFixed(2);
+                    });
+                    log("Found value for $currentMonthKey: $value");
+                  } else {
+                    log("Month not found for key: $currentMonthKey");
+                    setState(() {
+                      selectedMonthRoi = "null";
+                    });
+                  }
+                }
+              }
             }
-          }
-
-          // Log the result and update the UI state
-          if (currentMonthRoi != null) {
-            log("Current Month ROI for Key $currentMonthKey: $currentMonthRoi");
-
-            setState(() {
-              selectedMonthRoi = currentMonthRoi;
-            });
           } else {
-            log("No ROI found for Current Month Key: $currentMonthKey");
-
-            setState(() {
-              selectedMonthRoi = "--"; // Default value if no data
-            });
+            log('ClientId not found in list'); // Log if client ID is not found
           }
-
-          // Print the final selectedMonthRoi value
-          log("Selected Month ROI: $selectedMonthRoi");
         }
-
-        setState(() {
-          printCurrentMonthAccuracy();
-          printCurrentMonthRoi();
-        });
 
         void handleMonthChange(int sheetIndex, int month) {
           setState(() {
             selectedMonths[sheetIndex] =
                 DateTime(selectedMonths[sheetIndex].year, month + 1, 1);
           });
-          printSelectedMonthAccuracy(); // Print the accuracy after the month change
+
+          // Pass the dynamic key for selected month and year
+          currentMonthlyAccuracy("${selectedMonths[sheetIndex].month}",
+              "${selectedMonths[sheetIndex].year}");
+          currentMonthlROI("${selectedMonths[sheetIndex].month}",
+              "${selectedMonths[sheetIndex].year}");
         }
 
         void handleYearChange(int sheetIndex, int year) {
@@ -325,8 +337,19 @@ class _MultiCalendarState extends State<MultiCalendar> {
             selectedMonths[sheetIndex] =
                 DateTime(year, selectedMonths[sheetIndex].month, 1);
           });
-          printSelectedMonthAccuracy(); // Print the accuracy after the year change
+
+          // Pass the dynamic key for selected year and month
+          currentMonthlyAccuracy(
+              "${selectedMonths[sheetIndex].month}", "$year");
+          currentMonthlROI("${selectedMonths[sheetIndex].month}", "$year");
         }
+
+        print("????????????????? ${selectedMonthAccuracy}");
+
+        double accuracy = double.tryParse(selectedMonthAccuracy ?? "0") ?? 0;
+        double progress = accuracy / 100;
+        double roi = double.tryParse(selectedMonthRoi ?? "0") ?? 0;
+        double progress2 = roi / 100;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
@@ -513,52 +536,92 @@ class _MultiCalendarState extends State<MultiCalendar> {
                       ),
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Accuracy",
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
-                            SizedBox(height: 4),
-                            Text(
-                                selectedMonthAccuracy.toString() ??
-                                    "--", // Provide a default value if it's null
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: selectedMonthAccuracy == null ||
-                                            selectedMonthAccuracy == "--"
-                                        ? Colors.grey
-                                        : Colors
-                                            .green, // Use green if available, else grey
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        SizedBox(width: 20),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("ROI",
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
-                            SizedBox(height: 4),
-                            Text(
-                                selectedMonthRoi.toString() ??
-                                    "--", // Provide a default value if it's null
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: selectedMonthRoi == null ||
-                                            selectedMonthRoi == "--"
-                                        ? Colors.grey
-                                        : Colors
-                                            .green, // Use green if available, else grey
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ],
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("Accuracy",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(height: 4),
+                              CircularPercentIndicator(
+                                radius: 30.0,
+                                lineWidth: 5.0,
+                                percent: progress.clamp(
+                                    0, 1), // Ensures value is between 0-1
+                                center: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "$accuracy%", // Accuracy value displayed inside
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    ),
+                                    Text(
+                                      "Accuracy", // Label below value
+                                      style: TextStyle(
+                                          fontSize: 8, color: Colors.grey[700]),
+                                    ),
+                                  ],
+                                ),
+                                progressColor: Colors.blue,
+                                backgroundColor: Colors.grey[300]!,
+                                circularStrokeCap: CircularStrokeCap.round,
+                                animation: true,
+                                animationDuration: 1500, // Smooth animation
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 20),
+                          SizedBox(height: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("ROI",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(height: 4),
+                              CircularPercentIndicator(
+                                radius: 30.0,
+                                lineWidth: 5.0,
+                                percent: progress2.clamp(
+                                    0, 1), // Ensures value is between 0-1
+                                center: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "$roi%", // Accuracy value displayed inside
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    ),
+                                    Text(
+                                      "ROI", // Label below value
+                                      style: TextStyle(
+                                          fontSize: 8, color: Colors.grey[700]),
+                                    ),
+                                  ],
+                                ),
+                                progressColor: Colors.blue,
+                                backgroundColor: Colors.grey[300]!,
+                                circularStrokeCap: CircularStrokeCap.round,
+                                animation: true,
+                                animationDuration: 1500, // Smooth animation
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 ],

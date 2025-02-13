@@ -879,7 +879,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                       ),
 
                       Container(
-                        margin: EdgeInsets.zero,
+                        margin: EdgeInsets.only(top: 10),
                         padding: EdgeInsets.all(0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
@@ -924,20 +924,20 @@ class _ManageBrokerState extends State<ManageBroker> {
                                         children: [
                                           Row(
                                             children: [
-                                              Text(
-                                                "Accounts",
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: themeManager
-                                                              .themeMode ==
-                                                          ThemeMode.dark
-                                                      ? AppColors
-                                                          .lightPrimary // Dark mode
-                                                      : AppColors
-                                                          .darkPrimary, // Light mode
-                                                ),
-                                              ),
+                                              // Text(
+                                              //   "Accounts",
+                                              //   style: TextStyle(
+                                              //     fontSize: 16,
+                                              //     fontWeight: FontWeight.bold,
+                                              //     color: themeManager
+                                              //                 .themeMode ==
+                                              //             ThemeMode.dark
+                                              //         ? AppColors
+                                              //             .lightPrimary // Dark mode
+                                              //         : AppColors
+                                              //             .darkPrimary, // Light mode
+                                              //   ),
+                                              // ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                     left: 0.0),

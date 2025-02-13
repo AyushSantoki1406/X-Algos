@@ -131,7 +131,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                       pinned: true,
                       backgroundColor: themeManager.themeMode == ThemeMode.dark
                           ? AppColors.darkPrimary
-                          : AppColors.yellow,
+                          : AppColors.lightPrimary,
                       elevation: 0,
                       scrolledUnderElevation: 0,
                       centerTitle: true,

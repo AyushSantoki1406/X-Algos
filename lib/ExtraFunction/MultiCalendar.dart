@@ -147,6 +147,25 @@ class _MultiCalendarState extends State<MultiCalendar> {
 
         log("Final Monthly Accuracy: ${getMonthlyAccuracy(widget.updatedAllSheetData)}");
 
+        var allUserIds =
+            widget.updatedAllSheetData.map((sheet) => sheet['UserId']).toList();
+        log('All UserIds: $allUserIds');
+        log("Type of clientId: ${widget.clientId.runtimeType}");
+
+        for (var userId in allUserIds) {
+          log("Type of UserId: ${userId.runtimeType}");
+        }
+
+        if (allUserIds.contains(widget.clientId)) {
+          for (var sheet in widget.updatedAllSheetData) {
+            if (sheet['UserId'] == widget.clientId) {
+              log('User datass: ${sheet['monthlyAccuracy']}');
+            }
+          }
+        } else {
+          log('ClientId not found in list');
+        }
+
         final selectedMonth =
             selectedMonths[widget.allSheetData.indexOf(filteredSheet)];
         final selectedYear =

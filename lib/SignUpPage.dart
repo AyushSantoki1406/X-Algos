@@ -10,6 +10,16 @@ import 'package:xalgo/secret/secret.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
+
+String getOperatingSystem() {
+  if (kIsWeb) {
+    return "Web";
+  } else {
+    return Platform.operatingSystem;
+  }
+}
 
 void main() {
   runApp(const SignUpPage());

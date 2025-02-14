@@ -352,7 +352,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
         double progress2 = roi / 100;
 
         return Container(
-          margin: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
+          margin: const EdgeInsets.only(bottom: 0, left: 15, right: 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -411,8 +411,9 @@ class _MultiCalendarState extends State<MultiCalendar> {
                 children: [
                   Expanded(
                     child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 20),
+                      margin: EdgeInsets.symmetric(vertical: 0),
                       child: GridView.builder(
+                        padding: EdgeInsets.zero,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 7, // 7 columns for days of the week
                           childAspectRatio: 1,
@@ -429,6 +430,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
                         itemCount: days.length +
                             days.first.weekday % 7 +
                             7, // Adjusted count
+
                         itemBuilder: (context, index) {
                           if (index < 7) {
                             // Weekday Labels
@@ -478,8 +480,8 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                       ThemeMode.dark
                                   ? Colors.green
                                       .shade700 // Dark mode background for positive P&L
-                                  : Colors.green
-                                      .shade400; // Light mode background for positive P&L
+                                  : Color.fromRGBO(561, 205, 56,
+                                      1); // Light mode background for positive P&L
                             } else if (pnl < 0) {
                               backgroundColor = themeManager.themeMode ==
                                       ThemeMode.dark
@@ -539,7 +541,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
                   Align(
                     alignment: Alignment.center,
                     child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      margin: EdgeInsets.only(left: 20, right: 20, top: 30),
                       child: Column(
                         children: [
                           Column(
@@ -563,16 +565,19 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                       style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    ),
-                                    Text(
-                                      "Accuracy", // Label below value
-                                      style: TextStyle(
-                                          fontSize: 8, color: Colors.grey[700]),
+                                          color: themeManager.themeMode ==
+                                                  ThemeMode.dark
+                                              ? AppColors.lightPrimary
+                                              : AppColors.darkPrimary),
                                     ),
                                   ],
                                 ),
-                                progressColor: Colors.blue,
+                                progressColor: progress < 0.33
+                                    ? Colors.red
+                                    : progress < 0.67
+                                        ? Colors.orange
+                                        : Colors
+                                            .green, // Dynamically change color
                                 backgroundColor: Colors.grey[300]!,
                                 circularStrokeCap: CircularStrokeCap.round,
                                 animation: true,
@@ -603,12 +608,10 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                       style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    ),
-                                    Text(
-                                      "ROI", // Label below value
-                                      style: TextStyle(
-                                          fontSize: 8, color: Colors.grey[700]),
+                                          color: themeManager.themeMode ==
+                                                  ThemeMode.dark
+                                              ? AppColors.lightPrimary
+                                              : AppColors.darkPrimary),
                                     ),
                                   ],
                                 ),

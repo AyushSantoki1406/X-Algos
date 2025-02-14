@@ -304,10 +304,10 @@ class _CapitalState extends State<Capital> {
                                   Text(
                                     "Capital",
                                     style: TextStyle(
-                                        color: themeManager.themeMode ==
-                                                ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary),
+                                          color: themeManager.themeMode ==
+                                                  ThemeMode.dark
+                                              ? AppColors.lightPrimary
+                                              : AppColors.darkPrimary),
                                   ),
                                   isLoading
                                       ? Column(

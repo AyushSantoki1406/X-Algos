@@ -895,7 +895,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                               child: ListView.builder(
                                 shrinkWrap: true,
                                 physics: NeverScrollableScrollPhysics(),
-                                itemCount: matchedClients.length,
+                                itemCount: matchedClients.length ?? 0,
                                 itemBuilder: (context, index) {
                                   bool isSelected = selectedIndex == index;
                                   return GestureDetector(

@@ -51,15 +51,22 @@ class _DashboardAngel extends State<DashboardAngel>
   Map<String, String> monthlyAccuracy = {};
   Map<String, String> monthlyRoi = {};
 
-  @override
   void initState() {
     super.initState();
     fetchData(); // Call fetchData on init
-    _controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 1))
-          ..repeat();
-    _dotAnimation = IntTween(begin: 0, end: 2)
-        .animate(_controller); // For 3 dots, cycling through 0, 1, 2
+
+    // Initialize the controller once, no need to create it twice
+    _controller = AnimationController(
+      duration: Duration(seconds: 3), // Duration to slow down animation
+      vsync: this,
+    )..repeat(reverse: true); // Repeat and reverse the animation
+
+    _dotAnimation = IntTween(begin: 0, end: 2).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutCubic, // Smooth cubic animation
+      ),
+    );
   }
 
   void fetchData() async {
@@ -239,6 +246,7 @@ class _DashboardAngel extends State<DashboardAngel>
 
           double tradeAccuracy =
               totalTrades > 0 ? (successfulTrades / totalTrades) * 100 : 0;
+
           double roi =
               totalInvestment > 0 ? (totalProfit / totalInvestment) * 100 : 0;
 
@@ -367,6 +375,12 @@ class _DashboardAngel extends State<DashboardAngel>
             color: themeManager.themeMode == ThemeMode.dark
                 ? AppColors.darkBackground
                 : AppColors.lightBackground,
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(10), // Optional: rounded corners
+            ),
+            elevation:
+                5, // For a subtle shadow effect, you can adjust the value
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -383,34 +397,37 @@ class _DashboardAngel extends State<DashboardAngel>
                                             item['userData']?['data']
                                                 ?['clientcode']) ==
                                         true)
-                                ? userSchema?['AccountAliases']
-                                    ?[item['userData']?['data']?['clientcode']]
-                                : null,
+                                ? userSchema?['AccountAliases']?[
+                                        item['userData']?['data']
+                                            ?['clientcode']] ??
+                                    '' // Provide a default empty string
+                                : '',
                           ),
+
                           _buildAccountItem(
                             "Name",
                             item['userData'] != null
                                 ? (item['userData']['data']['name']?.length ?? 0) >
                                         25
-                                    ? item['userData']['data']['name']!
-                                            .substring(0, 25) +
+                                    ? item['userData']['data']['name']!.substring(0, 25) +
                                         "..."
                                     : item['userData']['data']['name']
-                                : (item['userDetails']['result']['first_name'] +
-                                                item['userDetails']['result']
-                                                    ['last_name'])
-                                            ?.length ??
-                                        0 > 25
-                                    ? (item['userDetails']['result']['first_name'] +
-                                                item['userDetails']['result']
-                                                    ['last_name'])
+                                : ((item['userDetails']?['result']?['first_name'] ?? '') + (item['userDetails']?['result']?['last_name'] ?? '')).length >
+                                        25
+                                    ? ((item['userDetails']?['result']?['first_name'] ?? '') +
+                                                (item['userDetails']?['result']
+                                                        ?['last_name'] ??
+                                                    ''))
                                             .substring(0, 25) +
                                         "..."
-                                    : (item['userDetails']['result']
-                                                ['first_name'] +
-                                            item['userDetails']['result']
-                                                ['last_name']) ??
-                                        "N/A",
+                                    : ((item['userDetails']?['result']?['first_name'] ?? '') +
+                                                (item['userDetails']?['result']
+                                                        ?['last_name'] ??
+                                                    ''))
+                                            .isEmpty
+                                        ? "N/A"
+                                        : (item['userDetails']?['result']?['first_name'] ?? '') +
+                                            (item['userDetails']?['result']?['last_name'] ?? ''),
                           ),
                           _buildAccountItem("Broker",
                               item['userData'] != null ? "AngelOne" : "Delta"),
@@ -543,8 +560,8 @@ class _DashboardAngel extends State<DashboardAngel>
                                     // This centers the entire container
                                     child: isLoading
                                         ? Container(
-                                            margin: const EdgeInsets.only(
-                                                bottom: 10),
+                                            // margin: const EdgeInsets.only(
+                                            //     bottom: 10),
                                             height: 37,
                                             width: MediaQuery.of(context)
                                                     .size
@@ -567,9 +584,29 @@ class _DashboardAngel extends State<DashboardAngel>
                                                           color: _dotAnimation
                                                                       .value ==
                                                                   0
-                                                              ? Colors.white
-                                                              : Colors
-                                                                  .grey, // White when it's 0, else gray
+                                                              ? themeManager.themeMode ==
+                                                                      ThemeMode
+                                                                          .dark
+                                                                  ? AppColors
+                                                                      .lightPrimary
+                                                                  : AppColors
+                                                                      .darkPrimary
+                                                              : themeManager
+                                                                          .themeMode ==
+                                                                      ThemeMode
+                                                                          .dark
+                                                                  ? const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      71,
+                                                                      71,
+                                                                      71)
+                                                                  : const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      140,
+                                                                      140,
+                                                                      140), // White when it's 0, else gray
                                                         ),
                                                       );
                                                     },
@@ -586,9 +623,29 @@ class _DashboardAngel extends State<DashboardAngel>
                                                           color: _dotAnimation
                                                                       .value ==
                                                                   1
-                                                              ? Colors.white
-                                                              : Colors
-                                                                  .grey, // White when it's 1, else gray
+                                                              ? themeManager.themeMode ==
+                                                                      ThemeMode
+                                                                          .dark
+                                                                  ? AppColors
+                                                                      .lightPrimary
+                                                                  : AppColors
+                                                                      .darkPrimary
+                                                              : themeManager
+                                                                          .themeMode ==
+                                                                      ThemeMode
+                                                                          .dark
+                                                                  ? const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      71,
+                                                                      71,
+                                                                      71)
+                                                                  : const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      140,
+                                                                      140,
+                                                                      140), // White when it's 1, else gray
                                                         ),
                                                       );
                                                     },
@@ -605,9 +662,29 @@ class _DashboardAngel extends State<DashboardAngel>
                                                           color: _dotAnimation
                                                                       .value ==
                                                                   2
-                                                              ? Colors.white
-                                                              : Colors
-                                                                  .grey, // White when it's 2, else gray
+                                                              ? themeManager.themeMode ==
+                                                                      ThemeMode
+                                                                          .dark
+                                                                  ? AppColors
+                                                                      .lightPrimary
+                                                                  : AppColors
+                                                                      .darkPrimary
+                                                              : themeManager
+                                                                          .themeMode ==
+                                                                      ThemeMode
+                                                                          .dark
+                                                                  ? const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      71,
+                                                                      71,
+                                                                      71)
+                                                                  : const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      140,
+                                                                      140,
+                                                                      140), // White when it's 2, else gray
                                                         ),
                                                       );
                                                     },
@@ -739,7 +816,7 @@ class _DashboardAngel extends State<DashboardAngel>
                                     .map((filteredSheet) {
                                   return Container(
                                     width: double.infinity,
-                                    margin: const EdgeInsets.only(top: 10),
+                                    margin: const EdgeInsets.only(top: 0),
                                     child: MultiCalendar(
                                       index2: index,
                                       allSheetData: allSheetData,

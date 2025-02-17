@@ -21,8 +21,9 @@ class ThemeManager extends ChangeNotifier {
     _themeMode =
         _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkMode', _themeMode == ThemeMode.dark);
-    notifyListeners(); // Update UI without restarting activity
+    await prefs.setBool(
+        'isDarkMode', _themeMode == ThemeMode.dark); // Save the theme mode
+    notifyListeners(); // Update UI without restarting the activity
   }
 
   Color get textColor =>

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:xalgo/ExecutedTrade.dart';
 import 'package:xalgo/SignUpPage.dart';
 import 'package:xalgo/HomePage.dart';
 import 'package:xalgo/theme/app_colors.dart';
@@ -17,23 +18,25 @@ void main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeManager(),
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  // Get the current theme mode from ThemeManager
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeManager>(
       builder: (context, themeManager, child) {
+        final themeMode = Provider.of<ThemeManager>(context).themeMode;
         return MaterialApp(
           title: 'X Algos',
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          themeMode: themeManager.themeMode,
+          themeMode: themeMode, // Set theme mode dynamically
+          theme: ThemeData.light(), // Light theme
+          darkTheme: ThemeData.dark(), // Dark theme
           home: const SplashScreen(), // Start with SplashScreen
           debugShowCheckedModeBanner: false,
         );
@@ -95,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Home(),
+              builder: (context) => ExecutedTrade(),
               settings: RouteSettings(),
               fullscreenDialog: false,
             ),

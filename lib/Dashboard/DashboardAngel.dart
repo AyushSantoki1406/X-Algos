@@ -99,7 +99,6 @@ class _DashboardAngel extends State<DashboardAngel>
         brokerInfo = aa != null ? jsonDecode(aa) as List : [];
       });
 
-      print("Response Body: ${email}");
       if (email != null) {
         fetchExcelSheet();
       }
@@ -126,7 +125,6 @@ class _DashboardAngel extends State<DashboardAngel>
       final filteredData =
           data.where((item) => ids.contains(item['_id'])).toList();
 
-      print("filtered data: $filteredData");
 
       // Cast each item in filteredData to Map<String, dynamic> safely
       List<Map<String, dynamic>> mergedData = filteredData.map((item) {

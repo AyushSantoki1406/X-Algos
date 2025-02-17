@@ -401,18 +401,20 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                                   right: 15),
                                               child: Switch(
                                                 value: themeManager.themeMode ==
-                                                    ThemeMode.dark,
+                                                    ThemeMode
+                                                        .dark, // Check current theme mode
                                                 onChanged: (bool value) {
+                                                  // Toggle the theme when the switch is changed
                                                   themeManager.toggleTheme();
                                                 },
-                                                activeColor:
-                                                    AppColors.lightPrimary,
-                                                inactiveTrackColor:
-                                                    Colors.grey[800],
-                                                activeTrackColor:
-                                                    AppColors.yellow,
+                                                activeColor: AppColors
+                                                    .lightPrimary, // Color for active switch (light mode)
+                                                inactiveTrackColor: Colors.grey[
+                                                    800], // Color for inactive track (dark mode)
+                                                activeTrackColor: AppColors
+                                                    .yellow, // Color for active track (light mode)
                                               ),
-                                            ),
+                                            )
                                           ],
                                         ),
                                       ],

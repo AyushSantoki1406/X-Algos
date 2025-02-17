@@ -208,9 +208,8 @@ class _MultiCalendarState extends State<MultiCalendar> {
           if (allUserIds.contains(widget.clientId)) {
             for (var sheet in widget.updatedAllSheetData) {
               if (sheet['UserId'] == widget.clientId) {
-                log('User data: ${sheet['monthlyAccuracy']}'); // Log user data for debugging
+                log('User data: ${sheet['monthlyAccuracy']}');
 
-                // Use passedMonthKey and passedYear or calculate default
                 String currentMonthKey;
 
                 if (passedMonthKey == null && passedYear == null) {
@@ -460,37 +459,97 @@ class _MultiCalendarState extends State<MultiCalendar> {
                           final day =
                               days[adjustedIndex - days.first.weekday % 7];
                           final dateKey = DateFormat('yyyy-MM-dd').format(day);
-                          final pnlList = pnlByDate[dateKey];
+                          final List<double> pnlList = (pnlByDate[dateKey]
+                                  is List)
+                              ? (pnlByDate[dateKey] as List)
+                                  .map((e) => e as double)
+                                  .toList()
+                              : pnlByDate[dateKey] is double
+                                  ? [pnlByDate[dateKey] as double]
+                                  : []; // Default to empty list if pnlByDate[dateKey] is neither List nor double
 
-                          final pnl = pnlByDate[dateKey] ??
-                              0.0; // Use default value if null
+                          print("mjkiuhgrtghh $pnlList");
 
+                          List<double> allProfits = [];
+
+// Extract only positive PNL values
+                          for (var entry in pnlByDate.entries) {
+                            final List<double> pnlList = (entry.value is List)
+                                ? (entry.value as List)
+                                    .map((e) => e as double)
+                                    .toList()
+                                : entry.value is double
+                                    ? [entry.value as double]
+                                    : []; // Default to empty list
+
+                            allProfits.addAll(pnlList.where((pnl) => pnl > 0));
+                          }
+
+// Find the maximum profit (handle case when list is empty)
+                          double maxProfit = allProfits.isNotEmpty
+                              ? allProfits.reduce((a, b) => a > b ? a : b)
+                              : 1;
+
+                          print("Maximum Profit: $maxProfit");
+
+                          List<double> lossLevels = [
+                            -maxProfit * 0.2,
+                            -maxProfit * 0.4,
+                            -maxProfit * 0.6,
+                            -maxProfit * 0.8,
+                          ];
+
+// Function to determine color based on profit/loss levels
+                          Color getPnlColor(double pnl) {
+                            if (pnl > 0) {
+                              double percentage = (pnl / maxProfit) * 100;
+
+                              if (percentage <= 20) {
+                                return Color.fromRGBO(
+                                    160, 235, 160, 1); // Soft Mint Green
+                              } else if (percentage <= 40) {
+                                return Color.fromRGBO(
+                                    80, 200, 120, 1); // Fresh Grass Green
+                              } else if (percentage <= 60) {
+                                return Color.fromRGBO(
+                                    50, 180, 90, 1); // Rich Forest Green
+                              } else if (percentage <= 80) {
+                                return Color.fromRGBO(
+                                    20, 150, 70, 1); // Deep Emerald Green
+                              } else {
+                                return Color.fromRGBO(
+                                    56, 205, 56, 1); // Intense Pine Green
+                              }
+                            } else if (pnl < 0) {
+                              if (pnl >= lossLevels[0]) {
+                                return Color.fromRGBO(
+                                    255, 180, 180, 1); // Light Red
+                              } else if (pnl >= lossLevels[1]) {
+                                return Color.fromRGBO(
+                                    255, 150, 150, 1); // Medium Red
+                              } else if (pnl >= lossLevels[2]) {
+                                return Color.fromRGBO(
+                                    255, 120, 120, 1); // Dark Red
+                              } else if (pnl >= lossLevels[3]) {
+                                return Color.fromRGBO(
+                                    255, 90, 90, 1); // Darker Red
+                              } else {
+                                return Color.fromRGBO(
+                                    255, 60, 60, 1); // Deepest Red
+                              }
+                            }
+
+                            // Default background color
+                            return Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? AppColors.darkBackground
+                                : AppColors.lightBackground;
+                          }
+
+                          final pnl = pnlByDate[dateKey] ?? 0.0;
                           final isCurrentMonth =
                               day.month == selectedMonth.month;
-
-                          // Determine background color based on P&L
-                          Color backgroundColor = themeManager.themeMode ==
-                                  ThemeMode.dark
-                              ? AppColors
-                                  .darkBackground // Dark mode background color
-                              : AppColors.lightBackground;
-                          if (pnl != null) {
-                            if (pnl > 0) {
-                              backgroundColor = themeManager.themeMode ==
-                                      ThemeMode.dark
-                                  ? Colors.green
-                                      .shade700 // Dark mode background for positive P&L
-                                  : Color.fromRGBO(561, 205, 56,
-                                      1); // Light mode background for positive P&L
-                            } else if (pnl < 0) {
-                              backgroundColor = themeManager.themeMode ==
-                                      ThemeMode.dark
-                                  ? Colors.red
-                                      .shade700 // Dark mode background for negative P&L
-                                  : Colors.red
-                                      .shade400; // Light mode background for negative P&L
-                            }
-                          }
+                          Color backgroundColor = getPnlColor(pnl);
 
                           return GestureDetector(
                             onTap: () {

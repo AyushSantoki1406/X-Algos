@@ -482,7 +482,9 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                     ? [entry.value as double]
                                     : []; // Default to empty list
 
-                            allProfits.addAll(pnlList.where((pnl) => pnl > 0));
+                            print("alllistis $pnlList");
+
+                            allProfits.addAll(pnlList);
                           }
 
 // Find the maximum profit (handle case when list is empty)
@@ -490,14 +492,19 @@ class _MultiCalendarState extends State<MultiCalendar> {
                               ? allProfits.reduce((a, b) => a > b ? a : b)
                               : 1;
 
-                          print("Maximum Profit: $maxProfit");
+                          double maxLoss =
+                              allProfits.reduce((a, b) => a < b ? a : b);
 
-                          List<double> lossLevels = [
-                            -maxProfit * 0.2,
-                            -maxProfit * 0.4,
-                            -maxProfit * 0.6,
-                            -maxProfit * 0.8,
-                          ];
+                          print("allprofit $allProfits");
+
+                          print("Maximum Profit: $maxLoss");
+
+                          // List<double> lossLevels = [
+                          //   -maxProfit * 0.2,
+                          //   -maxProfit * 0.4,
+                          //   -maxProfit * 0.6,
+                          //   -maxProfit * 0.8,
+                          // ];
 
 // Function to determine color based on profit/loss levels
                           Color getPnlColor(double pnl) {
@@ -521,18 +528,19 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                     56, 205, 56, 1); // Intense Pine Green
                               }
                             } else if (pnl < 0) {
-                              if (pnl >= lossLevels[0]) {
+                              double percentage = (pnl / maxLoss) * 100;
+                              print("ayushji $percentage");
+                              if (percentage >= 20) {
+                                return Color.fromRGBO(254, 141, 141, 1);
+                              } else if (percentage >= 40) {
                                 return Color.fromRGBO(
-                                    255, 180, 180, 1); // Light Red
-                              } else if (pnl >= lossLevels[1]) {
+                                    255, 126, 114, 1); // Medium Red
+                              } else if (percentage >= 60) {
                                 return Color.fromRGBO(
-                                    255, 150, 150, 1); // Medium Red
-                              } else if (pnl >= lossLevels[2]) {
+                                    255, 105, 105, 1); // Dark Red
+                              } else if (percentage >= 80) {
                                 return Color.fromRGBO(
-                                    255, 120, 120, 1); // Dark Red
-                              } else if (pnl >= lossLevels[3]) {
-                                return Color.fromRGBO(
-                                    255, 90, 90, 1); // Darker Red
+                                    255, 55, 55, 1); // Darker Red
                               } else {
                                 return Color.fromRGBO(
                                     255, 60, 60, 1); // Deepest Red

@@ -35,7 +35,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       key: _scaffoldKey,
       endDrawer: AppDrawer(),
-      backgroundColor: themeManager.themeMode == ThemeMode.dark
+      backgroundColor: themeManager.isDarkMode == ThemeMode.dark
           ? AppColors.darkPrimary
           : AppColors.lightPrimary,
       body: Stack(
@@ -47,7 +47,7 @@ class _HomeState extends State<Home> {
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
                   pinned: true,
-                  backgroundColor: themeManager.themeMode == ThemeMode.dark
+                  backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                       ? AppColors.darkPrimary
                       : AppColors.lightPrimary,
                   elevation: 0,
@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                     ),
@@ -67,7 +67,7 @@ class _HomeState extends State<Home> {
                     padding: const EdgeInsets.all(8.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(50),
-                      child: themeManager.themeMode == ThemeMode.dark
+                      child: themeManager.isDarkMode == ThemeMode.dark
                           ? Image.asset(
                               'assets/images/darklogo.png',
                               fit: BoxFit.cover,
@@ -83,7 +83,7 @@ class _HomeState extends State<Home> {
                       builder: (context) => IconButton(
                         icon: Icon(
                           Icons.menu,
-                          color: themeManager.themeMode == ThemeMode.dark
+                          color: themeManager.isDarkMode == ThemeMode.dark
                               ? AppColors.lightPrimary
                               : AppColors.darkPrimary,
                         ),

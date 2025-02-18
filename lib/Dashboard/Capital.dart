@@ -232,7 +232,7 @@ class _CapitalState extends State<Capital> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              color: themeManager.themeMode == ThemeMode.dark
+              color: themeManager.isDarkMode == ThemeMode.dark
                   ? AppColors.darkPrimary
                   : AppColors.lightPrimary,
               child: const Center(),
@@ -247,7 +247,7 @@ class _CapitalState extends State<Capital> {
               padding: EdgeInsets.all(0),
               margin: EdgeInsets.all(0),
               width: double.infinity,
-              color: themeManager.themeMode == ThemeMode.dark
+              color: themeManager.isDarkMode == ThemeMode.dark
                   ? AppColors.darkPrimary
                   : AppColors.lightPrimary,
               child: Padding(
@@ -257,7 +257,7 @@ class _CapitalState extends State<Capital> {
                   mainAxisSize: MainAxisSize.min, // Change this line
                   children: [
                     Card(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.bd_black
                           : AppColors.bd_white,
                       child: Container(
@@ -280,14 +280,14 @@ class _CapitalState extends State<Capital> {
                                   Text(
                                     "P&L",
                                     style: TextStyle(
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary),
                                   ),
                                   Text("₹",
                                       style: TextStyle(
-                                          color: themeManager.themeMode ==
+                                          color: themeManager.isDarkMode ==
                                                   ThemeMode.dark
                                               ? AppColors.lightPrimary
                                               : AppColors.darkPrimary)),
@@ -304,10 +304,10 @@ class _CapitalState extends State<Capital> {
                                   Text(
                                     "Capital",
                                     style: TextStyle(
-                                          color: themeManager.themeMode ==
-                                                  ThemeMode.dark
-                                              ? AppColors.lightPrimary
-                                              : AppColors.darkPrimary),
+                                        color: themeManager.isDarkMode ==
+                                                ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary),
                                   ),
                                   isLoading
                                       ? Column(
@@ -349,7 +349,7 @@ class _CapitalState extends State<Capital> {
                             .transparent, // Ensure background is transparent
                         child: DashboardAngel(
                           capital: newCapital,
-                          darkMode: themeManager.themeMode == ThemeMode.dark,
+                          darkMode: themeManager.isDarkMode == ThemeMode.dark,
                         ),
                       ),
                     )

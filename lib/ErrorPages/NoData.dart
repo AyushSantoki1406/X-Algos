@@ -11,14 +11,14 @@ class Nodata extends StatelessWidget {
     final themeManager = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: Container(
-        color: themeManager.themeMode == ThemeMode.dark
+        color: themeManager.isDarkMode == ThemeMode.dark
             ? AppColors.darkPrimary
             : AppColors.lightPrimary,
         child: Center(
           child: Text(
             'No data available at the moment.',
             style: TextStyle(
-              color: themeManager.themeMode == ThemeMode.dark
+              color: themeManager.isDarkMode == ThemeMode.dark
                   ? AppColors.bd_black
                   : AppColors.bd_white,
               fontSize: 18,

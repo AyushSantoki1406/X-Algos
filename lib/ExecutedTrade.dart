@@ -34,7 +34,6 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
       email = await secureStorage.read(key: 'Email').toString();
       var data = await secureStorage.read(key: 'userSchema');
       userSchema = jsonDecode(data.toString());
-      print("here is user email ........${userSchema?['Email']}");
     } catch (e) {
       print(e);
     }
@@ -61,7 +60,7 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
         child: Scaffold(
             key: _scaffoldKey, // Assign the key to Scaffold
             endDrawer: AppDrawer(),
-            backgroundColor: themeManager.themeMode == ThemeMode.dark
+            backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                 ? AppColors.darkPrimary
                 : AppColors.lightPrimary,
             body: PopScope(
@@ -71,7 +70,7 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
                 headerSliverBuilder: (context, innerBoxIsScrolled) => [
                   SliverAppBar(
                     pinned: true,
-                    backgroundColor: themeManager.themeMode == ThemeMode.dark
+                    backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.darkPrimary
                         : AppColors.lightPrimary,
                     elevation: 0,
@@ -82,7 +81,7 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: themeManager.themeMode == ThemeMode.dark
+                          color: themeManager.isDarkMode == ThemeMode.dark
                               ? AppColors.lightPrimary
                               : AppColors.darkPrimary),
                     ),
@@ -90,7 +89,7 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
                       padding: const EdgeInsets.only(left: 8.0, right: 8),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(50),
-                        child: themeManager.themeMode == ThemeMode.dark
+                        child: themeManager.isDarkMode == ThemeMode.dark
                             ? Image.asset(
                                 'assets/images/darklogo.png',
                                 fit: BoxFit.cover,
@@ -106,7 +105,7 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
                         // Ensure correct context
                         builder: (context) => IconButton(
                           icon: Icon(Icons.menu,
-                              color: themeManager.themeMode == ThemeMode.dark
+                              color: themeManager.isDarkMode == ThemeMode.dark
                                   ? AppColors.lightPrimary
                                   : AppColors.darkPrimary),
                           onPressed: () {

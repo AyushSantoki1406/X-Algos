@@ -245,7 +245,7 @@ class _MarketPlaceState extends State<MarketPlace> {
     return Scaffold(
         key: _scaffoldKey,
         endDrawer: AppDrawer(),
-        backgroundColor: themeManager.themeMode == ThemeMode.dark
+        backgroundColor: themeManager.isDarkMode == ThemeMode.dark
             ? AppColors.darkPrimary
             : AppColors.lightPrimary,
         body: PopScope(
@@ -255,7 +255,7 @@ class _MarketPlaceState extends State<MarketPlace> {
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               SliverAppBar(
                 pinned: true,
-                backgroundColor: themeManager.themeMode == ThemeMode.dark
+                backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                     ? AppColors.darkPrimary
                     : AppColors.lightPrimary,
                 elevation: 0,
@@ -266,7 +266,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary,
                   ),
@@ -275,7 +275,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                   padding: const EdgeInsets.only(left: 8.0, right: 8),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                    child: themeManager.themeMode == ThemeMode.dark
+                    child: themeManager.isDarkMode == ThemeMode.dark
                         ? Image.asset(
                             'assets/images/darklogo.png',
                             fit: BoxFit.cover,
@@ -290,7 +290,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                   Builder(
                     builder: (context) => IconButton(
                       icon: Icon(Icons.menu,
-                          color: themeManager.themeMode == ThemeMode.dark
+                          color: themeManager.isDarkMode == ThemeMode.dark
                               ? AppColors.lightPrimary
                               : AppColors.darkPrimary),
                       onPressed: () {
@@ -315,7 +315,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                           subscribedStrategies.contains(strategy['_id']);
                       return Container(
                         margin: EdgeInsets.all(0),
-                        color: themeManager.themeMode == ThemeMode.dark
+                        color: themeManager.isDarkMode == ThemeMode.dark
                             ? AppColors.darkPrimary
                             : AppColors.lightPrimary,
                         padding: EdgeInsets.only(left: 16, right: 16),
@@ -326,7 +326,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                             margin: EdgeInsets.all(0),
                             child: Card(
                               margin: EdgeInsets.all(0),
-                              color: themeManager.themeMode == ThemeMode.dark
+                              color: themeManager.isDarkMode == ThemeMode.dark
                                   ? AppColors.bd_black
                                   : AppColors.bd_white,
                               shape: RoundedRectangleBorder(
@@ -341,7 +341,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                   children: [
                                     // Header Section
                                     Card(
-                                      color: themeManager.themeMode ==
+                                      color: themeManager.isDarkMode ==
                                               ThemeMode.dark
                                           ? AppColors.bd_black
                                           : AppColors.bd_white,
@@ -371,7 +371,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors
                                                               .lightPrimary
@@ -383,7 +383,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   style: TextStyle(
                                                       fontSize: 12,
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors
                                                               .lightPrimary
@@ -411,7 +411,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                                 color: themeManager
-                                                            .themeMode ==
+                                                            .isDarkMode ==
                                                         ThemeMode.dark
                                                     ? AppColors.lightPrimary
                                                     : AppColors.darkPrimary),
@@ -422,7 +422,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                                 color: themeManager
-                                                            .themeMode ==
+                                                            .isDarkMode ==
                                                         ThemeMode.dark
                                                     ? AppColors.lightPrimary
                                                     : AppColors.darkPrimary),
@@ -440,7 +440,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                         strategy['description'],
                                         style: TextStyle(
                                             fontSize: 12,
-                                            color: themeManager.themeMode ==
+                                            color: themeManager.isDarkMode ==
                                                     ThemeMode.dark
                                                 ? AppColors.lightPrimary
                                                 : AppColors.darkPrimary),
@@ -455,7 +455,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Card(
-                                          color: themeManager.themeMode ==
+                                          color: themeManager.isDarkMode ==
                                                   ThemeMode.dark
                                               ? AppColors.bd_black
                                               : AppColors.bd_white,
@@ -468,7 +468,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   style: TextStyle(
                                                       fontSize: 13,
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors
                                                               .lightPrimary
@@ -481,7 +481,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                         ),
                                         SizedBox(height: 8),
                                         Card(
-                                          color: themeManager.themeMode ==
+                                          color: themeManager.isDarkMode ==
                                                   ThemeMode.dark
                                               ? AppColors.bd_black
                                               : AppColors.bd_white,
@@ -494,7 +494,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   style: TextStyle(
                                                       fontSize: 13,
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors
                                                               .lightPrimary
@@ -519,7 +519,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   Expanded(
                                                     child: Card(
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors.bd_black
                                                           : AppColors.bd_white,
@@ -534,7 +534,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                               style: TextStyle(
                                                                   fontSize: 13,
                                                                   color: themeManager
-                                                                              .themeMode ==
+                                                                              .isDarkMode ==
                                                                           ThemeMode
                                                                               .dark
                                                                       ? AppColors
@@ -551,7 +551,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   Expanded(
                                                     child: Card(
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors.bd_black
                                                           : AppColors.bd_white,
@@ -566,7 +566,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                               style: TextStyle(
                                                                   fontSize: 13,
                                                                   color: themeManager
-                                                                              .themeMode ==
+                                                                              .isDarkMode ==
                                                                           ThemeMode
                                                                               .dark
                                                                       ? AppColors
@@ -584,7 +584,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                         ),
                                         SizedBox(height: 8),
                                         Card(
-                                          color: themeManager.themeMode ==
+                                          color: themeManager.isDarkMode ==
                                                   ThemeMode.dark
                                               ? AppColors.bd_black
                                               : AppColors.bd_white,
@@ -597,7 +597,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   style: TextStyle(
                                                       fontSize: 13,
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors
                                                               .lightPrimary
@@ -634,7 +634,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                   backgroundColor: isSubscribed
                                                       ? Colors.grey.shade700
                                                       : themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? AppColors
                                                               .lightPrimary
@@ -649,7 +649,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                       color: isSubscribed
                                                           ? Colors.grey.shade600
                                                           : themeManager
-                                                                      .themeMode ==
+                                                                      .isDarkMode ==
                                                                   ThemeMode.dark
                                                               ? AppColors
                                                                   .lightPrimary
@@ -683,7 +683,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                     color: isSubscribed
                                                         ? Colors.grey.shade400
                                                         : themeManager
-                                                                    .themeMode ==
+                                                                    .isDarkMode ==
                                                                 ThemeMode.dark
                                                             ? AppColors
                                                                 .darkPrimary
@@ -718,7 +718,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                         ? BorderSide
                                                             .none // No border if subscribed
                                                         : BorderSide(
-                                                            color: themeManager.themeMode ==
+                                                            color: themeManager.isDarkMode ==
                                                                     ThemeMode
                                                                         .dark
                                                                 ? AppColors
@@ -747,7 +747,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                     color: isSubscribed
                                                         ? AppColors.lightPrimary
                                                         : themeManager
-                                                                    .themeMode ==
+                                                                    .isDarkMode ==
                                                                 ThemeMode.dark
                                                             ? AppColors
                                                                 .lightPrimary

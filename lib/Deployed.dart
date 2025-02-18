@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:xalgo/theme/app_colors.dart';
+import 'package:xalgo/theme/theme_manage.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 
 class Deployed extends StatefulWidget {
@@ -55,8 +58,26 @@ class DeployedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeProvider>(context);
+
     return Center(
-      child: Text("Deployed Page Content Goes Here!"),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 15),
+        child: Switch(
+          value: themeManager.isDarkMode ==
+              ThemeMode.dark, // Check current theme mode
+          onChanged: (bool value) {
+            // Toggle the theme when the switch is changed
+            themeManager.toggleTheme();
+          },
+          activeColor:
+              AppColors.lightPrimary, // Color for active switch (light mode)
+          inactiveTrackColor:
+              Colors.grey[800], // Color for inactive track (dark mode)
+          activeTrackColor:
+              AppColors.yellow, // Color for active track (light mode)
+        ),
+      ),
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ManageBroker extends StatefulWidget {
   const ManageBroker({super.key});
@@ -391,7 +392,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Account Name",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -403,7 +404,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -423,7 +424,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Client ID",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -435,7 +436,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -464,7 +465,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Enter Pin",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -476,7 +477,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -496,7 +497,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Totp Key",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -508,7 +509,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -528,7 +529,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Api Key",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -540,7 +541,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -565,7 +566,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Account Name",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -577,7 +578,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -597,7 +598,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "API Key",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -609,7 +610,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -629,7 +630,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "API Secret",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -641,7 +642,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -665,7 +666,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 labelText: "Upstox API",
                 labelStyle: TextStyle(
                     fontSize: 13,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
                 border: OutlineInputBorder(
@@ -677,7 +678,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(7.2),
                   borderSide: BorderSide(
-                      color: themeManager.themeMode == ThemeMode.dark
+                      color: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                       width: 0.5),
@@ -717,7 +718,7 @@ class _ManageBrokerState extends State<ManageBroker> {
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               pinned: true,
-              backgroundColor: themeManager.themeMode == ThemeMode.dark
+              backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                   ? AppColors.darkPrimary
                   : AppColors.lightPrimary,
               elevation: 0,
@@ -728,7 +729,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: themeManager.themeMode == ThemeMode.dark
+                    color: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
               ),
@@ -736,7 +737,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                 padding: const EdgeInsets.all(8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(50),
-                  child: themeManager.themeMode == ThemeMode.dark
+                  child: themeManager.isDarkMode == ThemeMode.dark
                       ? Image.asset(
                           'assets/images/darklogo.png',
                           fit: BoxFit.cover,
@@ -752,7 +753,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                   // Ensure correct context
                   builder: (context) => IconButton(
                     icon: Icon(Icons.menu,
-                        color: themeManager.themeMode == ThemeMode.dark
+                        color: themeManager.isDarkMode == ThemeMode.dark
                             ? AppColors.lightPrimary
                             : AppColors.darkPrimary),
                     onPressed: () {
@@ -764,14 +765,14 @@ class _ManageBrokerState extends State<ManageBroker> {
             ),
           ],
           body: Container(
-            color: themeManager.themeMode == ThemeMode.dark
+            color: themeManager.isDarkMode == ThemeMode.dark
                 ? AppColors.darkPrimary
                 : AppColors.lightPrimary,
             padding: const EdgeInsets.all(4),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(8),
               child: Card(
-                color: themeManager.themeMode == ThemeMode.dark
+                color: themeManager.isDarkMode == ThemeMode.dark
                     ? AppColors.bd_black
                     : AppColors.bd_white,
                 shape: RoundedRectangleBorder(
@@ -787,14 +788,14 @@ class _ManageBrokerState extends State<ManageBroker> {
                           margin: EdgeInsets.only(left: 20, right: 20),
                           child: DropdownButton<String>(
                             dropdownColor:
-                                themeManager.themeMode == ThemeMode.dark
+                                themeManager.isDarkMode == ThemeMode.dark
                                     ? AppColors.darkBackground
                                     : AppColors.lightPrimary,
                             value: selectBroker,
                             onChanged: onBrokerChange,
                             isExpanded: true,
                             style: TextStyle(color: Colors.grey),
-                            iconEnabledColor: themeManager.themeMode ==
+                            iconEnabledColor: themeManager.isDarkMode ==
                                     ThemeMode.dark
                                 ? AppColors
                                     .lightPrimary // Icon color in dark mode
@@ -802,7 +803,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                                     .darkPrimary, // Icon color in light mode
                             underline: Container(
                               height: 2,
-                              color: themeManager.themeMode == ThemeMode.dark
+                              color: themeManager.isDarkMode == ThemeMode.dark
                                   ? AppColors
                                       .lightPrimary // Underline color in dark mode
                                   : AppColors
@@ -814,10 +815,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "AngelOne",
                                   style: TextStyle(
-                                    color: themeManager.themeMode ==
-                                            ThemeMode.dark
-                                        ? AppColors.lightPrimary
-                                        : AppColors.darkPrimary,
+                                    color:
+                                        themeManager.isDarkMode == ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -826,10 +827,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "Delta",
                                   style: TextStyle(
-                                    color: themeManager.themeMode ==
-                                            ThemeMode.dark
-                                        ? AppColors.lightPrimary
-                                        : AppColors.darkPrimary,
+                                    color:
+                                        themeManager.isDarkMode == ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -838,10 +839,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "Upstox",
                                   style: TextStyle(
-                                    color: themeManager.themeMode ==
-                                            ThemeMode.dark
-                                        ? AppColors.lightPrimary
-                                        : AppColors.darkPrimary,
+                                    color:
+                                        themeManager.isDarkMode == ThemeMode.dark
+                                            ? AppColors.lightPrimary
+                                            : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -870,7 +871,7 @@ class _ManageBrokerState extends State<ManageBroker> {
                           child: Text(
                             'Add Broker',
                             style: TextStyle(
-                              color: themeManager.themeMode == ThemeMode.dark
+                              color: themeManager.isDarkMode == ThemeMode.dark
                                   ? AppColors.darkPrimary
                                   : AppColors.lightPrimary,
                             ), // Text color
@@ -891,139 +892,178 @@ class _ManageBrokerState extends State<ManageBroker> {
                             Padding(
                               padding: EdgeInsets.only(bottom: 0),
                             ),
-                            SingleChildScrollView(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: matchedClients.length ?? 0,
-                                itemBuilder: (context, index) {
-                                  bool isSelected = selectedIndex == index;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedIndex =
-                                            isSelected ? null : index;
-                                      });
-                                    },
+                            isLoggedIn
+                                ? Container(
+                                    // margin: const EdgeInsets.only(
+                                    //     bottom: 10),
+                                    height: 37,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.2,
                                     child: Container(
-                                      margin: EdgeInsets.symmetric(vertical: 5),
-                                      padding: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? (themeManager.themeMode ==
-                                                      ThemeMode.dark
-                                                  ? AppColors.lightPrimary
-                                                  : AppColors.darkPrimary)
-                                              : Colors.grey,
-                                          width: 2,
+                                      height: 37,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.2,
+                                      child: Center(
+                                        child: LoadingAnimationWidget.waveDots(
+                                          color: themeManager.isDarkMode ==
+                                                  ThemeMode.dark
+                                              ? AppColors.lightPrimary
+                                              : AppColors.darkPrimary,
+                                          size: 30,
                                         ),
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              // Text(
-                                              //   "Accounts",
-                                              //   style: TextStyle(
-                                              //     fontSize: 16,
-                                              //     fontWeight: FontWeight.bold,
-                                              //     color: themeManager
-                                              //                 .themeMode ==
-                                              //             ThemeMode.dark
-                                              //         ? AppColors
-                                              //             .lightPrimary // Dark mode
-                                              //         : AppColors
-                                              //             .darkPrimary, // Light mode
-                                              //   ),
-                                              // ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 0.0),
-                                                child: Text(
-                                                  "Account Name: ${matchedClients[index]['account_alice']}",
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: themeManager
-                                                                .themeMode ==
+                                    ),
+                                  )
+                                : SingleChildScrollView(
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: matchedClients.length ?? 0,
+                                      itemBuilder: (context, index) {
+                                        bool isSelected =
+                                            selectedIndex == index;
+                                        return GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              selectedIndex =
+                                                  isSelected ? null : index;
+                                            });
+                                          },
+                                          child: Container(
+                                            margin: EdgeInsets.symmetric(
+                                                vertical: 5),
+                                            padding: EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? (themeManager.isDarkMode ==
                                                             ThemeMode.dark
-                                                        ? AppColors
-                                                            .lightPrimary // Dark mode
-                                                        : AppColors
-                                                            .darkPrimary, // Light mode
-                                                  ),
-                                                ),
+                                                        ? AppColors.lightPrimary
+                                                        : AppColors.darkPrimary)
+                                                    : Colors.grey,
+                                                width: 2,
                                               ),
-                                              Spacer(),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 8.0),
-                                                child: Icon(
-                                                  isSelected
-                                                      ? Icons.arrow_drop_up
-                                                      : Icons.arrow_drop_down,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          // Dropdown list inside the same yellow border
-                                          AnimatedSize(
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            child: isSelected
-                                                ? Column(
-                                                    children: [
-                                                      Divider(
-                                                          color: Colors
-                                                              .grey), // Separator line
-                                                      _buildRow("Broker Name",
-                                                          '${matchedClients[index]['broker_name']}'),
-                                                      _buildRow("Account Alice",
-                                                          '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
-                                                      _buildRow("Name",
-                                                          '${matchedClients[index]['name'].length > 10 ? matchedClients[index]['name'].substring(0, 10) + '..' : matchedClients[index]['name']}'),
-                                                      _buildRow("Client ID",
-                                                          '${matchedClients[index]['clientid']}'),
-                                                      _buildRow("Date",
-                                                          '${matchedClients[index]['date']}'),
-                                                      SizedBox(height: 10),
-                                                      Container(
-                                                        width: double.infinity,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors.red,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                        ),
-                                                        child: IconButton(
-                                                          icon: Icon(
-                                                              Icons.delete,
-                                                              color:
-                                                                  Colors.white),
-                                                          onPressed: () {
-                                                            deleteBroker(
-                                                                index,
-                                                                matchedClients[
-                                                                        index][
-                                                                    'clientid']);
-                                                          },
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    // Text(
+                                                    //   "Accounts",
+                                                    //   style: TextStyle(
+                                                    //     fontSize: 16,
+                                                    //     fontWeight: FontWeight.bold,
+                                                    //     color: themeManager
+                                                    //                 .isDarkMode ==
+                                                    //             ThemeMode.dark
+                                                    //         ? AppColors
+                                                    //             .lightPrimary // Dark mode
+                                                    //         : AppColors
+                                                    //             .darkPrimary, // Light mode
+                                                    //   ),
+                                                    // ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 0.0),
+                                                      child: Text(
+                                                        "Account Name: ${matchedClients[index]['account_alice']}",
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: themeManager
+                                                                      .isDarkMode ==
+                                                                  ThemeMode.dark
+                                                              ? AppColors
+                                                                  .lightPrimary // Dark mode
+                                                              : AppColors
+                                                                  .darkPrimary, // Light mode
                                                         ),
                                                       ),
-                                                    ],
-                                                  )
-                                                : SizedBox.shrink(),
+                                                    ),
+                                                    Spacer(),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 8.0),
+                                                      child: Icon(
+                                                        isSelected
+                                                            ? Icons
+                                                                .arrow_drop_up
+                                                            : Icons
+                                                                .arrow_drop_down,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                // Dropdown list inside the same yellow border
+                                                AnimatedSize(
+                                                  duration: Duration(
+                                                      milliseconds: 300),
+                                                  child: isSelected
+                                                      ? Column(
+                                                          children: [
+                                                            Divider(
+                                                                color: Colors
+                                                                    .grey), // Separator line
+                                                            _buildRow(
+                                                                "Broker Name",
+                                                                '${matchedClients[index]['broker_name']}'),
+                                                            _buildRow(
+                                                                "Account Alice",
+                                                                '${matchedClients[index]['account_alice'].length > 10 ? matchedClients[index]['account_alice'].substring(0, 10) + '..' : matchedClients[index]['account_alice']}'),
+                                                            _buildRow("Name",
+                                                                '${matchedClients[index]['name'].length > 10 ? matchedClients[index]['name'].substring(0, 10) + '..' : matchedClients[index]['name']}'),
+                                                            _buildRow(
+                                                                "Client ID",
+                                                                '${matchedClients[index]['clientid']}'),
+                                                            _buildRow("Date",
+                                                                '${matchedClients[index]['date']}'),
+                                                            SizedBox(
+                                                                height: 10),
+                                                            Container(
+                                                              width: double
+                                                                  .infinity,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color:
+                                                                    Colors.red,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                              child: IconButton(
+                                                                icon: Icon(
+                                                                    Icons
+                                                                        .delete,
+                                                                    color: Colors
+                                                                        .white),
+                                                                onPressed: () {
+                                                                  deleteBroker(
+                                                                      index,
+                                                                      matchedClients[
+                                                                              index]
+                                                                          [
+                                                                          'clientid']);
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      : SizedBox.shrink(),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ],
-                                      ),
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
+                                  ),
                           ],
                         ),
                       )
@@ -1051,7 +1091,7 @@ class _ManageBrokerState extends State<ManageBroker> {
               style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 17,
-                  color: themeManager.themeMode == ThemeMode.dark
+                  color: themeManager.isDarkMode == ThemeMode.dark
                       ? AppColors.lightPrimary
                       : AppColors.darkPrimary),
             ),
@@ -1063,7 +1103,7 @@ class _ManageBrokerState extends State<ManageBroker> {
               style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 17,
-                  color: themeManager.themeMode == ThemeMode.dark
+                  color: themeManager.isDarkMode == ThemeMode.dark
                       ? AppColors.lightPrimary
                       : AppColors.darkPrimary),
             ),

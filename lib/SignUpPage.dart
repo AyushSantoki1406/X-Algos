@@ -12,6 +12,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
+import 'package:toastification/toastification.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 String getOperatingSystem() {
   if (kIsWeb) {
@@ -150,6 +152,36 @@ class _SignUpState extends State<SignUp> {
   }
 
   Future<void> fetchStep1Data(String route, Map<String, dynamic> body) async {
+    toastification.show(
+      context: context,
+      title: Text(
+        'Success!',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ).animate().fade(duration: 500.ms).slideY(begin: -0.5, end: 0),
+      description: Text(
+        'Your action was successful.',
+        style: TextStyle(fontSize: 12, color: Colors.black54),
+      ).animate().fade(duration: 700.ms),
+      icon: Icon(Icons.check_circle, color: Colors.green, size: 20),
+      autoCloseDuration: Duration(milliseconds: 2500),
+      backgroundColor: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 6),
+      margin: EdgeInsets.symmetric(horizontal: 20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black12,
+          blurRadius: 6,
+          offset: Offset(2, 2),
+        ),
+      ],
+      showProgressBar: false,
+      alignment: Alignment.topCenter,
+    );
     setState(() {
       isLoading = true;
     });
@@ -279,6 +311,11 @@ class _SignUpState extends State<SignUp> {
         setState(() {
           currentIndex++;
         });
+        toastification.show(
+          context: context,
+          title: Text('Hello, world!'),
+          autoCloseDuration: Duration(seconds: 5),
+        );
       }
     });
   }

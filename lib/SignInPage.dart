@@ -17,6 +17,7 @@ import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart'; // For kIsWeb
+import 'package:toastification/toastification.dart';
 
 void main() {
   runApp(const SignInPage());
@@ -190,6 +191,20 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
 
         // If canSendOtp is true, proceed to Step 2
         if (responseData['canSendOtp'] == true) {
+          toastification.show(
+            context: context,
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+                SizedBox(width: 10),
+                Text('Wow so easy!', style: TextStyle(color: Colors.black)),
+              ],
+            ),
+            autoCloseDuration: Duration(milliseconds: 3000),
+            backgroundColor: Colors.white, // Light theme color
+            closeOnClick: false,
+            pauseOnHover: true,
+          );
           setState(() {
             fetchStep2Data("${Secret.backendUrl}/signin-step-2");
             currentIndex++; // Move to the next step

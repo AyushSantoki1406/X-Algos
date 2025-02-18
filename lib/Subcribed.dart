@@ -86,7 +86,7 @@ class _SubcribedState extends State<Subcribed> {
         child: Scaffold(
             key: _scaffoldKey, // Assign the key to Scaffold
             endDrawer: Drawer(),
-            backgroundColor: themeManager.themeMode == ThemeMode.dark
+            backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                 ? AppColors.darkPrimary
                 : AppColors.lightPrimary,
             body: PopScope(
@@ -96,7 +96,7 @@ class _SubcribedState extends State<Subcribed> {
                 headerSliverBuilder: (context, innerBoxIsScrolled) => [
                   SliverAppBar(
                     pinned: true,
-                    backgroundColor: themeManager.themeMode == ThemeMode.dark
+                    backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                         ? AppColors.darkPrimary
                         : AppColors.lightPrimary,
                     elevation: 0,
@@ -107,7 +107,7 @@ class _SubcribedState extends State<Subcribed> {
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: themeManager.themeMode == ThemeMode.dark
+                          color: themeManager.isDarkMode == ThemeMode.dark
                               ? AppColors.lightPrimary
                               : AppColors.darkPrimary),
                     ),
@@ -115,7 +115,7 @@ class _SubcribedState extends State<Subcribed> {
                       padding: const EdgeInsets.only(left: 8.0, right: 8),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(50),
-                        child: themeManager.themeMode == ThemeMode.dark
+                        child: themeManager.isDarkMode == ThemeMode.dark
                             ? Image.asset(
                                 'assets/images/darklogo.png',
                                 fit: BoxFit.cover,
@@ -131,7 +131,7 @@ class _SubcribedState extends State<Subcribed> {
                         // Ensure correct context
                         builder: (context) => IconButton(
                           icon: Icon(Icons.menu,
-                              color: themeManager.themeMode == ThemeMode.dark
+                              color: themeManager.isDarkMode == ThemeMode.dark
                                   ? AppColors.lightPrimary
                                   : AppColors.darkPrimary),
                           onPressed: () {

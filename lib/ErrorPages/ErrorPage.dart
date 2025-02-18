@@ -11,14 +11,14 @@ class Errorpage extends StatelessWidget {
     final themeManager = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: Container(
-        color: themeManager.themeMode == ThemeMode.dark
+        color: themeManager.isDarkMode == ThemeMode.dark
             ? AppColors.darkPrimary
             : AppColors.lightPrimary,
         child: Center(
           child: Text(
             'An error occurred, please try again.',
             style: TextStyle(
-              color: themeManager.themeMode == ThemeMode.dark
+              color: themeManager.isDarkMode == ThemeMode.dark
                   ? AppColors.bd_black
                   : AppColors.lightBackground,
               fontSize: 18,

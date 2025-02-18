@@ -81,7 +81,6 @@ class _DashboardAngel extends State<DashboardAngel>
       setState(() {
         userSchema = jsonDecode(userSchemaStr);
       });
-      print(userSchema?['DeployedData']);
 
       List<String> ids2 =
           (userSchema?['DeployedData'] as List? ?? []).where((data) {
@@ -134,9 +133,6 @@ class _DashboardAngel extends State<DashboardAngel>
           orElse: () => null,
         );
 
-        print(
-            "Deployed Info: $deployedInfo"); // Debug print to check deployedInfo
-
         return {
           ...strategy,
           'AppliedDate':
@@ -152,7 +148,6 @@ class _DashboardAngel extends State<DashboardAngel>
       );
 
       final data3 = jsonDecode(response3.body);
-      print("Response data: $data3"); // Debug print to check the response data
 
       if (data3 is Map<String, dynamic> && data3.containsKey('allSheetData')) {
         final allSheetData = data3['allSheetData'] as List<dynamic>;
@@ -160,9 +155,6 @@ class _DashboardAngel extends State<DashboardAngel>
         setState(() {
           this.allSheetData = allSheetData;
         });
-
-        print(
-            "All Sheet Data: $allSheetData"); // Debug print to check allSheetData
       }
 
       if (allSheetData.length > 0) {
@@ -184,16 +176,11 @@ class _DashboardAngel extends State<DashboardAngel>
                 double? pnl = double.tryParse(trade[10].toString());
                 double? investment = double.tryParse(trade[5].toString());
 
-                print(
-                    "Trade Date: $date, PnL: $pnl, Investment: $investment"); // Debug print for trade details
-
                 if (date != null && pnl != null) {
                   DateTime? tradeDate;
                   try {
                     tradeDate = DateTime.parse(date);
                   } catch (e) {
-                    print(
-                        "Invalid date format: $date"); // Print error if the date is invalid
                     continue;
                   }
 
@@ -236,19 +223,11 @@ class _DashboardAngel extends State<DashboardAngel>
             }
           }
 
-          print(
-              "Monthly Metrics: $monthlyMetrics"); // Debug print for monthly metrics
-          print(
-              "Total Trades: $totalTrades, Successful Trades: $successfulTrades"); // Debug print for totals
-
           double tradeAccuracy =
               totalTrades > 0 ? (successfulTrades / totalTrades) * 100 : 0;
 
           double roi =
               totalInvestment > 0 ? (totalProfit / totalInvestment) * 100 : 0;
-
-          print(
-              "Trade Accuracy: $tradeAccuracy, ROI: $roi"); // Debug print for accuracy and ROI
 
           Map<String, double> monthlyAccuracy = {};
           Map<String, double> monthlyRoi = {};
@@ -288,7 +267,7 @@ class _DashboardAngel extends State<DashboardAngel>
         // Loop through the updatedSheetData and populate strategyMap
         for (var item in updatedSheetData) {
           dynamic userId = item['UserId']; // UserId
-          String strategyName = item['strategyName']; // strategyName
+          String strategyName = item['strategyName'];
 
           if (!strategyMap.containsKey(userId)) {
             // If the userId doesn't exist in the map, initialize it with an empty Set
@@ -312,7 +291,6 @@ class _DashboardAngel extends State<DashboardAngel>
         });
 
         // Print the final strategyMapWithArrays to debug
-        print("Strategy Map with Arrays: $strategyMapWithArrays");
 
         if (mounted) {
           setState(() {
@@ -359,17 +337,13 @@ class _DashboardAngel extends State<DashboardAngel>
 
         var lastValue = lastObject != null ? lastObject[10] : null;
 
-        print("poi $lastValue");
-
         final themeManager = Provider.of<ThemeProvider>(context);
-
-        print("userdata ${userSchema!['AccountAliases']['']}");
 
         return Container(
           // padding: EdgeInsets.only(left: 8, right: 8, top: 0),
           margin: EdgeInsets.only(bottom: 10, top: 0),
           child: Card(
-            color: themeManager.themeMode == ThemeMode.dark
+            color: themeManager.isDarkMode == ThemeMode.dark
                 ? AppColors.darkBackground
                 : AppColors.lightBackground,
             shape: RoundedRectangleBorder(
@@ -445,7 +419,7 @@ class _DashboardAngel extends State<DashboardAngel>
                       margin:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Card(
-                        color: themeManager.themeMode == ThemeMode.dark
+                        color: themeManager.isDarkMode == ThemeMode.dark
                             ? AppColors.darkBackground
                             : AppColors.lightBackground,
                         elevation: 3,
@@ -523,6 +497,7 @@ class _DashboardAngel extends State<DashboardAngel>
                                 indent: 0, // Space before the line starts
                                 endIndent: 0, // Space after the line ends
                               ),
+                              
                               _statItem(
                                   Text("Monthly gain",
                                       style: TextStyle(
@@ -574,7 +549,7 @@ class _DashboardAngel extends State<DashboardAngel>
                                                 child: LoadingAnimationWidget
                                                     .waveDots(
                                                   color: themeManager
-                                                              .themeMode ==
+                                                              .isDarkMode ==
                                                           ThemeMode.dark
                                                       ? AppColors.lightPrimary
                                                       : AppColors.darkPrimary,
@@ -593,7 +568,7 @@ class _DashboardAngel extends State<DashboardAngel>
                                                     true)
                                                   Card(
                                                     color: themeManager
-                                                                .themeMode ==
+                                                                .isDarkMode ==
                                                             ThemeMode.dark
                                                         ? AppColors
                                                             .darkBackground
@@ -618,7 +593,7 @@ class _DashboardAngel extends State<DashboardAngel>
                                                       child: DropdownButton<
                                                           String>(
                                                         dropdownColor: themeManager
-                                                                    .themeMode ==
+                                                                    .isDarkMode ==
                                                                 ThemeMode.dark
                                                             ? AppColors.bd_black
                                                             : AppColors
@@ -666,7 +641,7 @@ class _DashboardAngel extends State<DashboardAngel>
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .w500,
-                                                                    color: themeManager.themeMode ==
+                                                                    color: themeManager.isDarkMode ==
                                                                             ThemeMode
                                                                                 .dark
                                                                         ? Color.fromARGB(
@@ -737,7 +712,6 @@ class _DashboardAngel extends State<DashboardAngel>
   Widget _buildAccountItem(String label, String value) {
     final themeManager = Provider.of<ThemeProvider>(context);
 
-    print("📝 $label: $value"); // Logging each item with emoji
     return Padding(
       padding: EdgeInsets.only(top: 5, left: 20, right: 20),
       child: Row(
@@ -752,7 +726,7 @@ class _DashboardAngel extends State<DashboardAngel>
           Text(value,
               style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: themeManager.themeMode == ThemeMode.dark
+                  color: themeManager.isDarkMode == ThemeMode.dark
                       ? AppColors.lightPrimary
                       : AppColors.darkPrimary,
                   fontSize: 16)),
@@ -784,12 +758,12 @@ class _DashboardAngel extends State<DashboardAngel>
     );
   }
 
-  @override
-  void dispose() {
-    _controller
-        .dispose(); // Dispose of the controller before calling super.dispose()
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _controller
+  //       .dispose(); // Dispose of the controller before calling super.dispose()
+  //   super.dispose();
+  // }
 }
 
 class SkeletonCard extends StatelessWidget {

@@ -43,9 +43,17 @@ class MyAccountPage extends StatefulWidget {
 }
 
 class _MyAccountPageState extends State<MyAccountPage> {
-  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+        child: Scaffold(
+      body: DrawerItem(),
+    ));
+  }
+}
 
-  //function to get gmail
+class DrawerItem extends StatelessWidget {
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   Future<String?> getEmail() async {
     try {
@@ -115,7 +123,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
         },
         child: Scaffold(
             key: _scaffoldKey, // Assign the key to Scaffold
-            backgroundColor: themeManager.themeMode == ThemeMode.dark
+            backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                 ? AppColors.darkPrimary
                 : AppColors.lightPrimary,
             body: PopScope(
@@ -129,7 +137,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                       automaticallyImplyLeading:
                           false, // Prevents auto-adding the menu icon
                       pinned: true,
-                      backgroundColor: themeManager.themeMode == ThemeMode.dark
+                      backgroundColor: themeManager.isDarkMode == ThemeMode.dark
                           ? AppColors.darkPrimary
                           : AppColors.lightPrimary,
                       elevation: 0,
@@ -140,13 +148,13 @@ class _MyAccountPageState extends State<MyAccountPage> {
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: themeManager.themeMode == ThemeMode.dark
+                            color: themeManager.isDarkMode == ThemeMode.dark
                                 ? AppColors.lightPrimary
                                 : AppColors.darkPrimary),
                       ),
                       leading: IconButton(
                         icon: Icon(Icons.arrow_back,
-                            color: themeManager.themeMode == ThemeMode.dark
+                            color: themeManager.isDarkMode == ThemeMode.dark
                                 ? AppColors.lightPrimary
                                 : AppColors.darkPrimary),
                         onPressed: () {
@@ -197,6 +205,24 @@ class _MyAccountPageState extends State<MyAccountPage> {
                               return ListView(
                                 children: [
                                   Padding(
+                                    padding: const EdgeInsets.only(right: 15),
+                                    child: Switch(
+                                      value: themeManager.isDarkMode ==
+                                          ThemeMode
+                                              .dark, // Check current theme mode
+                                      onChanged: (bool value) {
+                                        // Toggle the theme when the switch is changed
+                                        themeManager.toggleTheme();
+                                      },
+                                      activeColor: AppColors
+                                          .lightPrimary, // Color for active switch (light mode)
+                                      inactiveTrackColor: Colors.grey[
+                                          800], // Color for inactive track (dark mode)
+                                      activeTrackColor: AppColors
+                                          .yellow, // Color for active track (light mode)
+                                    ),
+                                  ),
+                                  Padding(
                                     padding: const EdgeInsets.only(
                                         left: 16.0,
                                         bottom: 8,
@@ -205,7 +231,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                       "Email :$email",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary,
@@ -220,7 +246,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                     child: Text(
                                       "UserID: $algoID",
                                       style: TextStyle(
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary,
@@ -241,7 +267,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                   }),
                                   ExpansionTile(
                                     leading: Icon(Icons.analytics,
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary),
@@ -249,7 +275,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                       "Orders",
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors
                                                 .lightPrimary // Text color for dark mode
@@ -285,7 +311,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                   ),
                                   ExpansionTile(
                                     leading: Icon(Icons.analytics,
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary),
@@ -293,7 +319,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                       "Strategies",
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: themeManager.themeMode ==
+                                        color: themeManager.isDarkMode ==
                                                 ThemeMode.dark
                                             ? AppColors
                                                 .lightPrimary // Text color for dark mode
@@ -370,7 +396,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                             Row(
                                               children: [
                                                 Icon(
-                                                  themeManager.themeMode ==
+                                                  themeManager.isDarkMode ==
                                                           ThemeMode.dark
                                                       ? Icons.dark_mode
                                                       : Icons.light_mode,
@@ -384,7 +410,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                                     style: TextStyle(
                                                       fontSize: 16,
                                                       color: themeManager
-                                                                  .themeMode ==
+                                                                  .isDarkMode ==
                                                               ThemeMode.dark
                                                           ? Colors
                                                               .white // Text color for dark mode
@@ -395,25 +421,6 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                                 )
                                               ],
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 15),
-                                              child: Switch(
-                                                value: themeManager.themeMode ==
-                                                    ThemeMode
-                                                        .dark, // Check current theme mode
-                                                onChanged: (bool value) {
-                                                  // Toggle the theme when the switch is changed
-                                                  themeManager.toggleTheme();
-                                                },
-                                                activeColor: AppColors
-                                                    .lightPrimary, // Color for active switch (light mode)
-                                                inactiveTrackColor: Colors.grey[
-                                                    800], // Color for inactive track (dark mode)
-                                                activeTrackColor: AppColors
-                                                    .yellow, // Color for active track (light mode)
-                                              ),
-                                            )
                                           ],
                                         ),
                                       ],
@@ -426,7 +433,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                       child: Text(
                                         'Logout',
                                         style: TextStyle(
-                                            color: themeManager.themeMode ==
+                                            color: themeManager.isDarkMode ==
                                                     ThemeMode.dark
                                                 ? Colors.white
                                                 : AppColors.lightPrimary),
@@ -460,44 +467,50 @@ class _MyAccountPageState extends State<MyAccountPage> {
   }
 
   Widget _buildListTile(IconData icon, String title, {VoidCallback? onTap}) {
-    final themeManager = Provider.of<ThemeProvider>(context);
-
-    return ListTile(
-      leading: Icon(icon,
-          color: themeManager.themeMode == ThemeMode.dark
-              ? AppColors.lightPrimary
-              : AppColors.darkPrimary),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          color: themeManager.themeMode == ThemeMode.dark
-              ? AppColors.lightPrimary // Text color for dark mode
-              : AppColors.darkPrimary, // Text color for light mode
-        ),
-      ),
-      onTap: onTap,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeManager, child) {
+        return ListTile(
+          leading: Icon(
+            icon,
+            color: themeManager.isDarkMode == ThemeMode.dark
+                ? AppColors.lightPrimary
+                : AppColors.darkPrimary,
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              color: themeManager.isDarkMode == ThemeMode.dark
+                  ? AppColors.lightPrimary
+                  : AppColors.darkPrimary,
+            ),
+          ),
+          onTap: onTap,
+        );
+      },
     );
   }
 
   Widget _buildSubListTile(String title, {VoidCallback? onTap}) {
-    final themeManager = Provider.of<ThemeProvider>(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 55),
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            color: themeManager.themeMode == ThemeMode.dark
-                ? AppColors.lightPrimary
-                : AppColors.darkPrimary,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeManager, child) {
+        return Padding(
+          padding: const EdgeInsets.only(left: 55),
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                color: themeManager.isDarkMode == ThemeMode.dark
+                    ? AppColors.lightPrimary
+                    : AppColors.darkPrimary,
+              ),
+            ),
+            onTap: onTap,
           ),
-        ),
-        onTap: onTap,
-      ),
+        );
+      },
     );
   }
 }

@@ -379,7 +379,7 @@ class _ManageBrokerState extends State<ManageBroker> {
 
   // Method to conditionally show different forms
   Widget buildBrokerForm() {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     switch (selectBroker) {
       case '1': // AngelOne
@@ -702,14 +702,14 @@ class _ManageBrokerState extends State<ManageBroker> {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     String? selectedValue;
     String? selectedAccount;
 
     return Scaffold(
       key: _scaffoldKey, // Assign the key to Scaffold
-      endDrawer: AppDrawer(),
+      // endDrawer: AppDrawer(),
       body: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {},
@@ -814,10 +814,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "AngelOne",
                                   style: TextStyle(
-                                    color:
-                                        themeManager.themeMode == ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary,
+                                    color: themeManager.themeMode ==
+                                            ThemeMode.dark
+                                        ? AppColors.lightPrimary
+                                        : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -826,10 +826,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "Delta",
                                   style: TextStyle(
-                                    color:
-                                        themeManager.themeMode == ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary,
+                                    color: themeManager.themeMode ==
+                                            ThemeMode.dark
+                                        ? AppColors.lightPrimary
+                                        : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -838,10 +838,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "Upstox",
                                   style: TextStyle(
-                                    color:
-                                        themeManager.themeMode == ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary,
+                                    color: themeManager.themeMode ==
+                                            ThemeMode.dark
+                                        ? AppColors.lightPrimary
+                                        : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -1039,7 +1039,7 @@ class _ManageBrokerState extends State<ManageBroker> {
   }
 
   Widget _buildRow(String title, String value) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     return Column(
       children: [

@@ -66,7 +66,7 @@ class _SubcribedState extends State<Subcribed> {
       if (response.statusCode == 200) {
         String newUserSchemaJson = response.body;
         await secureStorage.write(key: 'backendData', value: newUserSchemaJson);
-        print(newUserSchemaJson); 
+        print(newUserSchemaJson);
       } else {
         print(
             'Failed to update user data. Status code: ${response.statusCode}');
@@ -78,14 +78,14 @@ class _SubcribedState extends State<Subcribed> {
 
   @override
   Widget build(BuildContext context) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {},
         child: Scaffold(
             key: _scaffoldKey, // Assign the key to Scaffold
-            endDrawer: AppDrawer(),
+            endDrawer: Drawer(),
             backgroundColor: themeManager.themeMode == ThemeMode.dark
                 ? AppColors.darkPrimary
                 : AppColors.lightPrimary,

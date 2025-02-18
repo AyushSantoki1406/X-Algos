@@ -240,7 +240,7 @@ class _MarketPlaceState extends State<MarketPlace> {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
         key: _scaffoldKey,
@@ -313,7 +313,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                       final strategy = strategyData[index];
                       bool isSubscribed =
                           subscribedStrategies.contains(strategy['_id']);
-                      return Container( 
+                      return Container(
                         margin: EdgeInsets.all(0),
                         color: themeManager.themeMode == ThemeMode.dark
                             ? AppColors.darkPrimary
@@ -410,7 +410,8 @@ class _MarketPlaceState extends State<MarketPlace> {
                                             style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
-                                                color: themeManager.themeMode ==
+                                                color: themeManager
+                                                            .themeMode ==
                                                         ThemeMode.dark
                                                     ? AppColors.lightPrimary
                                                     : AppColors.darkPrimary),
@@ -420,7 +421,8 @@ class _MarketPlaceState extends State<MarketPlace> {
                                             style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
-                                                color: themeManager.themeMode ==
+                                                color: themeManager
+                                                            .themeMode ==
                                                         ThemeMode.dark
                                                     ? AppColors.lightPrimary
                                                     : AppColors.darkPrimary),

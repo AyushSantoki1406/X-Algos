@@ -184,7 +184,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
           .where((sheet) => sheet['UserId'] == widget.clientId)
           .map((filteredSheet) {
         final pnlByDate = generatePnlMap(filteredSheet['sheetData']);
-        final themeManager = Provider.of<ThemeManager>(context);
+        final themeManager = Provider.of<ThemeProvider>(context);
 
         var allUserIds =
             widget.updatedAllSheetData.map((sheet) => sheet['UserId']).toList();
@@ -482,8 +482,6 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                     ? [entry.value as double]
                                     : []; // Default to empty list
 
-                            print("alllistis $pnlList");
-
                             allProfits.addAll(pnlList);
                           }
 
@@ -494,10 +492,6 @@ class _MultiCalendarState extends State<MultiCalendar> {
 
                           double maxLoss =
                               allProfits.reduce((a, b) => a < b ? a : b);
-
-                          print("allprofit $allProfits");
-
-                          print("Maximum Profit: $maxLoss");
 
                           // List<double> lossLevels = [
                           //   -maxProfit * 0.2,
@@ -513,40 +507,57 @@ class _MultiCalendarState extends State<MultiCalendar> {
 
                               if (percentage <= 20) {
                                 return Color.fromRGBO(
-                                    160, 235, 160, 1); // Soft Mint Green
+                                    151, 224, 151, 1); // Soft Mint Green
                               } else if (percentage <= 40) {
                                 return Color.fromRGBO(
-                                    80, 200, 120, 1); // Fresh Grass Green
+                                    121, 221, 121, 1); // Fresh Grass Green
                               } else if (percentage <= 60) {
                                 return Color.fromRGBO(
-                                    50, 180, 90, 1); // Rich Forest Green
+                                    114, 209, 114, 1); // Rich Forest Green
                               } else if (percentage <= 80) {
                                 return Color.fromRGBO(
-                                    20, 150, 70, 1); // Deep Emerald Green
+                                    93, 208, 93, 1); // Deep Emerald Green
                               } else {
                                 return Color.fromRGBO(
-                                    56, 205, 56, 1); // Intense Pine Green
-                              }
-                            } else if (pnl < 0) {
-                              double percentage = (pnl / maxLoss) * 100;
-                              print("ayushji $percentage");
-                              if (percentage >= 20) {
-                                return Color.fromRGBO(254, 141, 141, 1);
-                              } else if (percentage >= 40) {
-                                return Color.fromRGBO(
-                                    255, 126, 114, 1); // Medium Red
-                              } else if (percentage >= 60) {
-                                return Color.fromRGBO(
-                                    255, 105, 105, 1); // Dark Red
-                              } else if (percentage >= 80) {
-                                return Color.fromRGBO(
-                                    255, 55, 55, 1); // Darker Red
-                              } else {
-                                return Color.fromRGBO(
-                                    255, 60, 60, 1); // Deepest Red
+                                    49, 198, 49, 1); // Intense Pine Green
                               }
                             }
-
+                            // else if (pnl < 0) {
+                            //   double percentage = (pnl / maxLoss) * 100;
+                            //   if (percentage <= 20) {
+                            //     return Color.fromRGBO(249, 109, 109, 0.6);
+                            //   } else if (percentage <= 40) {
+                            //     return Color.fromRGBO(
+                            //         249, 109, 109, 1); // Medium Red
+                            //   } else if (percentage <= 60) {
+                            //     return Color.fromRGBO(
+                            //         242, 79, 79, 0.9); // Dark Red
+                            //   } else if (percentage <= 80) {
+                            //     return Color.fromRGBO(
+                            //         255, 64, 64, 1); // Darker Red
+                            //   } else {
+                            //     return Color.fromRGBO(
+                            //         250, 0, 0, 1); // Deepest Red
+                            //   }
+                            // }
+                            else if (pnl < 0) {
+                              double percentage = (pnl / maxLoss) * 100;
+                              if (percentage <= 20) {
+                                return Color.fromRGBO(250, 0, 0, 0.6);
+                              } else if (percentage <= 40) {
+                                return Color.fromRGBO(
+                                    250, 0, 0, 0.7); // Medium Red
+                              } else if (percentage <= 60) {
+                                return Color.fromRGBO(
+                                    250, 0, 0, 0.8); // Dark Red
+                              } else if (percentage <= 80) {
+                                return Color.fromRGBO(
+                                    250, 0, 0, 0.9); // Darker Red
+                              } else {
+                                return Color.fromRGBO(
+                                    250, 0, 0, 1); // Deepest Red
+                              }
+                            }
                             // Default background color
                             return Theme.of(context).brightness ==
                                     Brightness.dark

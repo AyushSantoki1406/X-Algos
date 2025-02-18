@@ -21,7 +21,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: AppDrawer(),
     ),
@@ -103,7 +103,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return PopScope(
@@ -374,7 +374,6 @@ class _MyAccountPageState extends State<MyAccountPage> {
                                                           ThemeMode.dark
                                                       ? Icons.dark_mode
                                                       : Icons.light_mode,
-                                                  color: themeManager.textColor,
                                                 ),
                                                 Padding(
                                                   padding:
@@ -461,7 +460,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
   }
 
   Widget _buildListTile(IconData icon, String title, {VoidCallback? onTap}) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     return ListTile(
       leading: Icon(icon,
@@ -482,7 +481,7 @@ class _MyAccountPageState extends State<MyAccountPage> {
   }
 
   Widget _buildSubListTile(String title, {VoidCallback? onTap}) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     return Padding(
       padding: const EdgeInsets.only(left: 55),

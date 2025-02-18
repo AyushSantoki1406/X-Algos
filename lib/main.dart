@@ -13,34 +13,26 @@ import 'package:provider/provider.dart';
 import 'package:xalgo/SignUpPage.dart';
 import 'package:xalgo/HomePage.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeManager(),
+      create: (context) => ThemeProvider(),
       child: MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
-  // Get the current theme mode from ThemeManager
 
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeManager>(
-      builder: (context, themeManager, child) {
-        final themeMode = Provider.of<ThemeManager>(context).themeMode;
-        return MaterialApp(
-          title: 'X Algos',
-          themeMode: themeMode, // Set theme mode dynamically
-          theme: ThemeData.light(), // Light theme
-          darkTheme: ThemeData.dark(), // Dark theme
-          home: const SplashScreen(), // Start with SplashScreen
-          debugShowCheckedModeBanner: false,
-        );
-      },
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      home: SplashScreen(),
     );
   }
 }

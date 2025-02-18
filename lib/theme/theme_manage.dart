@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemeManager extends ChangeNotifier {
+class ThemeProvider with ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
 
-  ThemeManager() {
-    loadTheme();
+  ThemeProvider() {
+    _loadTheme();
   }
 
   ThemeMode get themeMode => _themeMode;
 
-  Future<void> loadTheme() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isDark = prefs.getBool('isDarkMode') ?? false;
-    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
-    notifyListeners(); // Notify widgets to rebuild
-  }
-
-  Future<void> toggleTheme() async {
+  void toggleTheme() {
     _themeMode =
-        _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(
-        'isDarkMode', _themeMode == ThemeMode.dark); // Save the theme mode
-    notifyListeners(); // Update UI without restarting the activity
+        (_themeMode == ThemeMode.light) ? ThemeMode.dark : ThemeMode.light;
+    _saveTheme();
+    notifyListeners();
   }
 
-  Color get textColor =>
-      _themeMode == ThemeMode.dark ? Colors.white : Colors.black;
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    _themeMode = (prefs.getBool('isDarkMode') ?? false)
+        ? ThemeMode.dark
+        : ThemeMode.light;
+    notifyListeners();
+  }
+
+  Future<void> _saveTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isDarkMode', _themeMode == ThemeMode.dark);
+  }
 }

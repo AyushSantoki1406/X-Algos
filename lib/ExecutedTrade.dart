@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:xalgo/secret/secret.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
 import 'package:xalgo/theme/app_colors.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ExecutedTrade extends StatefulWidget {
   const ExecutedTrade({super.key});
@@ -12,9 +17,44 @@ class ExecutedTrade extends StatefulWidget {
 }
 
 class _ExecutedTradeState extends State<ExecutedTrade> {
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  String? email;
+  String? XID;
+  Map<String, dynamic>? userSchema;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+    fetchIDs();
+  }
+
+  void fetchData() async {
+    try {
+      email = await secureStorage.read(key: 'Email').toString();
+      var data = await secureStorage.read(key: 'userSchema');
+      userSchema = jsonDecode(data.toString());
+      print("here is user email ........${userSchema?['Email']}");
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void fetchIDs() async {
+    try {
+      var response = await http.post(
+        Uri.parse('${Secret.backendUrl}/'),
+        body: json.encode({'Email': email}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return WillPopScope(
         onWillPop: () async => false, // Prevents back button navigation

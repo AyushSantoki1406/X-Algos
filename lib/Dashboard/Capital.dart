@@ -225,7 +225,7 @@ class _CapitalState extends State<Capital> {
 
   @override
   Widget build(BuildContext context) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
         future: fetchProfile(),

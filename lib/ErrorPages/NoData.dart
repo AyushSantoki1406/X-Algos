@@ -8,7 +8,7 @@ class Nodata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: Container(
         color: themeManager.themeMode == ThemeMode.dark

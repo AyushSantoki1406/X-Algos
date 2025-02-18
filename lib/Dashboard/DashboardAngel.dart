@@ -8,7 +8,7 @@ import 'package:xalgo/ExtraFunction/MultiCalendar.dart';
 import 'package:xalgo/secret/secret.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'dart:developer';
-
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:xalgo/theme/theme_manage.dart';
 
 class DashboardAngel extends StatefulWidget {
@@ -59,7 +59,7 @@ class _DashboardAngel extends State<DashboardAngel>
     _controller = AnimationController(
       duration: Duration(seconds: 3), // Duration to slow down animation
       vsync: this,
-    )..repeat(reverse: true); // Repeat and reverse the animation
+    )..repeat(reverse: false); // Repeat and reverse the animation
 
     _dotAnimation = IntTween(begin: 0, end: 2).animate(
       CurvedAnimation(
@@ -124,7 +124,6 @@ class _DashboardAngel extends State<DashboardAngel>
 
       final filteredData =
           data.where((item) => ids.contains(item['_id'])).toList();
-
 
       // Cast each item in filteredData to Map<String, dynamic> safely
       List<Map<String, dynamic>> mergedData = filteredData.map((item) {
@@ -362,7 +361,7 @@ class _DashboardAngel extends State<DashboardAngel>
 
         print("poi $lastValue");
 
-        final themeManager = Provider.of<ThemeManager>(context);
+        final themeManager = Provider.of<ThemeProvider>(context);
 
         print("userdata ${userSchema!['AccountAliases']['']}");
 
@@ -565,129 +564,22 @@ class _DashboardAngel extends State<DashboardAngel>
                                                     .size
                                                     .width *
                                                 0.2,
-                                            child: Center(
-                                              // Center the content inside the loading spinner container
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: <Widget>[
-                                                  AnimatedBuilder(
-                                                    animation: _dotAnimation,
-                                                    builder: (context, child) {
-                                                      return Text(
-                                                        '.',
-                                                        style: TextStyle(
-                                                          fontSize: 30,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: _dotAnimation
-                                                                      .value ==
-                                                                  0
-                                                              ? themeManager.themeMode ==
-                                                                      ThemeMode
-                                                                          .dark
-                                                                  ? AppColors
-                                                                      .lightPrimary
-                                                                  : AppColors
-                                                                      .darkPrimary
-                                                              : themeManager
-                                                                          .themeMode ==
-                                                                      ThemeMode
-                                                                          .dark
-                                                                  ? const Color
-                                                                      .fromARGB(
-                                                                      255,
-                                                                      71,
-                                                                      71,
-                                                                      71)
-                                                                  : const Color
-                                                                      .fromARGB(
-                                                                      255,
-                                                                      140,
-                                                                      140,
-                                                                      140), // White when it's 0, else gray
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                  AnimatedBuilder(
-                                                    animation: _dotAnimation,
-                                                    builder: (context, child) {
-                                                      return Text(
-                                                        '.',
-                                                        style: TextStyle(
-                                                          fontSize: 30,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: _dotAnimation
-                                                                      .value ==
-                                                                  1
-                                                              ? themeManager.themeMode ==
-                                                                      ThemeMode
-                                                                          .dark
-                                                                  ? AppColors
-                                                                      .lightPrimary
-                                                                  : AppColors
-                                                                      .darkPrimary
-                                                              : themeManager
-                                                                          .themeMode ==
-                                                                      ThemeMode
-                                                                          .dark
-                                                                  ? const Color
-                                                                      .fromARGB(
-                                                                      255,
-                                                                      71,
-                                                                      71,
-                                                                      71)
-                                                                  : const Color
-                                                                      .fromARGB(
-                                                                      255,
-                                                                      140,
-                                                                      140,
-                                                                      140), // White when it's 1, else gray
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                  AnimatedBuilder(
-                                                    animation: _dotAnimation,
-                                                    builder: (context, child) {
-                                                      return Text(
-                                                        '.',
-                                                        style: TextStyle(
-                                                          fontSize: 30,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: _dotAnimation
-                                                                      .value ==
-                                                                  2
-                                                              ? themeManager.themeMode ==
-                                                                      ThemeMode
-                                                                          .dark
-                                                                  ? AppColors
-                                                                      .lightPrimary
-                                                                  : AppColors
-                                                                      .darkPrimary
-                                                              : themeManager
-                                                                          .themeMode ==
-                                                                      ThemeMode
-                                                                          .dark
-                                                                  ? const Color
-                                                                      .fromARGB(
-                                                                      255,
-                                                                      71,
-                                                                      71,
-                                                                      71)
-                                                                  : const Color
-                                                                      .fromARGB(
-                                                                      255,
-                                                                      140,
-                                                                      140,
-                                                                      140), // White when it's 2, else gray
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
+                                            child: Container(
+                                              height: 37,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.2,
+                                              child: Center(
+                                                child: LoadingAnimationWidget
+                                                    .waveDots(
+                                                  color: themeManager
+                                                              .themeMode ==
+                                                          ThemeMode.dark
+                                                      ? AppColors.lightPrimary
+                                                      : AppColors.darkPrimary,
+                                                  size: 30,
+                                                ),
                                               ),
                                             ),
                                           )
@@ -843,7 +735,7 @@ class _DashboardAngel extends State<DashboardAngel>
   }
 
   Widget _buildAccountItem(String label, String value) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     print("📝 $label: $value"); // Logging each item with emoji
     return Padding(
@@ -870,7 +762,7 @@ class _DashboardAngel extends State<DashboardAngel>
   }
 
   Widget _statItem(Widget title, Widget content) {
-    final themeManager = Provider.of<ThemeManager>(context);
+    final themeManager = Provider.of<ThemeProvider>(context);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,

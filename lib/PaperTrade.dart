@@ -20,7 +20,7 @@ class _PaperTradeState extends State<PaperTrade> {
     return Scaffold(
         key: _scaffoldKey, // Assign the key to Scaffold
         endDrawer: AppDrawer(),
-        backgroundColor: themeManager.isDarkMode == ThemeMode.dark
+        backgroundColor: themeManager.isDarkMode
             ? AppColors.darkPrimary
             : AppColors.lightPrimary,
         body: PopScope(
@@ -30,7 +30,7 @@ class _PaperTradeState extends State<PaperTrade> {
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               SliverAppBar(
                 pinned: true,
-                backgroundColor: themeManager.isDarkMode == ThemeMode.dark
+                backgroundColor: themeManager.isDarkMode
                     ? AppColors.darkPrimary
                     : AppColors.lightPrimary,
                 elevation: 0,
@@ -41,7 +41,7 @@ class _PaperTradeState extends State<PaperTrade> {
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: themeManager.isDarkMode == ThemeMode.dark
+                      color: themeManager.isDarkMode
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary),
                 ),
@@ -49,7 +49,7 @@ class _PaperTradeState extends State<PaperTrade> {
                   padding: const EdgeInsets.only(left: 8.0, right: 8),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                    child: themeManager.isDarkMode == ThemeMode.dark
+                    child: themeManager.isDarkMode
                         ? Image.asset(
                             'assets/images/darklogo.png',
                             fit: BoxFit.cover,
@@ -62,14 +62,21 @@ class _PaperTradeState extends State<PaperTrade> {
                 ),
                 actions: [
                   Builder(
-                    // Ensure correct context
                     builder: (context) => IconButton(
-                      icon: Icon(Icons.menu,
-                          color: themeManager.isDarkMode == ThemeMode.dark
-                              ? AppColors.lightPrimary
-                              : AppColors.darkPrimary),
+                      icon: Icon(
+                        Icons.menu,
+                        color: themeManager.isDarkMode
+                            ? AppColors.lightPrimary
+                            : AppColors.darkPrimary,
+                      ),
                       onPressed: () {
-                        Scaffold.of(context).openEndDrawer();
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyAccountPage(),
+                              settings: RouteSettings(),
+                              fullscreenDialog: false,
+                            ));
                       },
                     ),
                   ),

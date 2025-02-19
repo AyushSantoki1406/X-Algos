@@ -102,14 +102,21 @@ class _ExecutedTradeState extends State<ExecutedTrade> {
                     ),
                     actions: [
                       Builder(
-                        // Ensure correct context
                         builder: (context) => IconButton(
-                          icon: Icon(Icons.menu,
-                              color: themeManager.isDarkMode == ThemeMode.dark
-                                  ? AppColors.lightPrimary
-                                  : AppColors.darkPrimary),
+                          icon: Icon(
+                            Icons.menu,
+                            color: themeManager.isDarkMode
+                                ? AppColors.lightPrimary
+                                : AppColors.darkPrimary,
+                          ),
                           onPressed: () {
-                            Scaffold.of(context).openEndDrawer();
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MyAccountPage(),
+                                  settings: RouteSettings(),
+                                  fullscreenDialog: false,
+                                ));
                           },
                         ),
                       ),

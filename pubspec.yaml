@@ -59,6 +59,8 @@ dependencies:
   flutter_animate: ^4.5.2
   hive_flutter: ^1.1.0
   custom_refresh_indicator: ^4.0.1
+  animated_toggle_switch: ^0.8.4
+  flutter_advanced_switch: ^3.1.0
 
 dev_dependencies:
   flutter_test:

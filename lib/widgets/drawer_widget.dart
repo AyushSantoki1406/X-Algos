@@ -17,6 +17,7 @@ import 'package:xalgo/main.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -103,6 +104,12 @@ class DrawerItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeProvider>(context);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final _controller = ValueNotifier<bool>(false);
+
+    @override
+    void initState() {
+      _controller.value = themeManager.isDarkMode;
+    }
 
     return PopScope(
         canPop: false,
@@ -113,7 +120,7 @@ class DrawerItem extends StatelessWidget {
         },
         child: Scaffold(
             key: _scaffoldKey, // Assign the key to Scaffold
-            backgroundColor: themeManager.isDarkMode == ThemeMode.dark
+            backgroundColor: themeManager.isDarkMode
                 ? AppColors.darkPrimary
                 : AppColors.lightPrimary,
             body: PopScope(
@@ -127,7 +134,7 @@ class DrawerItem extends StatelessWidget {
                       automaticallyImplyLeading:
                           false, // Prevents auto-adding the menu icon
                       pinned: true,
-                      backgroundColor: themeManager.isDarkMode == ThemeMode.dark
+                      backgroundColor: themeManager.isDarkMode
                           ? AppColors.darkPrimary
                           : AppColors.lightPrimary,
                       elevation: 0,
@@ -138,18 +145,24 @@ class DrawerItem extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: themeManager.isDarkMode == ThemeMode.dark
+                            color: themeManager.isDarkMode
                                 ? AppColors.lightPrimary
                                 : AppColors.darkPrimary),
                       ),
                       leading: IconButton(
                         icon: Icon(Icons.arrow_back,
-                            color: themeManager.isDarkMode == ThemeMode.dark
+                            color: themeManager.isDarkMode
                                 ? AppColors.lightPrimary
                                 : AppColors.darkPrimary),
                         onPressed: () {
-                          Navigator.pop(
-                              context); // Goes back to the previous screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Home(),
+                              settings: RouteSettings(),
+                              fullscreenDialog: false,
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -194,16 +207,6 @@ class DrawerItem extends StatelessWidget {
                               String? algoID = backendSnapshot.data;
                               return ListView(
                                 children: [
-                                  Consumer<ThemeProvider>(
-                                    builder: (context, themeManager, child) {
-                                      return Switch(
-                                        value: themeManager.isDarkMode,
-                                        onChanged: (bool value) {
-                                          themeManager.toggleTheme();
-                                        },
-                                      );
-                                    },
-                                  ),
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         left: 16.0,
@@ -213,8 +216,7 @@ class DrawerItem extends StatelessWidget {
                                       "Email :$email",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
+                                        color: themeManager.isDarkMode
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary,
                                       ),
@@ -228,8 +230,7 @@ class DrawerItem extends StatelessWidget {
                                     child: Text(
                                       "UserID: $algoID",
                                       style: TextStyle(
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
+                                        color: themeManager.isDarkMode
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary,
                                       ),
@@ -249,16 +250,14 @@ class DrawerItem extends StatelessWidget {
                                   }),
                                   ExpansionTile(
                                     leading: Icon(Icons.analytics,
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
+                                        color: themeManager.isDarkMode
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary),
                                     title: Text(
                                       "Orders",
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
+                                        color: themeManager.isDarkMode
                                             ? AppColors
                                                 .lightPrimary // Text color for dark mode
                                             : AppColors
@@ -293,16 +292,14 @@ class DrawerItem extends StatelessWidget {
                                   ),
                                   ExpansionTile(
                                     leading: Icon(Icons.analytics,
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
+                                        color: themeManager.isDarkMode
                                             ? AppColors.lightPrimary
                                             : AppColors.darkPrimary),
                                     title: Text(
                                       "Strategies",
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
+                                        color: themeManager.isDarkMode
                                             ? AppColors
                                                 .lightPrimary // Text color for dark mode
                                             : AppColors
@@ -392,8 +389,7 @@ class DrawerItem extends StatelessWidget {
                                                     style: TextStyle(
                                                       fontSize: 16,
                                                       color: themeManager
-                                                                  .isDarkMode ==
-                                                              ThemeMode.dark
+                                                              .isDarkMode
                                                           ? Colors
                                                               .white // Text color for dark mode
                                                           : Colors
@@ -402,6 +398,30 @@ class DrawerItem extends StatelessWidget {
                                                   ),
                                                 )
                                               ],
+                                            ),
+                                            Consumer<ThemeProvider>(
+                                              builder: (context, themeManager,
+                                                  child) {
+                                                return Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    AdvancedSwitch(
+                                                      activeChild: Text('ON'),
+                                                      inactiveChild:
+                                                          Text('OFF'),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5),
+                                                      width: 76,
+                                                      controller: _controller,
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             ),
                                           ],
                                         ),
@@ -415,8 +435,7 @@ class DrawerItem extends StatelessWidget {
                                       child: Text(
                                         'Logout',
                                         style: TextStyle(
-                                            color: themeManager.isDarkMode ==
-                                                    ThemeMode.dark
+                                            color: themeManager.isDarkMode
                                                 ? Colors.white
                                                 : AppColors.lightPrimary),
                                       ),
@@ -454,7 +473,7 @@ class DrawerItem extends StatelessWidget {
         return ListTile(
           leading: Icon(
             icon,
-            color: themeManager.isDarkMode == ThemeMode.dark
+            color: themeManager.isDarkMode
                 ? AppColors.lightPrimary
                 : AppColors.darkPrimary,
           ),
@@ -462,7 +481,7 @@ class DrawerItem extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 16,
-              color: themeManager.isDarkMode == ThemeMode.dark
+              color: themeManager.isDarkMode
                   ? AppColors.lightPrimary
                   : AppColors.darkPrimary,
             ),
@@ -484,7 +503,7 @@ class DrawerItem extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 16,
-                color: themeManager.isDarkMode == ThemeMode.dark
+                color: themeManager.isDarkMode
                     ? AppColors.lightPrimary
                     : AppColors.darkPrimary,
               ),

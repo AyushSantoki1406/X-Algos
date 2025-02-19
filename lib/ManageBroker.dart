@@ -748,16 +748,23 @@ class _ManageBrokerState extends State<ManageBroker> {
                         ),
                 ),
               ),
-              actions: [
+             actions: [
                 Builder(
-                  // Ensure correct context
                   builder: (context) => IconButton(
-                    icon: Icon(Icons.menu,
-                        color: themeManager.isDarkMode == ThemeMode.dark
-                            ? AppColors.lightPrimary
-                            : AppColors.darkPrimary),
+                    icon: Icon(
+                      Icons.menu,
+                      color: themeManager.isDarkMode
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                    ),
                     onPressed: () {
-                      Scaffold.of(context).openEndDrawer();
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyAccountPage(),
+                            settings: RouteSettings(),
+                            fullscreenDialog: false,
+                          ));
                     },
                   ),
                 ),
@@ -815,10 +822,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "AngelOne",
                                   style: TextStyle(
-                                    color:
-                                        themeManager.isDarkMode == ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary,
+                                    color: themeManager.isDarkMode ==
+                                            ThemeMode.dark
+                                        ? AppColors.lightPrimary
+                                        : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -827,10 +834,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "Delta",
                                   style: TextStyle(
-                                    color:
-                                        themeManager.isDarkMode == ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary,
+                                    color: themeManager.isDarkMode ==
+                                            ThemeMode.dark
+                                        ? AppColors.lightPrimary
+                                        : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -839,10 +846,10 @@ class _ManageBrokerState extends State<ManageBroker> {
                                 child: Text(
                                   "Upstox",
                                   style: TextStyle(
-                                    color:
-                                        themeManager.isDarkMode == ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary,
+                                    color: themeManager.isDarkMode ==
+                                            ThemeMode.dark
+                                        ? AppColors.lightPrimary
+                                        : AppColors.darkPrimary,
                                   ),
                                 ),
                               ),
@@ -938,7 +945,8 @@ class _ManageBrokerState extends State<ManageBroker> {
                                                   BorderRadius.circular(8),
                                               border: Border.all(
                                                 color: isSelected
-                                                    ? (themeManager.isDarkMode ==
+                                                    ? (themeManager
+                                                                .isDarkMode ==
                                                             ThemeMode.dark
                                                         ? AppColors.lightPrimary
                                                         : AppColors.darkPrimary)
@@ -1075,6 +1083,8 @@ class _ManageBrokerState extends State<ManageBroker> {
           ),
         ),
       ),
+      drawer: AppDrawer(), // Optional: left drawer
+      endDrawer: AppDrawer(),
     );
   }
 

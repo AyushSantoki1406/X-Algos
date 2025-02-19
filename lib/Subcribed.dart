@@ -127,19 +127,26 @@ class _SubcribedState extends State<Subcribed> {
                       ),
                     ),
                     actions: [
-                      Builder(
-                        // Ensure correct context
-                        builder: (context) => IconButton(
-                          icon: Icon(Icons.menu,
-                              color: themeManager.isDarkMode == ThemeMode.dark
-                                  ? AppColors.lightPrimary
-                                  : AppColors.darkPrimary),
-                          onPressed: () {
-                            Scaffold.of(context).openEndDrawer();
-                          },
+                    Builder(
+                      builder: (context) => IconButton(
+                        icon: Icon(
+                          Icons.menu,
+                          color: themeManager.isDarkMode
+                              ? AppColors.lightPrimary
+                              : AppColors.darkPrimary,
                         ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyAccountPage(),
+                                settings: RouteSettings(),
+                                fullscreenDialog: false,
+                              ));
+                        },
                       ),
-                    ],
+                    ),
+                  ],
                   ),
                 ],
                 body: const SubcribedPage(),

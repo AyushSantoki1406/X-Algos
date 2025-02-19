@@ -99,7 +99,13 @@ class _HomeState extends State<Home> {
                               : AppColors.darkPrimary,
                         ),
                         onPressed: () {
-                          Scaffold.of(context).openEndDrawer();
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyAccountPage(),
+                                settings: RouteSettings(),
+                                fullscreenDialog: false,
+                              ));
                         },
                       ),
                     ),

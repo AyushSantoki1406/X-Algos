@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:shimmer/main.dart';
 import 'package:xalgo/Dashboard/DashboardAngel.dart';
 import 'package:xalgo/ErrorPages/ErrorPage.dart';
 import 'package:xalgo/ErrorPages/NoData.dart';
+import 'package:xalgo/SplashScreen.dart';
 import 'package:xalgo/main.dart';
 import 'package:xalgo/widgets/drawer_widget.dart';
 import 'package:provider/provider.dart';
@@ -19,15 +21,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer';
 import 'package:xalgo/ErrorPages/ErrorPage.dart' as errorPage;
 import 'package:xalgo/ErrorPages/NoData.dart' as noData;
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
+import 'package:xalgo/Indicator/ice_cream_indicator.dart';
+
+final GlobalKey<CapitalState> _capitalKey = GlobalKey<CapitalState>();
 
 class Capital extends StatefulWidget {
   const Capital({super.key});
 
   @override
-  State<Capital> createState() => _CapitalState();
+  CapitalState createState() => CapitalState();
 }
 
-class _CapitalState extends State<Capital> {
+class CapitalState extends State<Capital> {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   double sum = 0;
@@ -110,116 +116,137 @@ class _CapitalState extends State<Capital> {
     }
   }
 
-  //main function
-  void fetchData() async {
-    isLoading = true;
+  Future<void> fetchData() async {
+    if (!mounted) return;
+    if (isLoading) return;
+    setState(() => isLoading = true);
     try {
       String? email = await getEmail();
 
-      ///////////////userinfo stored
-      final profileData = await http.post(
-          Uri.parse('${Secret.backendUrl}/userinfo'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'Email': email}));
-      final data = profileData.body;
-      print("profile data is fetched DASHBOARD(Capital)");
+      final profileResponse = await http.post(
+        Uri.parse('${Secret.backendUrl}/userinfo'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email}),
+      );
 
-      await secureStorage.write(key: 'allClientData', value: data);
-
-      ////////////////////store dbschema
-      final dbschema = await http.post(
-          Uri.parse('${Secret.backendUrl}/dbSchema'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'Email': email}));
-
-      final data2 = dbschema.body;
-      print("dbschema data is fetched DASHBOARD(Capital)");
-
-      await secureStorage.write(key: 'userSchema', value: data2);
-
-      String? userSchemaString = await secureStorage.read(key: 'userSchema');
-
-      if (userSchemaString != null) {
-        Map<String, dynamic> userSchema = jsonDecode(userSchemaString);
-
-        int brokerCount = (userSchema['BrokerCount'] is int)
-            ? userSchema['BrokerCount']
-            : int.tryParse(userSchema['BrokerCount'].toString()) ?? 0;
-        print("finding Broker Count is true or false DASHBOARD(Capital)");
-        if (brokerCount > 0) {
-          await secureStorage.write(key: 'BrokerCount', value: 'true');
-          brokerLogin1 = true;
-        } else {
-          await secureStorage.write(key: 'BrokerCount', value: 'false');
-          brokerLogin1 = false;
-        }
+      if (profileResponse.statusCode == 200) {
+        await secureStorage.write(
+            key: 'allClientData', value: profileResponse.body);
       } else {
-        print('No user schema found');
+        throw Exception("Failed to fetch user info: ${profileResponse.body}");
       }
 
-      String? brokerCountStr = await secureStorage.read(key: 'BrokerCount');
+      // Fetch DB Schema
+      final dbschemaResponse = await http.post(
+        Uri.parse('${Secret.backendUrl}/dbSchema'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email}),
+      );
+
+      if (dbschemaResponse.statusCode == 200) {
+        var decodedData = jsonDecode(dbschemaResponse.body);
+
+        if (decodedData is Map<String, dynamic>) {
+          await secureStorage.write(
+              key: 'userSchema', value: dbschemaResponse.body);
+        } else {
+          throw Exception("Unexpected response format from dbSchema API.");
+        }
+      } else if (dbschemaResponse.statusCode == 403) {
+        throw Exception("Access denied (403) while fetching dbSchema.");
+      } else {
+        throw Exception("Failed to fetch dbSchema: ${dbschemaResponse.body}");
+      }
+
+      // Read stored user schema
+      String? userSchemaString = await secureStorage.read(key: 'userSchema');
+      if (userSchemaString != null) {
+        Map<String, dynamic> userSchema = jsonDecode(userSchemaString);
+        int brokerCount =
+            int.tryParse(userSchema['BrokerCount'].toString()) ?? 0;
+        brokerLogin1 = brokerCount > 0;
+
+        await secureStorage.write(
+            key: 'BrokerCount', value: brokerLogin1.toString());
+      }
 
       if (brokerLogin1) {
-        final response = await http.post(
-          Uri.parse('${Secret.backendUrl}/addbroker'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(
-              {'First': false, "Email": email, "userSchema": userSchemaString}),
-        );
+        try {
+          final brokerResponse = await http.post(
+            Uri.parse('${Secret.backendUrl}/addbroker'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'First': false,
+              "Email": email,
+              "userSchema": userSchemaString
+            }),
+          );
 
-        final a = jsonDecode(response.body);
+          if (brokerResponse.statusCode == 200) {
+            final brokerData = jsonDecode(brokerResponse.body);
+            List<dynamic> brokerList = (brokerData as List)
+                .map((user) => user['userData']['data'])
+                .toList();
 
-        List<dynamic> gg =
-            (a as List).map((user) => user['userData']['data']).toList();
+            double newSum = 0;
+            for (var item in brokerList) {
+              newSum += double.tryParse(item['net']?.toString() ?? '0') ?? 0.0;
+            }
 
-        double newSum = 0;
-
-        for (var item in gg) {
-          newSum += double.tryParse(item['net']?.toString() ?? '0') ?? 0.0;
+            if (mounted) {
+              setState(() {
+                sum = newSum;
+                newCapital = brokerList;
+                isLoading = false;
+              });
+            }
+          } else {
+            throw Exception(
+                "Failed to fetch broker data: ${brokerResponse.body}");
+          }
+        } catch (e) {
+          print("Error in capital to fetch addbroker $e");
+        } finally {
+          setState(() => isLoading = false); // Stop loader after request
         }
-
-        print("gg ${newSum}");
-        setState(() {
-          sum = newSum;
-          newCapital = gg;
-        });
-
-        print("Get sum in if part in DASHBOARD(Capital)${sum}");
-        await secureStorage.write(key: 'userSchema', value: userSchemaString);
-        setState(() {
-          isLoading = false;
-        });
       } else {
+        // Fetch client data
         String? clientDataString =
             await secureStorage.read(key: 'allClientData');
-        print("Ayush${clientDataString}");
-
         if (clientDataString != null) {
           List<dynamic> clientData = jsonDecode(clientDataString);
 
-          for (int index = 0; index < clientData.length; index++) {
-            var item = clientData[index];
-
+          double localSum = 0;
+          for (var item in clientData) {
             if (item['userData'] != null) {
-              sum += double.tryParse(
-                      item['capital']?[index]?['net']?.toString() ?? '0') ??
+              localSum += double.tryParse(
+                      item['capital']?[0]?['net']?.toString() ?? '0') ??
                   0.0;
             } else {
-              sum += double.tryParse(item['balances']?['result']?[0]
+              localSum += double.tryParse(item['balances']?['result']?[0]
                               ?['balance_inr']
                           ?.toString() ??
                       '0') ??
                   0.0;
             }
           }
-          print("Get sum in else part in DASHBOARD(Capital)${sum}");
-          setState(() {
-            isLoading = false;
-          });
+
+          if (mounted) {
+            setState(() {
+              sum = localSum;
+              isLoading = false;
+            });
+          }
         }
       }
     } catch (e) {
-      print(e);
+      print("Error in fetchData(): $e");
+
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -230,130 +257,183 @@ class _CapitalState extends State<Capital> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: fetchProfile(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container(
-              color: themeManager.isDarkMode == ThemeMode.dark
-                  ? AppColors.darkPrimary
-                  : AppColors.lightPrimary,
-              child: const Center(),
-            );
-          } else if (snapshot.hasError) {
+          if (snapshot.hasError) {
             return const errorPage.Errorpage();
           } else if (!snapshot.hasData) {
             return const noData.Nodata();
           } else if (snapshot.hasData) {
             final data = snapshot.data!;
-            return Container(
-              padding: EdgeInsets.all(0),
-              margin: EdgeInsets.all(0),
-              width: double.infinity,
-              color: themeManager.isDarkMode == ThemeMode.dark
-                  ? AppColors.darkPrimary
-                  : AppColors.lightPrimary,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min, // Change this line
-                  children: [
-                    Card(
-                      color: themeManager.isDarkMode == ThemeMode.dark
-                          ? AppColors.bd_black
-                          : AppColors.bd_white,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        width: double.infinity,
-                        padding: EdgeInsets.all(16),
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0), // Simplified padding
-                              child: Column(
-                                mainAxisSize: MainAxisSize
-                                    .min, // Prevent taking extra height
-                                children: [
-                                  Text(
-                                    "P&L",
-                                    style: TextStyle(
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary),
-                                  ),
-                                  Text("₹",
+            return
+                //  CustomRefreshIndicator(
+                //   onRefresh: () async {
+                //     await fetchData();
+                //   },
+                //   builder: (context, child, controller) {
+                //     return Stack(
+                //       children: [
+                //         child, // Main content stays below the indicator
+
+                //         // Custom Indicator positioned under the AppBar
+                //         AnimatedBuilder(
+                //           animation: controller,
+                //           builder: (context, _) {
+                //             double indicatorHeight = (controller.value * 80)
+                //                 .clamp(0.0, 80.0); // Adjust max height
+
+                //             return Container(
+                //               height:
+                //                   indicatorHeight, // Dynamic height based on pull
+                //               width: double.infinity,
+                //               decoration: BoxDecoration(
+                //                 color: Colors.pinkAccent, // Indicator color
+                //                 borderRadius: BorderRadius.vertical(
+                //                   bottom: Radius.circular(500), // Rounded bottom
+                //                 ),
+                //               ),
+                //               alignment: Alignment.center,
+                //               child: Opacity(
+                //                 opacity: controller.value.clamp(0.0, 1.0),
+                //                 child: Icon(
+                //                   Icons.icecream,
+                //                   size: 40,
+                //                   color: Colors.white,
+                //                 ),
+                //               ),
+                //             );
+                //           },
+                //         ),
+                //       ],
+                //     );
+                //   },
+                CustomMaterialIndicator(
+              onRefresh: () async {
+                await fetchData();
+              },
+              backgroundColor: Colors.white,
+              indicatorBuilder: (context, controller) {
+                return Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: CircularProgressIndicator(
+                    color: AppColors.yellow,
+                    value: controller.state.isLoading
+                        ? null
+                        : math.min(controller.value, 1.0),
+                  ),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.all(0),
+                margin: EdgeInsets.all(0),
+                width: double.infinity,
+                color: themeManager.isDarkMode
+                    ? AppColors.darkPrimary
+                    : AppColors.lightPrimary,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Change this line
+                    children: [
+                      Card(
+                        color: themeManager.isDarkMode
+                            ? AppColors.bd_black
+                            : AppColors.bd_white,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16),
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0), // Simplified padding
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Prevent taking extra height
+                                  children: [
+                                    Text(
+                                      "P&L",
                                       style: TextStyle(
                                           color: themeManager.isDarkMode ==
                                                   ThemeMode.dark
-                                              ? AppColors.lightPrimary
-                                              : AppColors.darkPrimary)),
-                                ],
+                                              ? AppColors.darkText
+                                              : AppColors.lightText),
+                                    ),
+                                    Text("₹",
+                                        style: TextStyle(
+                                            color: themeManager.isDarkMode ==
+                                                    ThemeMode.dark
+                                                ? AppColors.darkText
+                                                : AppColors.lightText)),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0), // Simplified padding
-                              child: Column(
-                                mainAxisSize: MainAxisSize
-                                    .min, // Prevent taking extra height
-                                children: [
-                                  Text(
-                                    "Capital",
-                                    style: TextStyle(
-                                        color: themeManager.isDarkMode ==
-                                                ThemeMode.dark
-                                            ? AppColors.lightPrimary
-                                            : AppColors.darkPrimary),
-                                  ),
-                                  isLoading
-                                      ? Column(
-                                          children: [
-                                            SizedBox(height: 5),
-                                            const SizedBox(
-                                              height: 15,
-                                              width: 15,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.yellow,
-                                              ),
-                                            )
-                                          ],
-                                        )
-                                      : Text(
-                                          '₹${sum.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            color: sum < 0
-                                                ? Colors.red
-                                                : Colors.green,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0), // Simplified padding
+                                child: Column(
+                                  mainAxisSize: MainAxisSize
+                                      .min, // Prevent taking extra height
+                                  children: [
+                                    Text(
+                                      "Capital",
+                                      style: TextStyle(
+                                          color: themeManager.isDarkMode ==
+                                                  ThemeMode.dark
+                                              ? AppColors.darkText
+                                              : AppColors.lightText),
+                                    ),
+                                    isLoading
+                                        ? Column(
+                                            children: [
+                                              SizedBox(height: 5),
+                                              const SizedBox(
+                                                height: 15,
+                                                width: 15,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: AppColors.yellow,
+                                                ),
+                                              )
+                                            ],
+                                          )
+                                        : Text(
+                                            '₹${sum.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: sum < 0
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 0), // Ensure there's no spacing
-                    Flexible(
-                      child: Container(
-                        margin: EdgeInsets.zero, // No margin
-                        padding: EdgeInsets.zero, // No padding
-                        color: Colors
-                            .transparent, // Ensure background is transparent
-                        child: DashboardAngel(
-                          capital: newCapital,
-                          darkMode: themeManager.isDarkMode == ThemeMode.dark,
+                      SizedBox(height: 0), // Ensure there's no spacing
+                      Flexible(
+                        child: Container(
+                          margin: EdgeInsets.zero, // No margin
+                          padding: EdgeInsets.zero, // No padding
+                          color: Colors
+                              .transparent, // Ensure background is transparent
+                          child: DashboardAngel(
+                            capital: newCapital,
+                            darkMode: themeManager.isDarkMode,
+                          ),
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             );

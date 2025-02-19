@@ -10,23 +10,13 @@ import 'package:xalgo/LiveTrade.dart';
 import 'package:xalgo/ManageBroker.dart';
 import 'package:xalgo/Marketplace.dart';
 import 'package:xalgo/PaperTrade.dart';
+import 'package:xalgo/SplashScreen.dart';
 import 'package:xalgo/Subcribed.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'package:xalgo/main.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-      ],
-      child: AppDrawer(),
-    ),
-  );
-}
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -204,23 +194,15 @@ class DrawerItem extends StatelessWidget {
                               String? algoID = backendSnapshot.data;
                               return ListView(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 15),
-                                    child: Switch(
-                                      value: themeManager.isDarkMode ==
-                                          ThemeMode
-                                              .dark, // Check current theme mode
-                                      onChanged: (bool value) {
-                                        // Toggle the theme when the switch is changed
-                                        themeManager.toggleTheme();
-                                      },
-                                      activeColor: AppColors
-                                          .lightPrimary, // Color for active switch (light mode)
-                                      inactiveTrackColor: Colors.grey[
-                                          800], // Color for inactive track (dark mode)
-                                      activeTrackColor: AppColors
-                                          .yellow, // Color for active track (light mode)
-                                    ),
+                                  Consumer<ThemeProvider>(
+                                    builder: (context, themeManager, child) {
+                                      return Switch(
+                                        value: themeManager.isDarkMode,
+                                        onChanged: (bool value) {
+                                          themeManager.toggleTheme();
+                                        },
+                                      );
+                                    },
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(
@@ -256,7 +238,7 @@ class DrawerItem extends StatelessWidget {
                                   Divider(),
                                   _buildListTile(Icons.settings, "Dashboard",
                                       onTap: () {
-                                    Navigator.pushReplacement(
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => Home(),

@@ -338,7 +338,6 @@ class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
         // Send login mail
         await sendLoginMail(email, userAgent);
 
-        // Update login status
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
 

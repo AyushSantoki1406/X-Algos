@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xalgo/Dashboard/Capital.dart';
+import 'package:xalgo/Dashboard/DashboardAngel.dart';
 import 'package:xalgo/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:xalgo/theme/theme_manage.dart';
@@ -13,17 +14,25 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool isRefreshing = false; // Track if the refresh is in progress
+  final GlobalKey<CapitalState> _capitalKey = GlobalKey<CapitalState>();
+  final GlobalKey<DashboardAngelState> _AngleDashboardKey =
+      GlobalKey<DashboardAngelState>();
+
+  bool isRefreshing = false;
 
   Future<void> _reloadData() async {
     setState(() {
-      isRefreshing = true; // Start refreshing when pull-to-refresh starts
+      isRefreshing = true;
     });
+
+    // Call fetchData() from Capital widget
+    _capitalKey.currentState?.fetchData();
+    _AngleDashboardKey.currentState?.fetchData();
 
     await Future.delayed(Duration(seconds: 2)); // Simulate network delay
 
     setState(() {
-      isRefreshing = false; // Stop refreshing after data load
+      isRefreshing = false;
     });
   }
 
@@ -32,10 +41,12 @@ class _HomeState extends State<Home> {
     final themeManager = Provider.of<ThemeProvider>(context);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+    print("helooooo ${themeManager.isDarkMode}");
+
     return Scaffold(
       key: _scaffoldKey,
       endDrawer: AppDrawer(),
-      backgroundColor: themeManager.isDarkMode == ThemeMode.dark
+      backgroundColor: themeManager.isDarkMode
           ? AppColors.darkPrimary
           : AppColors.lightPrimary,
       body: Stack(
@@ -47,7 +58,7 @@ class _HomeState extends State<Home> {
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
                   pinned: true,
-                  backgroundColor: themeManager.isDarkMode == ThemeMode.dark
+                  backgroundColor: themeManager.isDarkMode
                       ? AppColors.darkPrimary
                       : AppColors.lightPrimary,
                   elevation: 0,
@@ -58,7 +69,7 @@ class _HomeState extends State<Home> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: themeManager.isDarkMode == ThemeMode.dark
+                      color: themeManager.isDarkMode
                           ? AppColors.lightPrimary
                           : AppColors.darkPrimary,
                     ),
@@ -67,7 +78,7 @@ class _HomeState extends State<Home> {
                     padding: const EdgeInsets.all(8.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(50),
-                      child: themeManager.isDarkMode == ThemeMode.dark
+                      child: themeManager.isDarkMode
                           ? Image.asset(
                               'assets/images/darklogo.png',
                               fit: BoxFit.cover,
@@ -83,7 +94,7 @@ class _HomeState extends State<Home> {
                       builder: (context) => IconButton(
                         icon: Icon(
                           Icons.menu,
-                          color: themeManager.isDarkMode == ThemeMode.dark
+                          color: themeManager.isDarkMode
                               ? AppColors.lightPrimary
                               : AppColors.darkPrimary,
                         ),
@@ -97,7 +108,10 @@ class _HomeState extends State<Home> {
               ],
               body: Column(
                 children: [
-                  Expanded(child: Capital()),
+                  Expanded(
+                    child: Capital(
+                        key: _capitalKey), // Assign key to access fetchData()
+                  ),
                 ],
               ),
             ),
@@ -108,11 +122,10 @@ class _HomeState extends State<Home> {
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: const EdgeInsets.only(top: 20.0), // Adjust position
+                padding: const EdgeInsets.only(top: 20.0),
                 child: Container(
-                  height: 80.0, // Set the height for the logo
-                  width: MediaQuery.of(context).size.width *
-                      0.5, // Width as 50% of screen
+                  height: 80.0,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Image.asset(
                     'assets/your_logo.png', // Replace with your logo path
                     fit: BoxFit.contain,

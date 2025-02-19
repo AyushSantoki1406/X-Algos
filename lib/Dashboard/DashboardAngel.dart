@@ -1,4 +1,5 @@
 import 'dart:convert'; // Add this import for jsonDecode
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,11 @@ import 'package:xalgo/theme/app_colors.dart';
 import 'dart:developer';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:xalgo/theme/theme_manage.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
+
+final GlobalKey<DashboardAngelState> _AngleDashboardKey =
+    GlobalKey<DashboardAngelState>();
 
 class DashboardAngel extends StatefulWidget {
   final List<dynamic> capital; // Define the capital parameter
@@ -22,10 +28,10 @@ class DashboardAngel extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<DashboardAngel> createState() => _DashboardAngel();
+  State<DashboardAngel> createState() => DashboardAngelState();
 }
 
-class _DashboardAngel extends State<DashboardAngel>
+class DashboardAngelState extends State<DashboardAngel>
     with SingleTickerProviderStateMixin {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   List? brokerInfo = [];
@@ -261,7 +267,6 @@ class _DashboardAngel extends State<DashboardAngel>
           };
         }).toList();
 
-        log("updatedAllSheetData is null, not a Map, or does not contain 'sheetData'.updatedAllSheetData is null, not a Map, or does not contain 'sheetData'.${updatedSheetData.toString()}"); // Debug print to check updated sheet data
         Map<dynamic, Set<String>> strategyMap = {};
 
         // Loop through the updatedSheetData and populate strategyMap
@@ -309,427 +314,458 @@ class _DashboardAngel extends State<DashboardAngel>
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.only(top: 5),
-      itemCount: brokerInfo?.length ?? 0, // ✅ Prevent out-of-range access
-      itemBuilder: (context, index) {
-        if (brokerInfo == null || brokerInfo!.isEmpty) {
-          return Center(child: Text("No Data Available"));
-        }
+    return CustomMaterialIndicator(
+        onRefresh: () async {
+          fetchData();
+        },
+        elevation: 0, // Remove any shadow if this property exists
+        backgroundColor: Colors.transparent,
+        indicatorBuilder: (context, controller) {
+          return const SizedBox.shrink(); // Completely hides the indicator
+        },
+        // notificationPredicate: (_) => false,
+        child: ListView.builder(
+          padding: EdgeInsets.only(top: 5),
+          itemCount: brokerInfo?.length ?? 0,
+          itemBuilder: (context, index) {
+            if (brokerInfo == null || brokerInfo!.isEmpty) {
+              return Center(child: Text("No Data Available"));
+            }
 
-        final item = brokerInfo![index]; // ✅ Safe access
-        log("from ${item}");
-        final clientId = item?['userData'] != null
-            ? item['userData']['data']['clientcode']
-            : item?['balances']?['result']?[0]?['user_id']?.toString();
+            final item = brokerInfo![index]; // ✅ Safe access
+            log("from2 ${item}");
+            final clientId = item?['userData'] != null
+                ? item['userData']['data']['clientcode']
+                : item?['balances']?['result']?[0]?['user_id']?.toString();
 
-        void handleStrategyChange(String clientId, String strategy) {
-          setState(() {
-            selectedStrategies[clientId] = strategy;
-          });
-        }
+            void handleStrategyChange(String clientId, String strategy) {
+              setState(() {
+                selectedStrategies[clientId] = strategy;
+              });
+            }
 
-        var lastSheet = updatedAllSheetData?.isNotEmpty == true
-            ? updatedAllSheetData!.last
-            : null;
-        var sheetData = lastSheet?['sheetData'];
-        var lastObject = sheetData?.isNotEmpty == true ? sheetData!.last : null;
+            var lastSheet = updatedAllSheetData?.isNotEmpty == true
+                ? updatedAllSheetData!.last
+                : null;
+            var sheetData = lastSheet?['sheetData'];
+            var lastObject =
+                sheetData?.isNotEmpty == true ? sheetData!.last : null;
 
-        var lastValue = lastObject != null ? lastObject[10] : null;
+            var lastValue = lastObject != null ? lastObject[10] : null;
 
-        final themeManager = Provider.of<ThemeProvider>(context);
+            final themeManager = Provider.of<ThemeProvider>(context);
 
-        return Container(
-          // padding: EdgeInsets.only(left: 8, right: 8, top: 0),
-          margin: EdgeInsets.only(bottom: 10, top: 0),
-          child: Card(
-            color: themeManager.isDarkMode == ThemeMode.dark
-                ? AppColors.darkBackground
-                : AppColors.lightBackground,
-            shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(10), // Optional: rounded corners
-            ),
-            elevation:
-                5, // For a subtle shadow effect, you can adjust the value
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
+            return Container(
+              margin: EdgeInsets.only(bottom: 10, top: 0),
+              child: Card(
+                color: themeManager.isDarkMode
+                    ? AppColors.darkBackground
+                    : AppColors.lightBackground,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(10), // Optional: rounded corners
+                ),
+                elevation:
+                    5, // For a subtle shadow effect, you can adjust the value
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Column(
-                        children: [
-                          _buildAccountItem(
-                            "Name",
-                            (item['userData']?['data']?['clientcode'] != null &&
-                                    userSchema?['AccountAliases']?.containsKey(
-                                            item['userData']?['data']
-                                                ?['clientcode']) ==
-                                        true)
-                                ? userSchema?['AccountAliases']?[
-                                        item['userData']?['data']
-                                            ?['clientcode']] ??
-                                    '' // Provide a default empty string
-                                : '',
-                          ),
-
-                          _buildAccountItem(
-                            "Name",
-                            item['userData'] != null
-                                ? (item['userData']['data']['name']?.length ?? 0) >
-                                        25
-                                    ? item['userData']['data']['name']!.substring(0, 25) +
-                                        "..."
-                                    : item['userData']['data']['name']
-                                : ((item['userDetails']?['result']?['first_name'] ?? '') + (item['userDetails']?['result']?['last_name'] ?? '')).length >
-                                        25
-                                    ? ((item['userDetails']?['result']?['first_name'] ?? '') +
-                                                (item['userDetails']?['result']
-                                                        ?['last_name'] ??
-                                                    ''))
-                                            .substring(0, 25) +
-                                        "..."
-                                    : ((item['userDetails']?['result']?['first_name'] ?? '') +
-                                                (item['userDetails']?['result']
-                                                        ?['last_name'] ??
-                                                    ''))
-                                            .isEmpty
-                                        ? "N/A"
-                                        : (item['userDetails']?['result']?['first_name'] ?? '') +
-                                            (item['userDetails']?['result']?['last_name'] ?? ''),
-                          ),
-                          _buildAccountItem("Broker",
-                              item['userData'] != null ? "AngelOne" : "Delta"),
-                          // _buildAccountItem(
-                          //     "UserId",
-                          //     item['userData'] != null
-                          //         ? item['userData']['data']['clientcode']
-                          //         : item['balances']['result'][0]['user_id'] ??
-                          //             "N/A"),
-                          _buildAccountItem(
-                            "Active Strategy",
-                            userSchema?['ActiveStrategys']?.toString() ?? "N/A",
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      child: Card(
-                        color: themeManager.isDarkMode == ThemeMode.dark
-                            ? AppColors.darkBackground
-                            : AppColors.lightBackground,
-                        elevation: 3,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              top: 20, left: 20, right: 20, bottom: 20),
+                    Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
                           child: Column(
                             children: [
-                              _statItem(
-                                  Text("Account Balance",
-                                      style: TextStyle(
-                                          color: Color(0xFF777777),
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16)),
-                                  item['userData'] != null &&
-                                          index < widget.capital.length
-                                      ? Container(
-                                          child: Text(
-                                            '₹${(double.tryParse(widget.capital[index]['net'].toString()) ?? 0.0).toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              color: (item?['balances']
-                                                              ?.result[0]
-                                                              ?.balance_inr !=
-                                                          null &&
-                                                      double.tryParse(item?[
-                                                                      'balances']
-                                                                  ?.result[0]
-                                                                  ?.balance_inr
-                                                                  ?.toString() ??
-                                                              "0.0")! <
-                                                          0.0)
-                                                  ? Colors
-                                                      .red // Red if less than 0
-                                                  : Colors
-                                                      .green, // Green if greater than or equal to 0
-                                            ),
-                                          ),
-                                        )
-                                      : Text(
-                                          '₹${double.tryParse(item?['balances']?.result[0]?.balance_inr?.toString() ?? "0.0")?.toStringAsFixed(2) ?? ""}',
-                                          style: TextStyle(
-                                            color: (double.tryParse(item?[
-                                                                    'balances']
-                                                                ?.result[0]
-                                                                ?.balance_inr
-                                                                ?.toString() ??
-                                                            "0.0") ??
-                                                        0.0) >
-                                                    0.0
-                                                ? Colors
-                                                    .green // Green if greater than 0
-                                                : Colors
-                                                    .red, // Red if less than or equal to 0
-                                          ),
-                                        )),
-                              Divider(
-                                color: Colors.grey, // Line color
-                                thickness: 1, // Line thickness
-                                indent: 0, // Space before the line starts
-                                endIndent: 0, // Space after the line ends
+                              _buildAccountItem(
+                                "Name",
+                                (item['userData']?['data']?['clientcode'] !=
+                                            null &&
+                                        userSchema?['AccountAliases']
+                                                ?.containsKey(item['userData']
+                                                    ?['data']?['clientcode']) ==
+                                            true)
+                                    ? userSchema?['AccountAliases']?[
+                                            item['userData']?['data']
+                                                ?['clientcode']] ??
+                                        '' // Provide a default empty string
+                                    : '',
                               ),
-                              _statItem(
-                                  Text("over alll",
-                                      style: TextStyle(
-                                          color: Color(0xFF777777),
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16)),
-                                  Text(
-                                    '0',
-                                    style: TextStyle(color: Colors.green),
-                                  )),
-                              Divider(
-                                color: Colors.grey, // Line color
-                                thickness: 1, // Line thickness
-                                indent: 0, // Space before the line starts
-                                endIndent: 0, // Space after the line ends
+
+                              _buildAccountItem(
+                                "Name",
+                                item['userData'] != null
+                                    ? (item['userData']['data']['name']?.length ?? 0) >
+                                            25
+                                        ? item['userData']['data']['name']!.substring(0, 25) +
+                                            "..."
+                                        : item['userData']['data']['name']
+                                    : ((item['userDetails']?['result']?['first_name'] ?? '') + (item['userDetails']?['result']?['last_name'] ?? '')).length >
+                                            25
+                                        ? ((item['userDetails']?['result']?['first_name'] ?? '') +
+                                                    (item['userDetails']?['result']?['last_name'] ??
+                                                        ''))
+                                                .substring(0, 25) +
+                                            "..."
+                                        : ((item['userDetails']?['result']?['first_name'] ?? '') +
+                                                    (item['userDetails']?['result']
+                                                            ?['last_name'] ??
+                                                        ''))
+                                                .isEmpty
+                                            ? "N/A"
+                                            : (item['userDetails']?['result']?['first_name'] ?? '') +
+                                                (item['userDetails']?['result']?['last_name'] ?? ''),
                               ),
-                              
-                              _statItem(
-                                  Text("Monthly gain",
-                                      style: TextStyle(
-                                          color: Color(0xFF777777),
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16)),
-                                  Text('0%',
-                                      style: TextStyle(color: Colors.green))),
-                              Divider(
-                                color: Colors.grey, // Line color
-                                thickness: 1, // Line thickness
-                                indent: 0, // Space before the line starts
-                                endIndent: 0, // Space after the line ends
-                              ),
-                              _statItem(
-                                  Text("Today's gain",
-                                      style: TextStyle(
-                                          color: Color(0xFF777777),
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16)),
-                                  Text('0%',
-                                      style: TextStyle(color: Colors.green))),
-                              Divider(
-                                color: Colors.grey, // Line color
-                                thickness: 1, // Line thickness
-                                indent: 0, // Space before the line starts
-                                endIndent: 0, // Space after the line ends
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 10),
-                                child: Center(
-                                    // This centers the entire container
-                                    child: isLoading
-                                        ? Container(
-                                            // margin: const EdgeInsets.only(
-                                            //     bottom: 10),
-                                            height: 37,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.2,
-                                            child: Container(
-                                              height: 37,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.2,
-                                              child: Center(
-                                                child: LoadingAnimationWidget
-                                                    .waveDots(
-                                                  color: themeManager
-                                                              .isDarkMode ==
-                                                          ThemeMode.dark
-                                                      ? AppColors.lightPrimary
-                                                      : AppColors.darkPrimary,
-                                                  size: 30,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        : Center(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize
-                                                  .min, // Prevents unnecessary space
-                                              children: [
-                                                if (clientStrategyMap[clientId]
-                                                        ?.isNotEmpty ==
-                                                    true)
-                                                  Card(
-                                                    color: themeManager
-                                                                .isDarkMode ==
-                                                            ThemeMode.dark
-                                                        ? AppColors
-                                                            .darkBackground
-                                                        : AppColors
-                                                            .lightBackground,
-                                                    elevation: 3,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12),
-                                                      side: BorderSide(
-                                                          color:
-                                                              Color(0xFF777777),
-                                                          width:
-                                                              1), // White border
-                                                    ),
-                                                    child: Padding(
-                                                      padding: EdgeInsets.symmetric(
-                                                          horizontal:
-                                                              10), // Small padding
-                                                      child: DropdownButton<
-                                                          String>(
-                                                        dropdownColor: themeManager
-                                                                    .isDarkMode ==
-                                                                ThemeMode.dark
-                                                            ? AppColors.bd_black
-                                                            : AppColors
-                                                                .bd_white,
-                                                        isExpanded: true,
-                                                        underline:
-                                                            SizedBox(), // Removes the underline
-                                                        value: selectedStrategies[
-                                                                        clientId] ==
-                                                                    null ||
-                                                                !(clientStrategyMap[
-                                                                            clientId] ??
-                                                                        [])
-                                                                    .contains(
-                                                                        selectedStrategies[
-                                                                            clientId])
-                                                            ? clientStrategyMap[
-                                                                clientId]![0]
-                                                            : selectedStrategies[
-                                                                clientId],
-                                                        onChanged:
-                                                            (String? newValue) {
-                                                          setState(() {
-                                                            selectedStrategies[
-                                                                    clientId] =
-                                                                newValue!;
-                                                          });
-                                                        },
-                                                        items: (clientStrategyMap[
-                                                                    clientId] ??
-                                                                [])
-                                                            .map<
-                                                                DropdownMenuItem<
-                                                                    String>>(
-                                                              (strategy) =>
-                                                                  DropdownMenuItem<
-                                                                      String>(
-                                                                value: strategy,
-                                                                child: Text(
-                                                                  strategy,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: themeManager.isDarkMode ==
-                                                                            ThemeMode
-                                                                                .dark
-                                                                        ? Color.fromARGB(
-                                                                            255,
-                                                                            223,
-                                                                            223,
-                                                                            223)
-                                                                        : AppColors
-                                                                            .darkPrimary,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            )
-                                                            .toList(),
-                                                      ),
-                                                    ),
-                                                  )
-                                                else
-                                                  Padding(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        vertical: 10),
-                                                    child: Text(
-                                                        "No strategies available"),
-                                                  ),
-                                              ],
-                                            ),
-                                          )),
-                              ),
-                              const SizedBox(height: 10),
-                              Column(
-                                children: allSheetData
-                                    .where((sheet) =>
-                                        sheet["UserId"] == clientId &&
-                                        sheet["strategyName"] ==
-                                            selectedStrategies[clientId])
-                                    .map((filteredSheet) {
-                                  return Container(
-                                    width: double.infinity,
-                                    margin: const EdgeInsets.only(top: 0),
-                                    child: MultiCalendar(
-                                      index2: index,
-                                      allSheetData: allSheetData,
-                                      selectedStrategy:
-                                          selectedStrategies[clientId] ?? "",
-                                      clientId: clientId,
-                                      updatedAllSheetData:
-                                          updatedAllSheetData, // Now passing the data directly
-                                    ),
-                                  );
-                                }).toList(),
+                              _buildAccountItem("Broker",
+                                  item['userData'] != null ? "AngelOne" : ""),
+                              // _buildAccountItem(
+                              //     "UserId",
+                              //     item['userData'] != null
+                              //         ? item['userData']['data']['clientcode']
+                              //         : item['balances']['result'][0]['user_id'] ??
+                              //             "N/A"),
+                              _buildAccountItem(
+                                "Active Strategy",
+                                userSchema?['ActiveStrategys']?.toString() ??
+                                    "",
                               )
                             ],
                           ),
                         ),
-                      ),
-                    ),
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Card(
+                            color: themeManager.isDarkMode
+                                ? AppColors.darkBackground
+                                : AppColors.lightBackground,
+                            elevation: 3,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                  top: 20, left: 20, right: 20, bottom: 20),
+                              child: Column(
+                                children: [
+                                  _statItem(
+                                      Text("Account Balance",
+                                          style: TextStyle(
+                                              color: Color(0xFF777777),
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 16)),
+                                      item['userData'] != null &&
+                                              index < widget.capital.length
+                                          ? Container(
+                                              child: Text(
+                                                '₹${(double.tryParse(widget.capital[index]['net'].toString()) ?? 0.0).toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  color: (item?['balances']
+                                                                  ?.result[0]
+                                                                  ?.balance_inr !=
+                                                              null &&
+                                                          double.tryParse(item?[
+                                                                          'balances']
+                                                                      ?.result[
+                                                                          0]
+                                                                      ?.balance_inr
+                                                                      ?.toString() ??
+                                                                  "0.0")! <
+                                                              0.0)
+                                                      ? Colors
+                                                          .red // Red if less than 0
+                                                      : Colors
+                                                          .green, // Green if greater than or equal to 0
+                                                ),
+                                              ),
+                                            )
+                                          : Text(
+                                              '₹${double.tryParse(item?['balances']?.result[0]?.balance_inr?.toString() ?? "0.0")?.toStringAsFixed(2) ?? ""}',
+                                              style: TextStyle(
+                                                color: (double.tryParse(item?[
+                                                                        'balances']
+                                                                    ?.result[0]
+                                                                    ?.balance_inr
+                                                                    ?.toString() ??
+                                                                "0.0") ??
+                                                            0.0) >
+                                                        0.0
+                                                    ? Colors
+                                                        .green // Green if greater than 0
+                                                    : Colors
+                                                        .red, // Red if less than or equal to 0
+                                              ),
+                                            )),
+                                  Divider(
+                                    color: Colors.grey, // Line color
+                                    thickness: 1, // Line thickness
+                                    indent: 0, // Space before the line starts
+                                    endIndent: 0, // Space after the line ends
+                                  ),
+                                  _statItem(
+                                      Text("over alll",
+                                          style: TextStyle(
+                                              color: Color(0xFF777777),
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 16)),
+                                      Text(
+                                        '0',
+                                        style: TextStyle(color: Colors.green),
+                                      )),
+                                  Divider(
+                                    color: Colors.grey, // Line color
+                                    thickness: 1, // Line thickness
+                                    indent: 0, // Space before the line starts
+                                    endIndent: 0, // Space after the line ends
+                                  ),
+                                  _statItem(
+                                      Text("Monthly gain",
+                                          style: TextStyle(
+                                              color: Color(0xFF777777),
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 16)),
+                                      Text('0%',
+                                          style:
+                                              TextStyle(color: Colors.green))),
+                                  Divider(
+                                    color: Colors.grey, // Line color
+                                    thickness: 1, // Line thickness
+                                    indent: 0, // Space before the line starts
+                                    endIndent: 0, // Space after the line ends
+                                  ),
+                                  _statItem(
+                                      Text("Today's gain",
+                                          style: TextStyle(
+                                              color: Color(0xFF777777),
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 16)),
+                                      Text('0%',
+                                          style:
+                                              TextStyle(color: Colors.green))),
+                                  Divider(
+                                    color: Colors.grey, // Line color
+                                    thickness: 1, // Line thickness
+                                    indent: 0, // Space before the line starts
+                                    endIndent: 0, // Space after the line ends
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10),
+                                    child: Center(
+                                        // This centers the entire container
+                                        child: isLoading
+                                            ? Container(
+                                                // margin: const EdgeInsets.only(
+                                                //     bottom: 10),
+                                                height: 37,
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.2,
+                                                child: Container(
+                                                  height: 37,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.2,
+                                                  child: Center(
+                                                    child:
+                                                        LoadingAnimationWidget
+                                                            .waveDots(
+                                                      color: themeManager
+                                                                  .isDarkMode ==
+                                                              ThemeMode.dark
+                                                          ? AppColors
+                                                              .lightPrimary
+                                                          : AppColors
+                                                              .darkPrimary,
+                                                      size: 30,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize
+                                                      .min, // Prevents unnecessary space
+                                                  children: [
+                                                    if (clientStrategyMap[
+                                                                clientId]
+                                                            ?.isNotEmpty ==
+                                                        true)
+                                                      Card(
+                                                        color: themeManager
+                                                                    .isDarkMode ==
+                                                                ThemeMode.dark
+                                                            ? AppColors
+                                                                .darkBackground
+                                                            : AppColors
+                                                                .lightBackground,
+                                                        elevation: 3,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          side: BorderSide(
+                                                              color: Color(
+                                                                  0xFF777777),
+                                                              width:
+                                                                  1), // White border
+                                                        ),
+                                                        child: Padding(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      10), // Small padding
+                                                          child: DropdownButton<
+                                                              String>(
+                                                            dropdownColor: themeManager
+                                                                        .isDarkMode ==
+                                                                    ThemeMode
+                                                                        .dark
+                                                                ? AppColors
+                                                                    .bd_black
+                                                                : AppColors
+                                                                    .bd_white,
+                                                            isExpanded: true,
+                                                            underline:
+                                                                SizedBox(), // Removes the underline
+                                                            value: selectedStrategies[
+                                                                            clientId] ==
+                                                                        null ||
+                                                                    !(clientStrategyMap[clientId] ??
+                                                                            [])
+                                                                        .contains(selectedStrategies[
+                                                                            clientId])
+                                                                ? clientStrategyMap[
+                                                                        clientId]![
+                                                                    0]
+                                                                : selectedStrategies[
+                                                                    clientId],
+                                                            onChanged: (String?
+                                                                newValue) {
+                                                              setState(() {
+                                                                selectedStrategies[
+                                                                        clientId] =
+                                                                    newValue!;
+                                                              });
+                                                            },
+                                                            items: (clientStrategyMap[
+                                                                        clientId] ??
+                                                                    [])
+                                                                .map<
+                                                                    DropdownMenuItem<
+                                                                        String>>(
+                                                                  (strategy) =>
+                                                                      DropdownMenuItem<
+                                                                          String>(
+                                                                    value:
+                                                                        strategy,
+                                                                    child: Text(
+                                                                      strategy,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                        color: themeManager.isDarkMode == ThemeMode.dark
+                                                                            ? Color.fromARGB(
+                                                                                255,
+                                                                                223,
+                                                                                223,
+                                                                                223)
+                                                                            : AppColors.darkPrimary,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                                .toList(),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    else
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 10),
+                                                        child: Text(
+                                                            "No strategies available"),
+                                                      ),
+                                                  ],
+                                                ),
+                                              )),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Column(
+                                    children: allSheetData
+                                        .where((sheet) =>
+                                            sheet["UserId"] == clientId &&
+                                            sheet["strategyName"] ==
+                                                selectedStrategies[clientId])
+                                        .map((filteredSheet) {
+                                      return Container(
+                                        width: double.infinity,
+                                        margin: const EdgeInsets.only(top: 0),
+                                        child: MultiCalendar(
+                                          index2: index,
+                                          allSheetData: allSheetData,
+                                          selectedStrategy:
+                                              selectedStrategies[clientId] ??
+                                                  "",
+                                          clientId: clientId,
+                                          updatedAllSheetData:
+                                              updatedAllSheetData, // Now passing the data directly
+                                        ),
+                                      );
+                                    }).toList(),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
                   ],
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
+                ),
+              ),
+            );
+          },
+        ));
   }
 
   Widget _buildAccountItem(String label, String value) {
     final themeManager = Provider.of<ThemeProvider>(context);
+    bool isLoading = value.isEmpty;
 
     return Padding(
-      padding: EdgeInsets.only(top: 5, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 5, left: 20, right: 20),
       child: Row(
         children: [
           Text(
             "$label : ",
-            style: TextStyle(
+            style: const TextStyle(
                 color: Color(0xFF777777),
                 fontWeight: FontWeight.w800,
                 fontSize: 16),
           ),
-          Text(value,
-              style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  color: themeManager.isDarkMode == ThemeMode.dark
-                      ? AppColors.lightPrimary
-                      : AppColors.darkPrimary,
-                  fontSize: 16)),
+          isLoading
+              ? Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: double.infinity, // Adjust width as needed
+                    height: 16, // Match font size
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  value,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: themeManager.isDarkMode
+                          ? AppColors.lightPrimary
+                          : AppColors.darkPrimary,
+                      fontSize: 16),
+                ),
         ],
       ),
     );
@@ -758,12 +794,13 @@ class _DashboardAngel extends State<DashboardAngel>
     );
   }
 
-  // @override
-  // void dispose() {
-  //   _controller
-  //       .dispose(); // Dispose of the controller before calling super.dispose()
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _controller
+        .dispose(); // Dispose of the controller before calling super.dispose()
+
+    super.dispose();
+  }
 }
 
 class SkeletonCard extends StatelessWidget {

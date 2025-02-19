@@ -343,7 +343,6 @@ class _MultiCalendarState extends State<MultiCalendar> {
           currentMonthlROI("${selectedMonths[sheetIndex].month}", "$year");
         }
 
-
         double accuracy = double.tryParse(selectedMonthAccuracy ?? "0") ?? 0;
         double progress = accuracy / 100;
         double roi = double.tryParse(selectedMonthRoi ?? "0") ?? 0;
@@ -372,7 +371,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
                         value: index,
                         child: Text(monthName,
                             style: TextStyle(
-                                color: themeManager.isDarkMode == ThemeMode.dark
+                                color: themeManager.isDarkMode
                                     ? AppColors.lightPrimary
                                     : AppColors.darkPrimary)),
                       );
@@ -395,7 +394,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
                         child: Text(
                           year.toString(),
                           style: TextStyle(
-                              color: themeManager.isDarkMode == ThemeMode.dark
+                              color: themeManager.isDarkMode
                                   ? AppColors.lightPrimary
                                   : AppColors.darkPrimary),
                         ),
@@ -440,10 +439,9 @@ class _MultiCalendarState extends State<MultiCalendar> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 10,
-                                  color:
-                                      themeManager.isDarkMode == ThemeMode.dark
-                                          ? AppColors.lightPrimary
-                                          : AppColors.darkPrimary,
+                                  color: themeManager.isDarkMode
+                                      ? AppColors.lightPrimary
+                                      : AppColors.darkPrimary,
                                 ),
                               ),
                             );
@@ -466,7 +464,6 @@ class _MultiCalendarState extends State<MultiCalendar> {
                               : pnlByDate[dateKey] is double
                                   ? [pnlByDate[dateKey] as double]
                                   : []; // Default to empty list if pnlByDate[dateKey] is neither List nor double
-
 
                           List<double> allProfits = [];
 
@@ -711,7 +708,7 @@ class _MultiCalendarState extends State<MultiCalendar> {
               Text(
                 "Selected Date and P&L:",
                 style: TextStyle(
-                    color: themeManager.isDarkMode == ThemeMode.dark
+                    color: themeManager.isDarkMode
                         ? AppColors.lightPrimary
                         : AppColors.darkPrimary),
               ),
@@ -723,14 +720,14 @@ class _MultiCalendarState extends State<MultiCalendar> {
                       Text(
                         entry['date'],
                         style: TextStyle(
-                            color: themeManager.isDarkMode == ThemeMode.dark
+                            color: themeManager.isDarkMode
                                 ? AppColors.lightPrimary
                                 : AppColors.darkPrimary),
                       ),
                       Text(
                         entry['pnl'].toString(),
                         style: TextStyle(
-                            color: themeManager.isDarkMode == ThemeMode.dark
+                            color: themeManager.isDarkMode
                                 ? AppColors.lightPrimary
                                 : AppColors.darkPrimary),
                       ),
